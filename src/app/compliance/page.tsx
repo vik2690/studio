@@ -72,13 +72,13 @@ export default function ComplianceHubPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Compliance &amp; Controls Hub</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Compliance & Controls Hub</h1>
       
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
             <ShieldCheck className="mr-2 h-6 w-6 text-primary" />
-            Analyze Compliance Gaps &amp; Suggest Controls
+            Analyze Compliance Gaps & Suggest Controls
           </CardTitle>
           <CardDescription>
             Provide your risk gap analysis report and current policies to receive AI-powered control suggestions.
