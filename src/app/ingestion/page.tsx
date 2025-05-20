@@ -86,6 +86,26 @@ export default function IngestionProcessingPage() {
     <div className="space-y-8 p-1 md:p-2">
       <h1 className="text-3xl font-bold tracking-tight">Ingestion &amp; Processing Hub</h1>
 
+      <div>
+        <Card className="shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">System Status</CardTitle>
+            <Orbit className="h-5 w-5 text-green-500 animate-pulse" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl font-bold text-green-600 dark:text-green-400">System Operational</div>
+            <p className="text-xs text-muted-foreground mt-1">Last Sync: {lastSyncTime || 'N/A'}</p>
+            <div className="flex items-center mt-2">
+              <p className="text-xs text-muted-foreground mr-2">API Health:</p>
+              <Badge className={`${apiHealth.color} text-white text-xs`}>
+                <apiHealth.icon className="h-3 w-3 mr-1" />
+                {apiHealth.status}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -106,26 +126,6 @@ export default function IngestionProcessingPage() {
           <CardContent>
             <p className="text-xs text-muted-foreground">Periodic updates from global FATF watchlists and advisories.</p>
             <Badge variant="default" className="mt-2 bg-primary/10 text-primary-foreground hover:bg-primary/20">Active</Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div>
-        <Card className="shadow-lg hover:shadow-xl transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">System Status</CardTitle>
-            <Orbit className="h-5 w-5 text-green-500 animate-pulse" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-green-600 dark:text-green-400">System Operational</div>
-            <p className="text-xs text-muted-foreground mt-1">Last Sync: {lastSyncTime || 'N/A'}</p>
-            <div className="flex items-center mt-2">
-              <p className="text-xs text-muted-foreground mr-2">API Health:</p>
-              <Badge className={`${apiHealth.color} text-white text-xs`}>
-                <apiHealth.icon className="h-3 w-3 mr-1" />
-                {apiHealth.status}
-              </Badge>
-            </div>
           </CardContent>
         </Card>
       </div>
