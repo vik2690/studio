@@ -46,8 +46,8 @@ export interface ListedRegulationDocument {
   effectiveDate: string;
   jurisdictions: string[];
   shortSummary: string;
-  changeCount: number; // Added new field
-  fullText?: string; // Optional, for re-summarization or detailed view
+  changeCount: number; 
+  fullText?: string; 
 }
 
 export interface PolicyDocument {
@@ -77,11 +77,23 @@ export interface RiskData {
 export interface ProcessingQueueItem {
   id: string;
   fileName: string;
-  sourceSystem: 'GDPR Stream' | 'FATF Bulk Upload' | 'Internal System' | string; // string for more flexibility
+  sourceSystem: 'GDPR Stream' | 'FATF Bulk Upload' | 'Internal System' | string; 
   status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
   submittedAt: string;
-  progress?: number; // Optional: 0-100 for 'Processing' status
-  failureReason?: string; // Optional: for 'Failed' status
+  progress?: number; 
+  failureReason?: string; 
 }
 
+export interface RiskIssueItem {
+  id: string;
+  description: string;
+  impactedArea: string;
+  focusArea: string;
+  identifiedDate: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  riskType: 'Operational' | 'Reputational' | 'Financial' | 'Compliance' | 'Strategic' | 'Cybersecurity' | 'Third-Party' | 'Other';
+  status: 'Open' | 'In Progress' | 'Mitigated' | 'Closed' | 'Requires Attention';
+  regulatoryImplications?: string; // Placeholder for future feature
+  suggestedControls?: string[]; // Placeholder for future feature
+}
     
