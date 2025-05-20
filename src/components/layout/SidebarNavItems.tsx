@@ -17,7 +17,7 @@ const navItems = [
   { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
   { href: "/alerts-notifications", label: "Alerts & Notifications", icon: Bell },
   { href: "/audit-support", label: "Audit Support", icon: ClipboardCheck },
-  // { href: "/settings", label: "Settings", icon: Settings2 }, // Example for future use
+  { href: "/admin", label: "Admin Hub", icon: Settings2 },
 ];
 
 export function SidebarNavItems() {
@@ -45,3 +45,4 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
+
