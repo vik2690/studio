@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Webhook, FileCheck2, Orbit, AlertOctagon, SlidersHorizontal, ListChecks, RefreshCw, Zap, Archive } from 'lucide-react';
+import { Webhook, FileCheck2, Orbit, AlertOctagon, SlidersHorizontal, ListChecks, RefreshCw, Zap, Archive, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ProcessingQueueItem } from '@/lib/types';
 
@@ -19,15 +19,42 @@ const initialQueueItems: ProcessingQueueItem[] = [
   { id: 'fatf_upd_005', fileName: 'fatf_watchlist_delta_0728.json', sourceSystem: 'FATF Bulk Upload', status: 'Pending', submittedAt: '10:42 AM' },
 ];
 
+interface ApiHealth {
+  status: 'Nominal' | 'Degraded' | 'Offline';
+  color: 'bg-green-500' | 'bg-yellow-500' | 'bg-red-500';
+  icon: React.ElementType;
+}
+
 export default function IngestionProcessingPage() {
   const [queueItems, setQueueItems] = useState<ProcessingQueueItem[]>(initialQueueItems);
   const [failureCount, setFailureCount] = useState(5);
   const [isRefreshingQueue, setIsRefreshingQueue] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>('');
+  const [apiHealth, setApiHealth] = useState<ApiHealth>({ status: 'Nominal', color: 'bg-green-500', icon: CheckCircle });
   const { toast } = useToast();
+
+  const updateTimestamps = () => {
+    setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  };
+
+  useEffect(() => {
+    updateTimestamps();
+    // Simulate API health check
+    // In a real app, this would be an API call
+    setApiHealth({ status: 'Nominal', color: 'bg-green-500', icon: CheckCircle });
+
+    const failureInterval = setInterval(() => {
+      if (Math.random() < 0.15) {
+        setFailureCount(prev => prev + 1);
+      }
+    }, 7000);
+    return () => clearInterval(failureInterval);
+  }, []);
 
   const handleRefreshQueue = () => {
     setIsRefreshingQueue(true);
     toast({ title: "Refreshing Queue...", description: "Fetching latest file statuses." });
+    updateTimestamps(); 
     setTimeout(() => {
       const newStatusOptions: ProcessingQueueItem['status'][] = ['Pending', 'Processing', 'Completed', 'Failed'];
       const updatedItems = queueItems.map(item => {
@@ -40,7 +67,6 @@ export default function IngestionProcessingPage() {
         submittedAt: new Date(Date.now() - Math.random() * 10000000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }});
       
-      // Add a new item sometimes
       if (Math.random() > 0.5) {
         updatedItems.unshift({
           id: `file-${Date.now().toString().slice(-5)}`,
@@ -50,21 +76,11 @@ export default function IngestionProcessingPage() {
           submittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
       }
-      setQueueItems(updatedItems.slice(0, 6)); // Keep queue size manageable for UI
+      setQueueItems(updatedItems.slice(0, 6)); 
       setIsRefreshingQueue(false);
       toast({ title: "Queue Refreshed", description: "File statuses updated." });
     }, 1500);
   };
-
-  useEffect(() => {
-    // Simulate failure count changes
-    const failureInterval = setInterval(() => {
-      if (Math.random() < 0.15) {
-        setFailureCount(prev => prev + 1);
-      }
-    }, 7000);
-    return () => clearInterval(failureInterval);
-  }, []);
 
   return (
     <div className="space-y-8 p-1 md:p-2">
@@ -78,7 +94,7 @@ export default function IngestionProcessingPage() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Real-time event ingestion from GDPR compliance systems.</p>
-            <Badge variant="default" className="mt-2">Active</Badge>
+            <Badge variant="default" className="mt-2 bg-primary/10 text-primary-foreground hover:bg-primary/20">Active</Badge>
           </CardContent>
         </Card>
 
@@ -89,7 +105,7 @@ export default function IngestionProcessingPage() {
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Periodic updates from global FATF watchlists and advisories.</p>
-            <Badge variant="default" className="mt-2">Active</Badge>
+            <Badge variant="default" className="mt-2 bg-primary/10 text-primary-foreground hover:bg-primary/20">Active</Badge>
           </CardContent>
         </Card>
 
@@ -99,8 +115,15 @@ export default function IngestionProcessingPage() {
             <Orbit className="h-5 w-5 text-green-500 animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">Processing In Progress</div>
-            <p className="text-xs text-muted-foreground">Monitoring and transforming incoming data streams.</p>
+            <div className="text-xl font-bold text-green-600 dark:text-green-400">System Operational</div>
+            <p className="text-xs text-muted-foreground mt-1">Last Sync: {lastSyncTime || 'N/A'}</p>
+            <div className="flex items-center mt-2">
+              <p className="text-xs text-muted-foreground mr-2">API Health:</p>
+              <Badge className={`${apiHealth.color} text-white text-xs`}>
+                <apiHealth.icon className="h-3 w-3 mr-1" />
+                {apiHealth.status}
+              </Badge>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -129,14 +152,14 @@ export default function IngestionProcessingPage() {
                 <Zap className="h-4 w-4 mr-2 text-green-500" />
                 <span className="text-sm">Real-time Processing</span>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">Enabled</Badge>
+              <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100">Enabled</Badge>
             </div>
             <div className="flex items-center justify-between">
                <div className="flex items-center">
                 <Archive className="h-4 w-4 mr-2 text-blue-500" />
                 <span className="text-sm">Batch Processing</span>
               </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">Available</Badge>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100">Available</Badge>
             </div>
              <p className="text-xs text-muted-foreground pt-2">System adapts to data velocity and volume requirements.</p>
           </CardContent>
@@ -192,8 +215,8 @@ export default function IngestionProcessingPage() {
                         'outline' 
                       }
                       className={
-                        item.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                        item.status === 'Processing' ? 'bg-blue-100 text-blue-700' : ''
+                        item.status === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100' :
+                        item.status === 'Processing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100' : ''
                       }
                     >
                       {item.status}
@@ -220,5 +243,6 @@ export default function IngestionProcessingPage() {
     </div>
   );
 }
+
 
     
