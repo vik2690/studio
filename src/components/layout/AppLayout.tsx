@@ -73,7 +73,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <SidebarHeader className="p-3 flex justify-center">
             <Link href="/" className="flex flex-col items-center gap-1 text-sidebar-foreground" title="Cognitive Risk Intelligence & Control System">
                <Image src="https://placehold.co/36x36.png" alt="Cognitive Risk Intelligence & Control System Logo" width={30} height={30} data-ai-hint="abstract geometric shape" className="transition-all group-data-[collapsible=icon]:size-7"/>
-              <div className="font-extrabold tracking-tight group-data-[collapsible=icon]:hidden text-center text-xs leading-snug mt-1 px-1">
+              <div className="font-extrabold tracking-tight group-data-[collapsible=icon]:hidden text-center text-sm leading-snug mt-1 px-1">
                 Cognitive Risk<br />
                 Intelligence &<br />
                 Control System
