@@ -40,15 +40,15 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar variables for light theme */
-    --sidebar-background: 45 20% 95%; /* Very light, slightly warm off-white */
-    --sidebar-foreground: 45 15% 25%; /* Dark warm gray for text */
-    --sidebar-primary: 45 75% 45%; /* Main dark yellow for active/primary elements */
-    --sidebar-primary-foreground: 45 60% 95%; /* Light text for on primary */
-    --sidebar-accent: 45 50% 88%; /* Lighter warm yellow/beige for hover */
-    --sidebar-accent-foreground: 45 15% 25%; /* Dark text for on accent */
-    --sidebar-border: 45 20% 85%; /* Warm light gray border */
-    --sidebar-ring: 45 85% 55%; /* Vibrant dark yellow ring */
+    /* Sidebar variables for light theme with light blue */
+    --sidebar-background: 210 100% 96%; /* Very light blue */
+    --sidebar-foreground: 210 30% 25%; /* Dark desaturated blue for text */
+    --sidebar-primary: 210 75% 50%;    /* Medium, vibrant blue for active/primary */
+    --sidebar-primary-foreground: 210 60% 95%; /* Very light blue/off-white for text on primary */
+    --sidebar-accent: 210 60% 90%;     /* Lighter blue for hover */
+    --sidebar-accent-foreground: 210 30% 25%; /* Dark text for on accent */
+    --sidebar-border: 210 50% 88%;     /* Light blueish gray border */
+    --sidebar-ring: 210 85% 60%;       /* Vibrant blue ring */
   }
 
   .dark {
@@ -86,15 +86,15 @@
     --chart-4: 42 60% 50%; /* Deeper Gold */
     --chart-5: 40 50% 45%; /* Brownish Gold */
 
-    /* Sidebar variables for dark mode */
-    --sidebar-background: 45 10% 18%; /* Slightly warmer/yellower dark background */
-    --sidebar-foreground: 45 20% 85%; /* Light warm gray for text */
-    --sidebar-primary: 48 90% 55%; /* Main dark yellow for active/primary */
-    --sidebar-primary-foreground: 45 40% 15%; /* Dark text for on primary */
-    --sidebar-accent: 45 15% 30%; /* Darker warm yellow/brown for hover */
-    --sidebar-accent-foreground: 45 20% 85%; /* Light text for on accent */
-    --sidebar-border: 45 10% 25%; /* Warm dark gray border */
-    --sidebar-ring: 48 95% 60%; /* Bright yellow ring */
+    /* Sidebar variables for dark mode with light blue */
+    --sidebar-background: 210 30% 18%; /* Dark, muted blue */
+    --sidebar-foreground: 210 70% 85%; /* Light desaturated blue for text */
+    --sidebar-primary: 210 80% 60%;    /* Brighter, vibrant blue for active */
+    --sidebar-primary-foreground: 210 20% 15%; /* Very dark blue for text on primary */
+    --sidebar-accent: 210 25% 30%;     /* Darker, slightly more saturated blue for hover */
+    --sidebar-accent-foreground: 210 70% 85%; /* Light text for on accent */
+    --sidebar-border: 210 20% 25%;     /* Dark blueish gray border */
+    --sidebar-ring: 210 85% 65%;       /* Bright blue ring */
   }
 }
 
