@@ -38,6 +38,17 @@ export interface RegulationDocument {
   summary?: string; // AI generated
 }
 
+export interface ListedRegulationDocument {
+  id: string;
+  documentName: string;
+  regulatoryBody: string;
+  processedDate: string;
+  effectiveDate: string;
+  jurisdictions: string[];
+  shortSummary: string;
+  fullText?: string; // Optional, for re-summarization or detailed view
+}
+
 export interface PolicyDocument {
   id: string;
   title: string;

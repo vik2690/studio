@@ -1,20 +1,62 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { summarizeRegulationAction } from '@/lib/actions';
-import type { SummarizeRegulationsInput, type SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
+import type { SummarizeRegulationsInput, SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
+import type { ListedRegulationDocument } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileText, Wand2 } from 'lucide-react';
+import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+
+const initialListedDocuments: ListedRegulationDocument[] = [
+  {
+    id: 'reg_001',
+    documentName: 'MiFID II Update Q3 2024',
+    regulatoryBody: 'ESMA',
+    processedDate: '2024-07-15',
+    effectiveDate: '2024-09-01',
+    jurisdictions: ['EU', 'UK'],
+    shortSummary: 'Enhanced investor protection measures and transparency requirements for derivatives trading.',
+    fullText: 'Full text of MiFID II Update Q3 2024...'
+  },
+  {
+    id: 'reg_002',
+    documentName: 'BSA/AML Rule Change 2024-5B',
+    regulatoryBody: 'FinCEN',
+    processedDate: '2024-07-20',
+    effectiveDate: '2025-01-01',
+    jurisdictions: ['USA'],
+    shortSummary: 'New diligence requirements for correspondent accounts and virtual asset service providers.',
+    fullText: 'Full text of BSA/AML Rule Change 2024-5B...'
+  },
+  {
+    id: 'reg_003',
+    documentName: 'GDPR Article 30 Amendment',
+    regulatoryBody: 'European Commission',
+    processedDate: '2024-06-10',
+    effectiveDate: '2024-08-01',
+    jurisdictions: ['EU'],
+    shortSummary: 'Clarifications on records of processing activities for small and medium-sized enterprises.',
+    fullText: 'Full text of GDPR Article 30 Amendment...'
+  },
+];
 
 export default function RegulationsPage() {
   const [documentText, setDocumentText] = useState('');
-  const [summaryResult, setSummaryResult] = useState(null);
+  const [summaryResult, setSummaryResult] = useState<SummarizeRegulationsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [listedDocuments, setListedDocuments] = useState<ListedRegulationDocument[]>(initialListedDocuments);
+  const [selectedDocumentForSummary, setSelectedDocumentForSummary] = useState<ListedRegulationDocument | null>(null);
+  const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
+
   const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -41,14 +83,34 @@ export default function RegulationsPage() {
     }
   };
 
+  const handleViewSimplifiedSummary = (doc: ListedRegulationDocument) => {
+    if (doc.fullText) {
+      setDocumentText(doc.fullText);
+      // Clear previous summary and trigger new summarization
+      setSummaryResult(null); 
+      // Auto-submit for summarization or prompt user? For now, just set text
+      toast({ title: "Document Loaded", description: `"${doc.documentName}" loaded for summarization. Click "Generate Summary".` });
+      // Scroll to the top or to the summarization card
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      toast({ title: "No Full Text", description: "Full text is not available for this document to generate a new summary.", variant: "destructive" });
+    }
+  };
+
+  const handleViewDetail = (doc: ListedRegulationDocument) => {
+    setSelectedDocumentForSummary(doc);
+    setIsDetailViewOpen(true);
+  };
+
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Regulations Management</h1>
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold tracking-tight">Regulations Hub</h1>
       
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <FileText className="mr-2 h-6 w-6 text-primary" />
+            <FileSignature className="mr-2 h-6 w-6 text-primary" />
             Process Regulatory Document
           </CardTitle>
           <CardDescription>
@@ -104,6 +166,95 @@ export default function RegulationsPage() {
             </Alert>
           </CardContent>
         </Card>
+      )}
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <BookOpen className="mr-2 h-6 w-6 text-primary" />
+            Regulatory Documents Library
+          </CardTitle>
+          <CardDescription>
+            Browse and manage ingested regulatory documents.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Document Name</TableHead>
+                <TableHead>Regulatory Body</TableHead>
+                <TableHead>Processed Date</TableHead>
+                <TableHead>Effective Date</TableHead>
+                <TableHead>Jurisdictions</TableHead>
+                <TableHead>Short Summary</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {listedDocuments.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    No documents found.
+                  </TableCell>
+                </TableRow>
+              )}
+              {listedDocuments.map((doc) => (
+                <TableRow key={doc.id}>
+                  <TableCell className="font-medium">{doc.documentName}</TableCell>
+                  <TableCell>{doc.regulatoryBody}</TableCell>
+                  <TableCell>{doc.processedDate}</TableCell>
+                  <TableCell>{doc.effectiveDate}</TableCell>
+                  <TableCell>
+                    {doc.jurisdictions.map(j => <Badge key={j} variant="secondary" className="mr-1 mb-1">{j}</Badge>)}
+                  </TableCell>
+                  <TableCell className="text-xs max-w-xs truncate" title={doc.shortSummary}>{doc.shortSummary}</TableCell>
+                  <TableCell className="space-x-2 whitespace-nowrap">
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(doc)}>
+                      <Eye className="mr-1 h-4 w-4" /> Detail
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleViewSimplifiedSummary(doc)}>
+                      <Wand2 className="mr-1 h-4 w-4" /> Summarize
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {selectedDocumentForSummary && (
+        <Dialog open={isDetailViewOpen} onOpenChange={setIsDetailViewOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{selectedDocumentForSummary.documentName}</DialogTitle>
+              <DialogDescription>
+                Full details for the selected regulatory document.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+              <p><strong>Regulatory Body:</strong> {selectedDocumentForSummary.regulatoryBody}</p>
+              <p><strong>Processed Date:</strong> {selectedDocumentForSummary.processedDate}</p>
+              <p><strong>Effective Date:</strong> {selectedDocumentForSummary.effectiveDate}</p>
+              <p><strong>Jurisdictions:</strong> {selectedDocumentForSummary.jurisdictions.join(', ')}</p>
+              <p><strong>Short Summary:</strong> {selectedDocumentForSummary.shortSummary}</p>
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Full Document Text (Excerpt):</h4>
+                <Textarea
+                  value={selectedDocumentForSummary.fullText || "Full text not available."}
+                  readOnly
+                  className="min-h-[200px] text-xs bg-muted/50"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
