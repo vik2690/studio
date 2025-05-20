@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle } from 'lucide-react';
+import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const navItems = [
@@ -13,6 +13,9 @@ const navItems = [
   { href: "/risk-issues", label: "Risk & Issues Hub", icon: AlertTriangle },
   { href: "/aml", label: "AML Hub", icon: ShieldAlert },
   { href: "/compliance", label: "Compliance Hub", icon: FileText },
+  { href: "/operations-center", label: "Operations Center", icon: Activity },
+  { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
+  { href: "/alerts-notifications", label: "Alerts & Notifications", icon: Bell },
   { href: "/audit-support", label: "Audit Support", icon: ClipboardCheck },
   // { href: "/settings", label: "Settings", icon: Settings2 }, // Example for future use
 ];
