@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { 
   Webhook, FileCheck2, Orbit, AlertOctagon, SlidersHorizontal, 
   ListChecks, RefreshCw, Zap, Archive, CheckCircle, AlertTriangle, XCircle,
-  DatabaseZap, ArrowDownCircle, Share2
+  DatabaseZap, ArrowDownCircle, Share2, Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ProcessingQueueItem } from '@/lib/types';
@@ -112,7 +112,7 @@ export default function IngestionProcessingPage() {
       <Card className="shadow-lg hover:shadow-xl transition-shadow">
         <CardHeader>
           <CardTitle className="flex items-center text-muted-foreground">
-            <Share2 className="mr-2 h-5 w-5" /> System Architecture & Health
+            <Share2 className="mr-2 h-5 w-5" /> System Architecture &amp; Health
           </CardTitle>
           <CardDescription>Visual overview of system connections and operational status.</CardDescription>
         </CardHeader>
@@ -121,7 +121,7 @@ export default function IngestionProcessingPage() {
           <div className="flex justify-center">
             <div className="p-4 border-2 border-primary rounded-lg shadow-lg bg-background w-auto max-w-md text-center">
               <DatabaseZap className="h-10 w-10 mx-auto text-primary mb-2" />
-              <h3 className="text-xl font-semibold text-primary">Ingestion & Processing Hub</h3>
+              <h3 className="text-xl font-semibold text-primary">Ingestion &amp; Processing Hub</h3>
               <p className="text-md text-muted-foreground">Central Data Pipeline</p>
               <Badge className="mt-3 text-sm py-1 px-3 bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100 border border-green-300 dark:border-green-500">Operational</Badge>
             </div>
@@ -158,7 +158,7 @@ export default function IngestionProcessingPage() {
               </div>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Risk Module</CardTitle>
-                <CardDescription>Risk Gap & Assessment Engine</CardDescription>
+                <CardDescription>Risk Gap &amp; Assessment Engine</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-1">Status: <span className="font-semibold text-yellow-600">Warning</span></p>
@@ -274,12 +274,13 @@ export default function IngestionProcessingPage() {
                 <TableHead className="w-[100px]">Progress</TableHead>
                 <TableHead>Submitted At</TableHead>
                 <TableHead>Failure Reason</TableHead>
+                <TableHead>Review &amp; Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {queueItems.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground h-24">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground h-24">
                     Processing queue is currently empty.
                   </TableCell>
                 </TableRow>
@@ -317,6 +318,12 @@ export default function IngestionProcessingPage() {
                   </TableCell>
                   <TableCell>{item.submittedAt}</TableCell>
                   <TableCell className="text-destructive text-xs">{item.failureReason || 'N/A'}</TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm">
+                      <Eye className="mr-1.5 h-4 w-4" />
+                      Review
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -326,3 +333,4 @@ export default function IngestionProcessingPage() {
     </div>
   );
 }
+
