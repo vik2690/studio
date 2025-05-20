@@ -24,7 +24,7 @@ export function OverviewChart({ data, title, description, dataKey, xAxisKey, cha
   return (
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-muted-foreground">{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>

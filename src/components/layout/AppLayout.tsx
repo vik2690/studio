@@ -73,7 +73,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <SidebarHeader className="p-3 flex justify-center">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-foreground" title="CRICS">
                <Image src="https://placehold.co/36x36.png" alt="CRICS Logo" width={30} height={30} data-ai-hint="abstract geometric shape" className="transition-all group-data-[collapsible=icon]:size-7"/>
-              <span className="font-semibold group-data-[collapsible=icon]:hidden">CRICS</span>
+              <span className="font-extrabold tracking-tight group-data-[collapsible=icon]:hidden">CRICS</span>
             </Link>
           </SidebarHeader>
           <SidebarContent className="p-2">
