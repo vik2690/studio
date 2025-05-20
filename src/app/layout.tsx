@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CRICS - Compliance & Risk Management',
-  description: 'AI-Powered Compliance & Risk Integrated Control System',
+  title: 'Cognitive Risk Intelligence & Control System - Compliance & Risk Management',
+  description: 'AI-Powered Compliance & Risk Intelligence & Control System',
 };
 
 export default function RootLayout({

@@ -23,11 +23,11 @@ const AppHeader = () => (
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
           <nav className="grid gap-6 text-lg font-medium p-6">
             <Link
-              href="#"
+              href="/"
               className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
             >
-              <Image src="https://placehold.co/32x32.png" alt="CRICS Logo" width={32} height={32} data-ai-hint="abstract geometric shape" />
-              <span className="sr-only">CRICS</span>
+              <Image src="https://placehold.co/32x32.png" alt="Cognitive Risk Intelligence & Control System Logo" width={32} height={32} data-ai-hint="abstract geometric shape" />
+              <span className="sr-only">Cognitive Risk Intelligence & Control System</span>
             </Link>
             <SidebarNavItems />
           </nav>
@@ -71,9 +71,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <Sidebar className="hidden border-r bg-sidebar text-sidebar-foreground md:block" collapsible="icon">
           <SidebarHeader className="p-3 flex justify-center">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-foreground" title="CRICS">
-               <Image src="https://placehold.co/36x36.png" alt="CRICS Logo" width={30} height={30} data-ai-hint="abstract geometric shape" className="transition-all group-data-[collapsible=icon]:size-7"/>
-              <span className="font-extrabold tracking-tight group-data-[collapsible=icon]:hidden">CRICS</span>
+            <Link href="/" className="flex flex-col items-center gap-1 text-sidebar-foreground" title="Cognitive Risk Intelligence & Control System">
+               <Image src="https://placehold.co/36x36.png" alt="Cognitive Risk Intelligence & Control System Logo" width={30} height={30} data-ai-hint="abstract geometric shape" className="transition-all group-data-[collapsible=icon]:size-7"/>
+              <div className="font-extrabold tracking-tight group-data-[collapsible=icon]:hidden text-center text-xs leading-snug mt-1 px-1">
+                Cognitive Risk<br />
+                Intelligence &<br />
+                Control System
+              </div>
             </Link>
           </SidebarHeader>
           <SidebarContent className="p-2">
