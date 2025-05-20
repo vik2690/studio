@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface Metric {
@@ -60,3 +61,15 @@ export interface RiskData {
     status: 'Open' | 'Mitigated' | 'Closed';
     impactedControls?: string[];
 }
+
+export interface ProcessingQueueItem {
+  id: string;
+  fileName: string;
+  sourceSystem: 'GDPR Stream' | 'FATF Bulk Upload' | 'Internal System' | string; // string for more flexibility
+  status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
+  submittedAt: string;
+  progress?: number; // Optional: 0-100 for 'Processing' status
+  failureReason?: string; // Optional: for 'Failed' status
+}
+
+    
