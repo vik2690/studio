@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ReguGuard - Compliance & Risk Management',
-  description: 'AI-Powered Regulatory Compliance and Risk Management Platform',
+  title: 'CRICS - Compliance & Risk Management',
+  description: 'AI-Powered Compliance & Risk Integrated Control System',
 };
 
 export default function RootLayout({
