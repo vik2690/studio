@@ -1,3 +1,4 @@
+
 "use client"
 
 import type { ChartDataPoint } from '@/lib/types';
@@ -9,14 +10,19 @@ interface OverviewChartProps {
   data: ChartDataPoint[];
   title: string;
   description?: string;
-  dataKey: string;
-  xAxisKey: string;
-  chartConfig: ChartConfig;
+  dataKey: string; // Key for Y-axis values in the data objects
+  xAxisKey: string; // Key for X-axis categories in the data objects
+  chartConfig: ChartConfig; // Config where keys might represent series or aspects of the chart
 }
 
 export function OverviewChart({ data, title, description, dataKey, xAxisKey, chartConfig }: OverviewChartProps) {
+  // Determine the fill color for the bar.
+  // Assumes chartConfig might have a key matching dataKey or the first key in chartConfig is the relevant series.
+  const seriesKey = Object.keys(chartConfig)[0]; // Get the first key from chartConfig as the series identifier
+  const barFillColor = chartConfig[seriesKey]?.color || "hsl(var(--chart-1))"; // Fallback color
+
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
@@ -32,8 +38,19 @@ export function OverviewChart({ data, title, description, dataKey, xAxisKey, cha
                 cursor={{ fill: 'hsl(var(--muted))' }}
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Legend />
-              <Bar dataKey={dataKey} radius={[4, 4, 0, 0]} />
+              <Legend 
+                formatter={(value, entry, index) => {
+                     // 'value' here is the dataKey of the Bar ('value' in our case)
+                     // We want the label from the chartConfig for this series
+                     const configEntry = chartConfig[value]; // or chartConfig[seriesKey]
+                     return configEntry?.label || value;
+                }}
+              />
+              <Bar 
+                dataKey={dataKey} 
+                fill={barFillColor} // Use the determined fill color
+                radius={[4, 4, 0, 0]} 
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
