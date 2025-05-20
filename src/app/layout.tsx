@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google'; // Assuming this font setup is intentional and working
+import { Inter, Roboto_Mono } from 'next/font/google'; // Changed imports
 import './globals.css';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({ // Changed to Inter
+  variable: '--font-inter', // Changed variable name
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const robotoMono = Roboto_Mono({ // Changed to Roboto_Mono
+  variable: '--font-roboto-mono', // Changed variable name
   subsets: ['latin'],
 });
 
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${inter.variable} ${robotoMono.variable} antialiased`}> {/* Updated font variables */}
         <AppLayout>{children}</AppLayout>
         <Toaster />
       </body>
