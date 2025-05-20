@@ -3,7 +3,7 @@
 
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
-import { PieChartCard } from '@/components/dashboard/PieChartCard'; // New import
+import { PieChartCard } from '@/components/dashboard/PieChartCard';
 import { AlertTriangle, ShieldCheck, BarChartHorizontalBig, FileWarning } from 'lucide-react';
 import type { Metric, ChartDataPoint } from '@/lib/types';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -25,7 +25,7 @@ const riskTrendData: ChartDataPoint[] = [
 ];
 
 const riskTrendChartConfig = {
-  value: { // Changed key to 'value' to match dataKey for bar fill
+  value: { 
     label: "Identified Risks",
     color: "hsl(var(--chart-1))",
   },
@@ -39,13 +39,12 @@ const controlEffectivenessData: ChartDataPoint[] = [
 ];
 
 const controlEffectivenessChartConfig = {
-  value: { // Changed key to 'value'
+  value: { 
     label: "Effectiveness (%)",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
 
-// New data for Pie Charts
 const riskDistributionData: ChartDataPoint[] = [
   { name: "Critical", value: 25 },
   { name: "High", value: 40 },
@@ -54,10 +53,10 @@ const riskDistributionData: ChartDataPoint[] = [
 ];
 
 const riskDistributionChartConfig = {
-  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" }, // e.g., red
-  "High": { label: "High", color: "hsl(var(--chart-1))" },     // e.g., orange
-  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" }, // e.g., yellow
-  "Low": { label: "Low", color: "hsl(var(--chart-3))" },      // e.g., green
+  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" }, 
+  "High": { label: "High", color: "hsl(var(--chart-1))" },     
+  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" }, 
+  "Low": { label: "Low", color: "hsl(var(--chart-3))" },      
 } satisfies ChartConfig;
 
 const controlStatusData: ChartDataPoint[] = [
@@ -67,15 +66,15 @@ const controlStatusData: ChartDataPoint[] = [
 ];
 
 const controlStatusChartConfig = {
-  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" }, // e.g., blue/green
-  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" }, // e.g., yellow
-  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },     // e.g., orange/red
+  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" }, 
+  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" }, 
+  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },     
 } satisfies ChartConfig;
 
 
 export default function OverviewPage() {
   return (
-    <div className="space-y-6 p-6"> {/* Added p-6 for internal padding */}
+    <div className="space-y-6 px-4 sm:px-6 py-6"> 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview Dashboard</h1>
       </div>
@@ -91,17 +90,9 @@ export default function OverviewPage() {
           data={riskTrendData} 
           title="Risk Trend Analysis"
           description="Monthly trend of identified risks."
-          dataKey="value" // This is the key for the Y-axis values
-          xAxisKey="name" // This is the key for the X-axis categories
-          chartConfig={riskTrendChartConfig} // Config keys should match series, or be general if one series
-        />
-        <OverviewChart 
-          data={controlEffectivenessData} 
-          title="Control Effectiveness"
-          description="Quarterly control effectiveness score."
-          dataKey="value"
-          xAxisKey="name"
-          chartConfig={controlEffectivenessChartConfig}
+          dataKey="value" 
+          xAxisKey="name" 
+          chartConfig={riskTrendChartConfig} 
         />
         <PieChartCard
           data={riskDistributionData}
@@ -110,6 +101,14 @@ export default function OverviewPage() {
           dataKey="value"
           nameKey="name"
           chartConfig={riskDistributionChartConfig}
+        />
+        <OverviewChart 
+          data={controlEffectivenessData} 
+          title="Control Effectiveness"
+          description="Quarterly control effectiveness score."
+          dataKey="value"
+          xAxisKey="name"
+          chartConfig={controlEffectivenessChartConfig}
         />
         <PieChartCard
           data={controlStatusData}

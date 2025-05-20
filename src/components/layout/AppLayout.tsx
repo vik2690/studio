@@ -86,7 +86,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </Sidebar>
         <div className="flex flex-col sm:pl-14 print:sm:pl-0"> {/* Adjust pl-14 based on collapsed sidebar width */}
           <AppHeader />
-          <main className="flex-1 bg-background shadow-sm rounded-lg md:m-0 print:shadow-none">
+          <main className="flex-1 bg-background md:m-0 print:shadow-none">
             {children}
           </main>
         </div>
