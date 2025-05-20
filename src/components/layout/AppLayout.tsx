@@ -84,9 +84,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <SidebarNavItems />
           </SidebarContent>
         </Sidebar>
-        <div className="flex flex-col print:pl-0 md:pl-[var(--sidebar-width)] peer-data-[state=collapsed]:md:pl-[var(--sidebar-width-icon)] transition-[padding] duration-200 ease-linear">
+        <div className="flex flex-col print:pl-0 md:pl-[var(--sidebar-width)] peer-data-[state=collapsed]:md:pl-[var(--sidebar-width-icon)] transition-[padding] duration-200 ease-linear sm:gap-0 sm:py-4">
           <AppHeader />
-          <main className="flex-1 bg-background md:m-0 print:shadow-none">
+          <main className="flex-1 bg-background md:m-0 print:shadow-none px-4 sm:px-6 pt-2 pb-4 sm:pb-6">
             {children}
           </main>
         </div>
