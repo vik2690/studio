@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { summarizeRegulationAction, compareDocumentsAction } from '@/lib/actions';
 import type { SummarizeRegulationsInput, SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
 import type { CompareDocumentsInput, CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
@@ -11,8 +11,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input'; // Added Input for file upload
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature, GitCompareArrows, ListChecks } from 'lucide-react';
+import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature, GitCompareArrows, ListChecks, UploadCloud } from 'lucide-react'; // Added UploadCloud
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +82,32 @@ export default function RegulationsPage() {
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
 
   const { toast } = useToast();
+
+  const handleFileUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+    setTextState: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      toast({ title: 'No file selected', variant: 'destructive' });
+      return;
+    }
+
+    // Reset file input value to allow re-uploading the same file after an error or change
+    event.target.value = '';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      setTextState(text);
+      toast({ title: 'File Loaded', description: `Successfully loaded ${file.name}` });
+    };
+    reader.onerror = () => {
+      toast({ title: 'File Read Error', description: `Failed to read ${file.name}`, variant: 'destructive' });
+    };
+    reader.readAsText(file);
+  };
+
 
   const handleSummarizeSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -162,18 +189,29 @@ export default function RegulationsPage() {
             Process & Summarize Regulatory Document
           </CardTitle>
           <CardDescription>
-            Paste the text of a regulatory document below to generate a concise summary using AI.
+            Paste the text of a regulatory document below or upload a file to generate a concise summary using AI.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSummarizeSubmit}>
           <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="documentFileSummary" className="text-base font-semibold">Upload Document for Summary</Label>
+              <Input 
+                id="documentFileSummary"
+                type="file"
+                className="mt-1"
+                accept=".txt,.md,.html,.xml,.json"
+                onChange={(e) => handleFileUpload(e, setDocumentText)}
+                disabled={isLoadingSummary}
+              />
+            </div>
             <div>
               <Label htmlFor="documentText" className="text-base font-semibold">Document Text</Label>
               <Textarea
                 id="documentText"
                 value={documentText}
                 onChange={(e) => setDocumentText(e.target.value)}
-                placeholder="Paste the full text of the regulatory document here..."
+                placeholder="Paste the full text of the regulatory document here or upload a file above..."
                 className="min-h-[200px] mt-1 text-sm"
                 disabled={isLoadingSummary}
               />
@@ -223,36 +261,12 @@ export default function RegulationsPage() {
             Compare Regulatory Documents
           </CardTitle>
           <CardDescription>
-            Paste the text of two documents and select a regulatory body for contextual AI-powered comparison.
+            Select a regulatory body, then upload or paste the text of two documents for AI-powered comparison.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleCompareSubmit}>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="document1CompareText" className="text-base font-semibold">Document 1 Text</Label>
-                <Textarea
-                  id="document1CompareText"
-                  value={document1CompareText}
-                  onChange={(e) => setDocument1CompareText(e.target.value)}
-                  placeholder="Paste the full text of the first document here..."
-                  className="min-h-[200px] mt-1 text-sm"
-                  disabled={isLoadingComparison}
-                />
-              </div>
-              <div>
-                <Label htmlFor="document2CompareText" className="text-base font-semibold">Document 2 Text</Label>
-                <Textarea
-                  id="document2CompareText"
-                  value={document2CompareText}
-                  onChange={(e) => setDocument2CompareText(e.target.value)}
-                  placeholder="Paste the full text of the second document here..."
-                  className="min-h-[200px] mt-1 text-sm"
-                  disabled={isLoadingComparison}
-                />
-              </div>
-            </div>
-            <div>
+             <div>
               <Label htmlFor="regulatoryBodyCompare" className="text-base font-semibold">Regulatory Body (for context)</Label>
               <Select value={selectedRegBodyCompare} onValueChange={setSelectedRegBodyCompare} disabled={isLoadingComparison}>
                 <SelectTrigger id="regulatoryBodyCompare" className="mt-1">
@@ -265,6 +279,47 @@ export default function RegulationsPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="document1FileCompare" className="text-base font-semibold">Document 1</Label>
+                 <Input 
+                  id="document1FileCompare"
+                  type="file"
+                  accept=".txt,.md,.html,.xml,.json"
+                  onChange={(e) => handleFileUpload(e, setDocument1CompareText)}
+                  disabled={isLoadingComparison}
+                  className="w-full"
+                />
+                <Textarea
+                  id="document1CompareText"
+                  value={document1CompareText}
+                  onChange={(e) => setDocument1CompareText(e.target.value)}
+                  placeholder="Paste text or upload Document 1..."
+                  className="min-h-[200px] text-sm"
+                  disabled={isLoadingComparison}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="document2FileCompare" className="text-base font-semibold">Document 2</Label>
+                <Input 
+                  id="document2FileCompare"
+                  type="file"
+                  accept=".txt,.md,.html,.xml,.json"
+                  onChange={(e) => handleFileUpload(e, setDocument2CompareText)}
+                  disabled={isLoadingComparison}
+                  className="w-full"
+                />
+                <Textarea
+                  id="document2CompareText"
+                  value={document2CompareText}
+                  onChange={(e) => setDocument2CompareText(e.target.value)}
+                  placeholder="Paste text or upload Document 2..."
+                  className="min-h-[200px] text-sm"
+                  disabled={isLoadingComparison}
+                />
+              </div>
+            </div>
+           
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoadingComparison} className="w-full sm:w-auto">
