@@ -25,7 +25,8 @@ const initialListedDocuments: ListedRegulationDocument[] = [
     effectiveDate: '2024-09-01',
     jurisdictions: ['EU', 'UK'],
     shortSummary: 'Enhanced investor protection measures and transparency requirements for derivatives trading.',
-    fullText: 'Full text of MiFID II Update Q3 2024...'
+    changeCount: 5,
+    fullText: 'Full text of MiFID II Update Q3 2024 regarding enhanced investor protection measures, new pre-trade and post-trade transparency requirements for equity and non-equity instruments, particularly focusing on derivatives. Includes updated guidelines on best execution and reporting obligations under RTS 27 and RTS 28.'
   },
   {
     id: 'reg_002',
@@ -35,7 +36,8 @@ const initialListedDocuments: ListedRegulationDocument[] = [
     effectiveDate: '2025-01-01',
     jurisdictions: ['USA'],
     shortSummary: 'New diligence requirements for correspondent accounts and virtual asset service providers.',
-    fullText: 'Full text of BSA/AML Rule Change 2024-5B...'
+    changeCount: 12,
+    fullText: 'Full text of BSA/AML Rule Change 2024-5B. This rule imposes stricter due diligence requirements for U.S. financial institutions maintaining correspondent accounts for foreign financial institutions. It also expands the definition of financial institution to include certain Virtual Asset Service Providers (VASPs) and outlines specific AML program requirements for them, including customer identification and transaction monitoring.'
   },
   {
     id: 'reg_003',
@@ -45,7 +47,8 @@ const initialListedDocuments: ListedRegulationDocument[] = [
     effectiveDate: '2024-08-01',
     jurisdictions: ['EU'],
     shortSummary: 'Clarifications on records of processing activities for small and medium-sized enterprises.',
-    fullText: 'Full text of GDPR Article 30 Amendment...'
+    changeCount: 3,
+    fullText: 'Full text of GDPR Article 30 Amendment. This amendment provides specific clarifications and potential exemptions regarding the obligation to maintain records of processing activities (RoPA) for small and medium-sized enterprises (SMEs) under certain conditions, aiming to reduce administrative burden while maintaining data protection standards.'
   },
 ];
 
@@ -187,6 +190,7 @@ export default function RegulationsPage() {
                 <TableHead>Processed Date</TableHead>
                 <TableHead>Effective Date</TableHead>
                 <TableHead>Jurisdictions</TableHead>
+                <TableHead>Change Count</TableHead>
                 <TableHead>Short Summary</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -194,7 +198,7 @@ export default function RegulationsPage() {
             <TableBody>
               {listedDocuments.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     No documents found.
                   </TableCell>
                 </TableRow>
@@ -208,6 +212,7 @@ export default function RegulationsPage() {
                   <TableCell>
                     {doc.jurisdictions.map(j => <Badge key={j} variant="secondary" className="mr-1 mb-1">{j}</Badge>)}
                   </TableCell>
+                  <TableCell>{doc.changeCount}</TableCell>
                   <TableCell className="text-xs max-w-xs truncate" title={doc.shortSummary}>{doc.shortSummary}</TableCell>
                   <TableCell className="space-x-2 whitespace-nowrap">
                     <Button variant="outline" size="sm" onClick={() => handleViewDetail(doc)}>
@@ -238,6 +243,7 @@ export default function RegulationsPage() {
               <p><strong>Processed Date:</strong> {selectedDocumentForSummary.processedDate}</p>
               <p><strong>Effective Date:</strong> {selectedDocumentForSummary.effectiveDate}</p>
               <p><strong>Jurisdictions:</strong> {selectedDocumentForSummary.jurisdictions.join(', ')}</p>
+              <p><strong>Change Count:</strong> {selectedDocumentForSummary.changeCount}</p>
               <p><strong>Short Summary:</strong> {selectedDocumentForSummary.shortSummary}</p>
               <div className="mt-4">
                 <h4 className="font-semibold mb-2">Full Document Text (Excerpt):</h4>

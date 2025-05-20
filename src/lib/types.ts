@@ -46,6 +46,7 @@ export interface ListedRegulationDocument {
   effectiveDate: string;
   jurisdictions: string[];
   shortSummary: string;
+  changeCount: number; // Added new field
   fullText?: string; // Optional, for re-summarization or detailed view
 }
 
