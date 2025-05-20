@@ -7,7 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Webhook, FileCheck2, Orbit, AlertOctagon, SlidersHorizontal, ListChecks, RefreshCw, Zap, Archive, CheckCircle } from 'lucide-react';
+import { 
+  Webhook, FileCheck2, Orbit, AlertOctagon, SlidersHorizontal, 
+  ListChecks, RefreshCw, Zap, Archive, CheckCircle, AlertTriangle, XCircle,
+  DatabaseZap, ArrowDownCircle, Share2
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ProcessingQueueItem } from '@/lib/types';
 
@@ -40,7 +44,6 @@ export default function IngestionProcessingPage() {
   useEffect(() => {
     updateTimestamps();
     // Simulate API health check
-    // In a real app, this would be an API call
     setApiHealth({ status: 'Nominal', color: 'bg-green-500', icon: CheckCircle });
 
     const failureInterval = setInterval(() => {
@@ -105,6 +108,84 @@ export default function IngestionProcessingPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="shadow-lg hover:shadow-xl transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center text-muted-foreground">
+            <Share2 className="mr-2 h-5 w-5" /> System Architecture & Health
+          </CardTitle>
+          <CardDescription>Visual overview of system connections and operational status.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Central Hub */}
+          <div className="flex justify-center">
+            <div className="p-4 border-2 border-primary rounded-lg shadow-lg bg-background w-auto max-w-md text-center">
+              <DatabaseZap className="h-10 w-10 mx-auto text-primary mb-2" />
+              <h3 className="text-xl font-semibold text-primary">Ingestion & Processing Hub</h3>
+              <p className="text-md text-muted-foreground">Central Data Pipeline</p>
+              <Badge className="mt-3 text-sm py-1 px-3 bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100 border border-green-300 dark:border-green-500">Operational</Badge>
+            </div>
+          </div>
+
+          {/* Connection Visual */}
+          <div className="flex justify-center items-center space-x-4 text-muted-foreground py-4">
+            <div className="h-px flex-grow bg-border max-w-xs"></div>
+            <ArrowDownCircle className="h-8 w-8 text-primary" />
+            <div className="h-px flex-grow bg-border max-w-xs"></div>
+          </div>
+
+          {/* Connected Modules */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* AML Module */}
+            <Card className="relative shadow-md hover:shadow-lg transition-shadow border-l-4 border-green-500">
+              <div className="absolute top-3 right-3 p-1.5 bg-green-100 dark:bg-green-700 rounded-full shadow">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-200" />
+              </div>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">AML Module</CardTitle>
+                <CardDescription>Anti-Money Laundering Analysis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-1">Status: <span className="font-semibold text-green-600">Healthy</span></p>
+                <p className="text-xs text-muted-foreground">Connection: Real-time</p>
+              </CardContent>
+            </Card>
+            
+            {/* Risk Module - Warning */}
+            <Card className="relative shadow-md hover:shadow-lg transition-shadow border-l-4 border-yellow-500">
+              <div className="absolute top-3 right-3 p-1.5 bg-yellow-100 dark:bg-yellow-700 rounded-full shadow">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-200" />
+              </div>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Risk Module</CardTitle>
+                <CardDescription>Risk Gap & Assessment Engine</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-1">Status: <span className="font-semibold text-yellow-600">Warning</span></p>
+                <p className="text-xs text-muted-foreground">Details: High processing latency detected.</p>
+                <p className="text-xs text-muted-foreground">Last Update: 2 mins ago</p>
+              </CardContent>
+            </Card>
+            
+            {/* Controls Module - Error */}
+            <Card className="relative shadow-md hover:shadow-lg transition-shadow border-l-4 border-red-500">
+               <div className="absolute top-3 right-3 p-1.5 bg-red-100 dark:bg-red-700 rounded-full shadow">
+                <XCircle className="w-5 h-5 text-red-600 dark:text-red-200" />
+               </div>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Controls Module</CardTitle>
+                <CardDescription>Compliance Control Suggestion</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-1">Status: <span className="font-semibold text-red-600">Error</span></p>
+                <p className="text-xs text-muted-foreground">Details: Control suggestion API unresponsive.</p>
+                <p className="text-xs text-muted-foreground">Last Attempt: 1 min ago</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
