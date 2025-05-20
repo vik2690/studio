@@ -209,6 +209,64 @@ export default function RegulationsPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">Regulations Hub</h1>
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <BookOpen className="mr-2 h-6 w-6 text-primary" />
+            Regulatory Documents Library
+          </CardTitle>
+          <CardDescription>
+            Browse and manage ingested regulatory documents.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Document Name</TableHead>
+                <TableHead>Regulatory Body</TableHead>
+                <TableHead>Processed Date</TableHead>
+                <TableHead>Effective Date</TableHead>
+                <TableHead>Jurisdictions</TableHead>
+                <TableHead>Change Count</TableHead>
+                <TableHead>Short Summary</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {listedDocuments.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    No documents found.
+                  </TableCell>
+                </TableRow>
+              )}
+              {listedDocuments.map((doc) => (
+                <TableRow key={doc.id}>
+                  <TableCell className="font-medium">{doc.documentName}</TableCell>
+                  <TableCell>{doc.regulatoryBody}</TableCell>
+                  <TableCell>{doc.processedDate}</TableCell>
+                  <TableCell>{doc.effectiveDate}</TableCell>
+                  <TableCell>
+                    {doc.jurisdictions.map(j => <Badge key={j} variant="secondary" className="mr-1 mb-1">{j}</Badge>)}
+                  </TableCell>
+                  <TableCell>{doc.changeCount}</TableCell>
+                  <TableCell className="text-xs max-w-xs truncate" title={doc.shortSummary}>{doc.shortSummary}</TableCell>
+                  <TableCell className="space-x-2 whitespace-nowrap">
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(doc)}>
+                      <Eye className="mr-1 h-4 w-4" /> Detail
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleViewSimplifiedSummary(doc)}>
+                      <Wand2 className="mr-1 h-4 w-4" /> Summarize
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       
       <Card id="summarization-card" className="shadow-lg">
         <CardHeader>
@@ -411,64 +469,6 @@ export default function RegulationsPage() {
           </CardFooter>
         </Card>
       )}
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <BookOpen className="mr-2 h-6 w-6 text-primary" />
-            Regulatory Documents Library
-          </CardTitle>
-          <CardDescription>
-            Browse and manage ingested regulatory documents.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Document Name</TableHead>
-                <TableHead>Regulatory Body</TableHead>
-                <TableHead>Processed Date</TableHead>
-                <TableHead>Effective Date</TableHead>
-                <TableHead>Jurisdictions</TableHead>
-                <TableHead>Change Count</TableHead>
-                <TableHead>Short Summary</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {listedDocuments.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
-                    No documents found.
-                  </TableCell>
-                </TableRow>
-              )}
-              {listedDocuments.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell className="font-medium">{doc.documentName}</TableCell>
-                  <TableCell>{doc.regulatoryBody}</TableCell>
-                  <TableCell>{doc.processedDate}</TableCell>
-                  <TableCell>{doc.effectiveDate}</TableCell>
-                  <TableCell>
-                    {doc.jurisdictions.map(j => <Badge key={j} variant="secondary" className="mr-1 mb-1">{j}</Badge>)}
-                  </TableCell>
-                  <TableCell>{doc.changeCount}</TableCell>
-                  <TableCell className="text-xs max-w-xs truncate" title={doc.shortSummary}>{doc.shortSummary}</TableCell>
-                  <TableCell className="space-x-2 whitespace-nowrap">
-                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(doc)}>
-                      <Eye className="mr-1 h-4 w-4" /> Detail
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleViewSimplifiedSummary(doc)}>
-                      <Wand2 className="mr-1 h-4 w-4" /> Summarize
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       {selectedDocumentForSummary && (
         <Dialog open={isDetailViewOpen} onOpenChange={setIsDetailViewOpen}>
