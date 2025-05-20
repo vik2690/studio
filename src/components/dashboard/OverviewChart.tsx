@@ -22,7 +22,7 @@ export function OverviewChart({ data, title, description, dataKey, xAxisKey, cha
   const barFillColor = chartConfig[seriesKey]?.color || "hsl(var(--chart-1))"; // Fallback color
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-border/60 hover:border-primary/60">
       <CardHeader>
         <CardTitle className="text-muted-foreground">{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

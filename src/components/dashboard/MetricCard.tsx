@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Metric } from '@/lib/types';
@@ -8,7 +9,7 @@ interface MetricCardProps extends Metric {}
 
 export function MetricCard({ title, value, change, changeType, icon: Icon, description }: MetricCardProps) {
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-border/60 hover:border-primary/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
