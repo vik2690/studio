@@ -26,7 +26,7 @@ export default function AMLDashboardPage() {
   const [transactions, setTransactions] = useState<FlaggedTransaction[]>(initialTransactions);
   const [selectedTransaction, setSelectedTransaction] = useState<FlaggedTransaction | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [aiSuggestions, setAiSuggestions = useState(null);
+  const [aiSuggestions, setAiSuggestions] = useState<FlagAMLTransactionsOutput | null>(null);
   const { toast } = useToast();
 
   // Form state for manual flagging
