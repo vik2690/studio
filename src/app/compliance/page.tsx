@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState } from 'react';
 import { suggestControlsAction } from '@/lib/actions';
-import type { SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
+import type { SuggestControlsInput, SuggestControlsOutput } from '@/ai/flows/suggest-controls';
 import type { ControlSuggestion } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +17,8 @@ import { Badge } from '@/components/ui/badge';
 export default function ComplianceHubPage() {
   const [riskGapReport, setRiskGapReport] = useState('');
   const [currentPolicies, setCurrentPolicies] = useState('');
-  const [aiResult, setAiResult] = useState(null);
-  const [suggestedControls, setSuggestedControls] = useState([]);
+  const [aiResult, setAiResult] = useState<SuggestControlsOutput | null>(null);
+  const [suggestedControls, setSuggestedControls] = useState<ControlSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -48,7 +49,7 @@ export default function ComplianceHubPage() {
         setSuggestedControls(controlsArray.map((controlText, index) => ({
           id: `control-${Date.now()}-${index}`,
           suggestion: controlText,
-          justification: result.justification, // อาจจะต้องปรับปรุงถ้า justification มีหลายส่วน
+          justification: result.justification,
           status: 'pending',
         })));
         toast({ title: "Analysis Complete", description: "Control suggestions generated." });
@@ -111,22 +112,22 @@ export default function ComplianceHubPage() {
           <CardFooter>
             <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? (
-                &lt;&gt;
+                <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Analyzing...
-                &lt;&gt;
+                </>
               ) : (
-                &lt;&gt;
+                <>
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Get Control Suggestions
-                &lt;&gt;
+                </>
               )}
             </Button>
           </CardFooter>
         </form>
       </Card>
 
-      {aiResult && suggestedControls.length &gt; 0 && (
+      {aiResult && suggestedControls.length > 0 && (
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -143,27 +144,27 @@ export default function ComplianceHubPage() {
             </Alert>
             
             <h3 className="text-xl font-semibold mt-6 mb-3">Suggested Controls for Review:</h3>
-            {suggestedControls.map(control =&gt; (
+            {suggestedControls.map(control => (
               <Card key={control.id} className="bg-muted/50 p-4">
                 <div className="flex justify-between items-start">
                   <p className="text-sm font-medium">{control.suggestion}</p>
                   <Badge variant={
                     control.status === 'approved' ? 'default' :
                     control.status === 'rejected' ? 'destructive' :
-                    control.status === 'implemented' ? 'secondary' : // Consider a success variant for implemented
+                    control.status === 'implemented' ? 'secondary' :
                     'outline'
                   }>
                     {control.status.toUpperCase()}
                   </Badge>
                 </div>
                 <div className="mt-3 flex space-x-2">
-                  <Button size="sm" variant="outline" onClick={() =&gt; handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
+                  <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
                     <ThumbsUp className="mr-1 h-4 w-4" /> Approve
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() =&gt; handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
+                  <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
                     <ThumbsDown className="mr-1 h-4 w-4" /> Reject
                   </Button>
-                   <Button size="sm" variant="default" onClick={() =&gt; handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
+                   <Button size="sm" variant="default" onClick={() => handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
                     Mark Implemented
                   </Button>
                 </div>
