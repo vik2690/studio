@@ -74,7 +74,7 @@ const controlStatusChartConfig = {
 
 export default function OverviewPage() {
   return (
-    <div className="space-y-6 px-4 sm:px-6 pt-0 pb-6"> 
+    <div className="space-y-6 px-4 sm:px-6 py-6"> 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview Dashboard</h1>
       </div>
