@@ -11,9 +11,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input'; // Added Input for file upload
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature, GitCompareArrows, ListChecks, UploadCloud } from 'lucide-react'; // Added UploadCloud
+import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature, GitCompareArrows, ListChecks, UploadCloud, FileDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -93,8 +93,7 @@ export default function RegulationsPage() {
       return;
     }
 
-    // Reset file input value to allow re-uploading the same file after an error or change
-    event.target.value = '';
+    event.target.value = ''; // Reset file input
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -161,6 +160,35 @@ export default function RegulationsPage() {
     }
   };
 
+  const handleExportComparison = () => {
+    if (!comparisonResult) {
+      toast({ title: "No Data", description: "No comparison data to export.", variant: "destructive"});
+      return;
+    }
+
+    let exportText = `Regulatory Document Comparison Report\n`;
+    if (selectedRegBodyCompare) {
+      exportText += `Regulatory Body Context: ${selectedRegBodyCompare}\n`;
+    }
+    exportText += `========================================\n\n`;
+    exportText += `Overall Assessment:\n${comparisonResult.overallAssessment}\n\n`;
+    exportText += `Similarities:\n`;
+    comparisonResult.similarities.forEach(item => exportText += `- ${item}\n`);
+    exportText += `\nDifferences:\n`;
+    comparisonResult.differences.forEach(item => exportText += `- ${item}\n`);
+
+    const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'comparison_result.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: "Comparison results downloaded as comparison_result.txt"});
+  };
+
   const handleViewSimplifiedSummary = (doc: ListedRegulationDocument) => {
     if (doc.fullText) {
       setDocumentText(doc.fullText);
@@ -200,7 +228,7 @@ export default function RegulationsPage() {
                 id="documentFileSummary"
                 type="file"
                 className="mt-1"
-                accept=".txt,.md,.html,.xml,.json"
+                accept=".txt,.md,.html,.xml,.json,.pdf"
                 onChange={(e) => handleFileUpload(e, setDocumentText)}
                 disabled={isLoadingSummary}
               />
@@ -281,11 +309,11 @@ export default function RegulationsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="document1FileCompare" className="text-base font-semibold">Document 1</Label>
+                <Label htmlFor="document1FileCompare" className="text-base font-semibold">Upload Document 1</Label>
                  <Input 
                   id="document1FileCompare"
                   type="file"
-                  accept=".txt,.md,.html,.xml,.json"
+                  accept=".txt,.md,.html,.xml,.json,.pdf"
                   onChange={(e) => handleFileUpload(e, setDocument1CompareText)}
                   disabled={isLoadingComparison}
                   className="w-full"
@@ -300,11 +328,11 @@ export default function RegulationsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="document2FileCompare" className="text-base font-semibold">Document 2</Label>
+                <Label htmlFor="document2FileCompare" className="text-base font-semibold">Upload Document 2</Label>
                 <Input 
                   id="document2FileCompare"
                   type="file"
-                  accept=".txt,.md,.html,.xml,.json"
+                  accept=".txt,.md,.html,.xml,.json,.pdf"
                   onChange={(e) => handleFileUpload(e, setDocument2CompareText)}
                   disabled={isLoadingComparison}
                   className="w-full"
@@ -375,6 +403,12 @@ export default function RegulationsPage() {
               )}
             </div>
           </CardContent>
+          <CardFooter>
+            <Button onClick={handleExportComparison} disabled={!comparisonResult} className="w-full sm:w-auto">
+              <FileDown className="mr-2 h-4 w-4" />
+              Export Comparison
+            </Button>
+          </CardFooter>
         </Card>
       )}
 
