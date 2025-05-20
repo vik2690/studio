@@ -69,7 +69,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
-        <Sidebar className="hidden border-r bg-sidebar text-sidebar-foreground md:block" collapsible="icon">
+        <Sidebar className="hidden border-r bg-sidebar text-sidebar-foreground md:block peer" collapsible="icon"> {/* Added peer class here */}
           <SidebarHeader className="p-3 flex justify-center">
             <Link href="/" className="flex flex-col items-center gap-1 text-sidebar-foreground" title="Cognitive Risk Intelligence & Control System">
                <Image src="https://placehold.co/36x36.png" alt="Cognitive Risk Intelligence & Control System Logo" width={30} height={30} data-ai-hint="abstract geometric shape" className="transition-all group-data-[collapsible=icon]:size-7"/>
@@ -84,7 +84,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <SidebarNavItems />
           </SidebarContent>
         </Sidebar>
-        <div className="flex flex-col sm:pl-14 print:sm:pl-0"> {/* Adjust pl-14 based on collapsed sidebar width */}
+        <div className="flex flex-col print:pl-0 md:pl-[var(--sidebar-width)] peer-data-[state=collapsed]:md:pl-[var(--sidebar-width-icon)] transition-[padding] duration-200 ease-linear">
           <AppHeader />
           <main className="flex-1 bg-background md:m-0 print:shadow-none">
             {children}
