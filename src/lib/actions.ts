@@ -4,7 +4,7 @@
 import { summarizeRegulations as _summarizeRegulations, type SummarizeRegulationsInput, type SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
 import { flagAMLTransactions as _flagAMLTransactions, type FlagAMLTransactionsInput, type FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
 import { suggestControls as _suggestControls, type SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
-import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput, CompareDocumentsInputSchema as CompareDocumentsActionInputSchema } from '@/ai/flows/compare-documents-flow';
+import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
 import { z } from 'zod';
 
 // Define Zod schemas for input validation if not already strictly typed by AI flows
@@ -20,6 +20,13 @@ const FlagAMLTransactionsActionInputSchema = z.object({
 const SuggestControlsActionInputSchema = z.object({
   riskGapAnalysisReport: z.string().min(1, "Risk gap analysis report cannot be empty."),
   currentPolicies: z.string().min(1, "Current policies cannot be empty."),
+});
+
+// Redefine the schema here as it cannot be exported from the 'use server' flow file
+const CompareDocumentsActionInputSchema = z.object({
+  document1Text: z.string().min(1, "Document 1 text cannot be empty.").describe("The text of the first regulatory document."),
+  document2Text: z.string().min(1, "Document 2 text cannot be empty.").describe("The text of the second regulatory document."),
+  regulatoryBody: z.string().optional().describe("The relevant regulatory body for context, e.g., ESMA, FinCEN."),
 });
 
 

@@ -11,14 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const CompareDocumentsInputSchema = z.object({
+const CompareDocumentsInputSchema = z.object({
   document1Text: z.string().min(1, "Document 1 text cannot be empty.").describe("The text of the first regulatory document."),
   document2Text: z.string().min(1, "Document 2 text cannot be empty.").describe("The text of the second regulatory document."),
   regulatoryBody: z.string().optional().describe("The relevant regulatory body for context, e.g., ESMA, FinCEN."),
 });
 export type CompareDocumentsInput = z.infer<typeof CompareDocumentsInputSchema>;
 
-export const CompareDocumentsOutputSchema = z.object({
+const CompareDocumentsOutputSchema = z.object({
   similarities: z.array(z.string()).describe("Key similarities found between the two documents."),
   differences: z.array(z.string()).describe("Key differences found between the two documents."),
   overallAssessment: z.string().describe("A brief overall assessment of the comparison, highlighting the most critical changes or overlaps."),
