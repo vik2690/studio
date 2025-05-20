@@ -40,15 +40,15 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar variables for light theme with light blue */
-    --sidebar-background: 210 100% 96%; /* Very light blue */
-    --sidebar-foreground: 210 30% 25%; /* Dark desaturated blue for text */
-    --sidebar-primary: 210 75% 50%;    /* Medium, vibrant blue for active/primary */
-    --sidebar-primary-foreground: 210 60% 95%; /* Very light blue/off-white for text on primary */
-    --sidebar-accent: 210 60% 90%;     /* Lighter blue for hover */
-    --sidebar-accent-foreground: 210 30% 25%; /* Dark text for on accent */
-    --sidebar-border: 210 50% 88%;     /* Light blueish gray border */
-    --sidebar-ring: 210 85% 60%;       /* Vibrant blue ring */
+    /* Sidebar variables for light theme with light brown */
+    --sidebar-background: 30 40% 90%; /* Very light, slightly desaturated brown/beige */
+    --sidebar-foreground: 30 40% 25%; /* Darker brown for text */
+    --sidebar-primary: 30 50% 45%;    /* Medium, richer brown for active/primary */
+    --sidebar-primary-foreground: 30 30% 95%; /* Very light color for text on primary */
+    --sidebar-accent: 30 40% 85%;     /* Slightly different shade of light brown for hover */
+    --sidebar-accent-foreground: 30 40% 25%; /* Darker brown for text on accent */
+    --sidebar-border: 30 30% 80%;     /* Light brown-gray border */
+    --sidebar-ring: 30 60% 50%;       /* Noticeable brown ring */
   }
 
   .dark {
@@ -86,15 +86,15 @@
     --chart-4: 42 60% 50%; /* Deeper Gold */
     --chart-5: 40 50% 45%; /* Brownish Gold */
 
-    /* Sidebar variables for dark mode with light blue */
-    --sidebar-background: 210 30% 18%; /* Dark, muted blue */
-    --sidebar-foreground: 210 70% 85%; /* Light desaturated blue for text */
-    --sidebar-primary: 210 80% 60%;    /* Brighter, vibrant blue for active */
-    --sidebar-primary-foreground: 210 20% 15%; /* Very dark blue for text on primary */
-    --sidebar-accent: 210 25% 30%;     /* Darker, slightly more saturated blue for hover */
-    --sidebar-accent-foreground: 210 70% 85%; /* Light text for on accent */
-    --sidebar-border: 210 20% 25%;     /* Dark blueish gray border */
-    --sidebar-ring: 210 85% 65%;       /* Bright blue ring */
+    /* Sidebar variables for dark mode with dark brown */
+    --sidebar-background: 30 25% 20%; /* Dark, muted brown */
+    --sidebar-foreground: 30 30% 85%; /* Light, warm off-white/beige for text */
+    --sidebar-primary: 30 40% 50%;    /* Medium-dark, noticeable brown for active */
+    --sidebar-primary-foreground: 30 20% 15%; /* Very dark brown for text on primary */
+    --sidebar-accent: 30 25% 30%;     /* Darker, slightly more saturated brown for hover */
+    --sidebar-accent-foreground: 30 30% 85%; /* Light text for on accent */
+    --sidebar-border: 30 20% 25%;     /* Dark brown-gray border */
+    --sidebar-ring: 30 50% 55%;       /* Brighter brown ring */
   }
 }
 
