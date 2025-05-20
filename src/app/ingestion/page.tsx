@@ -84,9 +84,9 @@ export default function IngestionProcessingPage() {
 
   return (
     <div className="space-y-8 p-1 md:p-2">
-      <h1 className="text-3xl font-bold tracking-tight">Ingestion & Processing Hub</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Ingestion &amp; Processing Hub</h1>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">GDPR Data Stream</CardTitle>
@@ -108,7 +108,9 @@ export default function IngestionProcessingPage() {
             <Badge variant="default" className="mt-2 bg-primary/10 text-primary-foreground hover:bg-primary/20">Active</Badge>
           </CardContent>
         </Card>
+      </div>
 
+      <div>
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">System Status</CardTitle>
@@ -243,6 +245,3 @@ export default function IngestionProcessingPage() {
     </div>
   );
 }
-
-
-    
