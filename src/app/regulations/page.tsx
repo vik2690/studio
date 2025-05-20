@@ -224,6 +224,7 @@ export default function RegulationsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>ID</TableHead>
                 <TableHead>Document Name</TableHead>
                 <TableHead>Regulatory Body</TableHead>
                 <TableHead>Processed Date</TableHead>
@@ -237,13 +238,14 @@ export default function RegulationsPage() {
             <TableBody>
               {listedDocuments.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     No documents found.
                   </TableCell>
                 </TableRow>
               )}
               {listedDocuments.map((doc) => (
                 <TableRow key={doc.id}>
+                  <TableCell className="font-medium">{doc.id}</TableCell>
                   <TableCell className="font-medium">{doc.documentName}</TableCell>
                   <TableCell>{doc.regulatoryBody}</TableCell>
                   <TableCell>{doc.processedDate}</TableCell>
