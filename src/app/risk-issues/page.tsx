@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Eye, ShieldCheck, AlertTriangle, FileText, Activity, ExternalLink, Settings2, PlayCircle } from 'lucide-react';
+import { MoreHorizontal, Eye, ShieldCheck, AlertTriangle, FileText, Activity, ExternalLink, Settings2, PlayCircle, Scale } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const initialRiskItems: RiskIssueItem[] = [
@@ -21,6 +21,7 @@ const initialRiskItems: RiskIssueItem[] = [
     severity: 'Critical',
     riskType: 'Cybersecurity',
     status: 'Open',
+    violatedRegulation: 'GDPR Article 32',
   },
   {
     id: 'ISSUE-002',
@@ -31,6 +32,7 @@ const initialRiskItems: RiskIssueItem[] = [
     severity: 'High',
     riskType: 'Compliance',
     status: 'In Progress',
+    violatedRegulation: 'BSA - 31 CFR § 1020.210',
   },
   {
     id: 'RISK-003',
@@ -51,6 +53,7 @@ const initialRiskItems: RiskIssueItem[] = [
     severity: 'High',
     riskType: 'Operational',
     status: 'Open',
+    violatedRegulation: 'MiFID II - Article 17',
   },
   {
     id: 'ISSUE-005',
@@ -76,7 +79,7 @@ const initialRiskItems: RiskIssueItem[] = [
 
 const severityVariantMap: Record<RiskIssueItem['severity'], 'destructive' | 'default' | 'secondary' | 'outline'> = {
   'Critical': 'destructive',
-  'High': 'default', // Will use primary color
+  'High': 'default', 
   'Medium': 'secondary',
   'Low': 'outline',
 };
@@ -115,6 +118,7 @@ export default function RiskIssuesHubPage() {
                 <TableHead className="min-w-[250px]">Description</TableHead>
                 <TableHead>Impacted Area</TableHead>
                 <TableHead>Focus Area</TableHead>
+                <TableHead>Violated Regulation</TableHead>
                 <TableHead>Identified Date</TableHead>
                 <TableHead>Severity</TableHead>
                 <TableHead>Risk Type</TableHead>
@@ -125,7 +129,7 @@ export default function RiskIssuesHubPage() {
             <TableBody>
               {riskItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
+                  <TableCell colSpan={10} className="h-24 text-center">
                     No risks or issues identified.
                   </TableCell>
                 </TableRow>
@@ -136,6 +140,13 @@ export default function RiskIssuesHubPage() {
                     <TableCell className="text-xs">{item.description}</TableCell>
                     <TableCell className="text-xs">{item.impactedArea}</TableCell>
                     <TableCell><Badge variant="outline">{item.focusArea}</Badge></TableCell>
+                    <TableCell className="text-xs">
+                      {item.violatedRegulation ? (
+                        <Badge variant="secondary" className="whitespace-nowrap">{item.violatedRegulation}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )}
+                    </TableCell>
                     <TableCell>{item.identifiedDate}</TableCell>
                     <TableCell>
                       <Badge variant={severityVariantMap[item.severity]}>
@@ -150,7 +161,7 @@ export default function RiskIssuesHubPage() {
                         variant={
                             item.status === 'Open' ? 'default' :
                             item.status === 'In Progress' ? 'secondary' :
-                            item.status === 'Mitigated' ? 'outline' : // A more neutral or positive one
+                            item.status === 'Mitigated' ? 'outline' : 
                             item.status === 'Closed' ? 'outline' :
                             item.status === 'Requires Attention' ? 'destructive':
                             'secondary'
@@ -177,7 +188,7 @@ export default function RiskIssuesHubPage() {
                             <Eye className="mr-2 h-4 w-4" /> View Details
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleAction('Explore Regulatory Implications', item.id)}>
-                            <ExternalLink className="mr-2 h-4 w-4" /> Regulatory Implications
+                            <Scale className="mr-2 h-4 w-4" /> Regulatory Implications
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleAction('Suggest Controls', item.id)}>
                             <ShieldCheck className="mr-2 h-4 w-4" /> Suggest Controls

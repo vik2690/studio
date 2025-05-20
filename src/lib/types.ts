@@ -93,6 +93,7 @@ export interface RiskIssueItem {
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   riskType: 'Operational' | 'Reputational' | 'Financial' | 'Compliance' | 'Strategic' | 'Cybersecurity' | 'Third-Party' | 'Other';
   status: 'Open' | 'In Progress' | 'Mitigated' | 'Closed' | 'Requires Attention';
+  violatedRegulation?: string; // New field
   regulatoryImplications?: string; // Placeholder for future feature
   suggestedControls?: string[]; // Placeholder for future feature
 }
