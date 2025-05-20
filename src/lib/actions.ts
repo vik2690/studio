@@ -1,8 +1,10 @@
+
 "use server";
 
 import { summarizeRegulations as _summarizeRegulations, type SummarizeRegulationsInput, type SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
 import { flagAMLTransactions as _flagAMLTransactions, type FlagAMLTransactionsInput, type FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
 import { suggestControls as _suggestControls, type SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
+import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput, CompareDocumentsInputSchema as CompareDocumentsActionInputSchema } from '@/ai/flows/compare-documents-flow';
 import { z } from 'zod';
 
 // Define Zod schemas for input validation if not already strictly typed by AI flows
@@ -59,3 +61,17 @@ export async function suggestControlsAction(input: SuggestControlsInput): Promis
     return { error: "Failed to suggest controls. Please try again." };
   }
 }
+
+export async function compareDocumentsAction(input: CompareDocumentsInput): Promise<CompareDocumentsOutput | { error: string }> {
+  const validation = CompareDocumentsActionInputSchema.safeParse(input);
+  if (!validation.success) {
+    return { error: validation.error.errors.map(e => e.message).join(', ') };
+  }
+  try {
+    return await _compareDocuments(validation.data);
+  } catch (e) {
+    console.error("Error in compareDocumentsAction:", e);
+    return { error: "Failed to compare documents. Please try again." };
+  }
+}
+

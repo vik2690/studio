@@ -2,15 +2,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { summarizeRegulationAction } from '@/lib/actions';
+import { summarizeRegulationAction, compareDocumentsAction } from '@/lib/actions';
 import type { SummarizeRegulationsInput, SummarizeRegulationsOutput } from '@/ai/flows/summarize-regulations';
+import type { CompareDocumentsInput, CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
 import type { ListedRegulationDocument } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature } from 'lucide-react';
+import { Loader2, FileText, Wand2, BookOpen, Eye, FileSignature, GitCompareArrows, ListChecks } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -52,23 +54,41 @@ const initialListedDocuments: ListedRegulationDocument[] = [
   },
 ];
 
+const regulatoryBodies = [
+  { value: 'ESMA', label: 'ESMA (European Securities and Markets Authority)' },
+  { value: 'FinCEN', label: 'FinCEN (Financial Crimes Enforcement Network)' },
+  { value: 'EC', label: 'European Commission' },
+  { value: 'SEC', label: 'SEC (U.S. Securities and Exchange Commission)' },
+  { value: 'PRA', label: 'PRA (Prudential Regulation Authority)' },
+  { value: 'FCA', label: 'FCA (Financial Conduct Authority)' },
+  { value: 'MAS', label: 'MAS (Monetary Authority of Singapore)' },
+  { value: 'Other', label: 'Other/Not Specified' },
+];
+
 export default function RegulationsPage() {
   const [documentText, setDocumentText] = useState('');
   const [summaryResult, setSummaryResult] = useState<SummarizeRegulationsOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  
   const [listedDocuments, setListedDocuments] = useState<ListedRegulationDocument[]>(initialListedDocuments);
   const [selectedDocumentForSummary, setSelectedDocumentForSummary] = useState<ListedRegulationDocument | null>(null);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
 
+  const [document1CompareText, setDocument1CompareText] = useState('');
+  const [document2CompareText, setDocument2CompareText] = useState('');
+  const [selectedRegBodyCompare, setSelectedRegBodyCompare] = useState<string | undefined>(undefined);
+  const [comparisonResult, setComparisonResult] = useState<CompareDocumentsOutput | null>(null);
+  const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+
   const { toast } = useToast();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSummarizeSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!documentText.trim()) {
       toast({ title: "Input Error", description: "Document text cannot be empty.", variant: "destructive" });
       return;
     }
-    setIsLoading(true);
+    setIsLoadingSummary(true);
     setSummaryResult(null);
     try {
       const input: SummarizeRegulationsInput = { documentText };
@@ -80,21 +100,46 @@ export default function RegulationsPage() {
         toast({ title: "Summarization Complete", description: "Document summary generated successfully." });
       }
     } catch (e) {
-      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+      toast({ title: "Error", description: "An unexpected error occurred during summarization.", variant: "destructive" });
     } finally {
-      setIsLoading(false);
+      setIsLoadingSummary(false);
+    }
+  };
+
+  const handleCompareSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!document1CompareText.trim() || !document2CompareText.trim()) {
+      toast({ title: "Input Error", description: "Both document texts are required for comparison.", variant: "destructive" });
+      return;
+    }
+    setIsLoadingComparison(true);
+    setComparisonResult(null);
+    try {
+      const input: CompareDocumentsInput = { 
+        document1Text: document1CompareText,
+        document2Text: document2CompareText,
+        regulatoryBody: selectedRegBodyCompare
+      };
+      const result = await compareDocumentsAction(input);
+      if ('error' in result) {
+        toast({ title: "Comparison Error", description: result.error, variant: "destructive" });
+      } else {
+        setComparisonResult(result);
+        toast({ title: "Comparison Complete", description: "Documents compared successfully." });
+      }
+    } catch (e) {
+      toast({ title: "Error", description: "An unexpected error occurred during comparison.", variant: "destructive" });
+    } finally {
+      setIsLoadingComparison(false);
     }
   };
 
   const handleViewSimplifiedSummary = (doc: ListedRegulationDocument) => {
     if (doc.fullText) {
       setDocumentText(doc.fullText);
-      // Clear previous summary and trigger new summarization
       setSummaryResult(null); 
-      // Auto-submit for summarization or prompt user? For now, just set text
       toast({ title: "Document Loaded", description: `"${doc.documentName}" loaded for summarization. Click "Generate Summary".` });
-      // Scroll to the top or to the summarization card
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('summarization-card')?.scrollIntoView({ behavior: 'smooth' });
     } else {
       toast({ title: "No Full Text", description: "Full text is not available for this document to generate a new summary.", variant: "destructive" });
     }
@@ -110,17 +155,17 @@ export default function RegulationsPage() {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">Regulations Hub</h1>
       
-      <Card className="shadow-lg">
+      <Card id="summarization-card" className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileSignature className="mr-2 h-6 w-6 text-primary" />
-            Process Regulatory Document
+            Process & Summarize Regulatory Document
           </CardTitle>
           <CardDescription>
             Paste the text of a regulatory document below to generate a concise summary using AI.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSummarizeSubmit}>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="documentText" className="text-base font-semibold">Document Text</Label>
@@ -130,13 +175,13 @@ export default function RegulationsPage() {
                 onChange={(e) => setDocumentText(e.target.value)}
                 placeholder="Paste the full text of the regulatory document here..."
                 className="min-h-[200px] mt-1 text-sm"
-                disabled={isLoading}
+                disabled={isLoadingSummary}
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-              {isLoading ? (
+            <Button type="submit" disabled={isLoadingSummary} className="w-full sm:w-auto">
+              {isLoadingSummary ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
@@ -167,6 +212,113 @@ export default function RegulationsPage() {
                 {summaryResult.summary}
               </AlertDescription>
             </Alert>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <GitCompareArrows className="mr-2 h-6 w-6 text-primary" />
+            Compare Regulatory Documents
+          </CardTitle>
+          <CardDescription>
+            Paste the text of two documents and select a regulatory body for contextual AI-powered comparison.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleCompareSubmit}>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="document1CompareText" className="text-base font-semibold">Document 1 Text</Label>
+                <Textarea
+                  id="document1CompareText"
+                  value={document1CompareText}
+                  onChange={(e) => setDocument1CompareText(e.target.value)}
+                  placeholder="Paste the full text of the first document here..."
+                  className="min-h-[200px] mt-1 text-sm"
+                  disabled={isLoadingComparison}
+                />
+              </div>
+              <div>
+                <Label htmlFor="document2CompareText" className="text-base font-semibold">Document 2 Text</Label>
+                <Textarea
+                  id="document2CompareText"
+                  value={document2CompareText}
+                  onChange={(e) => setDocument2CompareText(e.target.value)}
+                  placeholder="Paste the full text of the second document here..."
+                  className="min-h-[200px] mt-1 text-sm"
+                  disabled={isLoadingComparison}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="regulatoryBodyCompare" className="text-base font-semibold">Regulatory Body (for context)</Label>
+              <Select value={selectedRegBodyCompare} onValueChange={setSelectedRegBodyCompare} disabled={isLoadingComparison}>
+                <SelectTrigger id="regulatoryBodyCompare" className="mt-1">
+                  <SelectValue placeholder="Select a regulatory body" />
+                </SelectTrigger>
+                <SelectContent>
+                  {regulatoryBodies.map(body => (
+                    <SelectItem key={body.value} value={body.value}>{body.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isLoadingComparison} className="w-full sm:w-auto">
+              {isLoadingComparison ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Comparing...
+                </>
+              ) : (
+                <>
+                  <GitCompareArrows className="mr-2 h-4 w-4" />
+                  Compare Documents
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+
+      {comparisonResult && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <ListChecks className="mr-2 h-6 w-6 text-primary" />
+              AI-Generated Comparison
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertTitle className="font-semibold">Overall Assessment:</AlertTitle>
+              <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                {comparisonResult.overallAssessment}
+              </AlertDescription>
+            </Alert>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Similarities:</h3>
+              {comparisonResult.similarities.length > 0 ? (
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {comparisonResult.similarities.map((item, index) => <li key={`sim-${index}`}>{item}</li>)}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No significant similarities identified by AI.</p>
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Differences:</h3>
+              {comparisonResult.differences.length > 0 ? (
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {comparisonResult.differences.map((item, index) => <li key={`diff-${index}`}>{item}</li>)}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No significant differences identified by AI.</p>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -265,3 +417,4 @@ export default function RegulationsPage() {
     </div>
   );
 }
+
