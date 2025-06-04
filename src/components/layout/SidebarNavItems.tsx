@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell, FileSpreadsheet, Globe } from 'lucide-react';
+import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell, FileSpreadsheet, Globe, GitCompareArrows } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const navItems = [

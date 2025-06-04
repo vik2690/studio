@@ -151,7 +151,7 @@ export interface WorkloadItem {
   description: string;
   status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
   submittedAt: string;
-  regulatoryBody?: string; // Added for reporter agent
+  regulatoryBody?: string;
 }
 
 export interface ActivityLogEntry {
@@ -172,5 +172,33 @@ export interface AIAgent {
   llmModel?: string;
   workloadQueue?: WorkloadItem[];
   activityLog?: ActivityLogEntry[];
+}
+
+export interface ReportChange {
+  field: string; // e.g., 'status', 'associatedRisks', 'typeOfReport'
+  oldValue: string | string[] | undefined;
+  newValue: string | string[] | undefined;
+  changedBy: string;
+  changeReason?: string;
+}
+
+export interface ReportVersionMetadata {
+  version: number; // e.g., 1, 2, 3
+  timestamp: string; // Date of this version
+  changes: ReportChange[];
+}
+
+export interface ReportItem {
+  reportId: string;
+  status: 'Generated' | 'Pending Generation' | 'Failed' | 'Draft' | 'Archived';
+  regulatoryBody: string;
+  typeOfReport: string;
+  associatedRisks?: string[];
+  associatedControls?: string[];
+  frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'Annually' | 'Ad-hoc';
+  dateOfGeneration: string;
+  lastModifiedDate: string;
+  impactedCitations?: string[];
+  versionHistory?: ReportVersionMetadata[];
 }
 
