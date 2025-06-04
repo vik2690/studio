@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon } from 'lucide-react';
+import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -109,7 +109,45 @@ const initialAgents: AIAgent[] = [
     lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
     nextRun: 'N/A',
     details: 'Temporarily disabled for system maintenance on data pipeline (ETL-03).',
-  }
+  },
+  {
+    id: 'report-generator',
+    emoji: '📊',
+    name: 'Insight Reporter Agent',
+    role: 'Generates scheduled and on-demand compliance reports.',
+    status: 'Idle',
+    lastActive: new Date(Date.now() - 120 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    nextRun: '08:00 AM Daily',
+    details: 'Awaiting next scheduled report: "Daily AML Transaction Summary".',
+    llmModel: 'Gemini 1.5 Flash (Vertex AI)',
+    workloadQueue: [
+      { id: 'daily_aml_summary_next', description: 'Generate Daily AML Transaction Summary', status: 'Pending', submittedAt: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+      { id: 'weekly_risk_overview_prev', description: 'Generate Weekly Risk Overview (Completed)', status: 'Completed', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) },
+    ],
+    activityLog: [
+      { timestamp: new Date(Date.now() - 125 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Agent started, loaded report templates.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 120 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Successfully generated "Ad-hoc KYC Compliance Check Report".', type: 'Success' },
+      { timestamp: new Date(Date.now() - 119 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Entering idle state. Next scheduled run at 08:00 AM.', type: 'Info' },
+    ],
+  },
+  {
+    id: 'alert-monitor',
+    emoji: '🔔',
+    name: 'Notification Dispatcher Agent',
+    role: 'Monitors thresholds and dispatches periodic alerts/notifications.',
+    status: 'Active',
+    lastActive: new Date(Date.now() - 15 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    nextRun: 'Continuous',
+    details: 'Monitoring 12 active alert rules. No critical alerts triggered in last 5 minutes.',
+    llmModel: 'N/A (Rule-based)', // Can be N/A or describe the engine
+    workloadQueue: [], // Typically event-driven, queue might not be primary
+    activityLog: [
+      { timestamp: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'System check: All notification channels (Email, SMS) are operational.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 3 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Rule "High-Value Transaction" (ID: AVT-001) checked. 0 triggers.', type: 'Debug' },
+      { timestamp: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Dispatched daily digest: "System Health Overview" to admin_group.', type: 'Success' },
+      { timestamp: new Date(Date.now() - 30 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Rule "Multiple Failed Logins" (ID: SEC-003) checked. 1 low-priority event logged.', type: 'Info' },
+    ],
+  },
 ];
 
 const statusConfig: Record<AIAgentStatusValue, { color: string; icon: LucideIcon, textColor?: string }> = {
@@ -137,16 +175,58 @@ export default function OperationsCenterPage() {
           let newStatus = agent.status;
           if (agent.status === 'Processing' && Math.random() < 0.1) {
             newStatus = Math.random() < 0.5 ? 'Idle' : 'Active'; // Finished processing, could go idle or active
-          } else if (agent.status === 'Idle' && Math.random() < 0.05) {
+          } else if (agent.status === 'Idle' && Math.random() < 0.05 && agent.id !== 'report-generator') { // Keep report generator idle unless explicitly changed
             newStatus = 'Processing';
           } else if (agent.status === 'Error' && Math.random() < 0.2) {
             newStatus = 'Active';
           }
 
-          return { ...agent, lastActive: newLastActive, status: newStatus };
+
+          // Simulate activity log updates for active agents
+          let newActivityLog = agent.activityLog ? [...agent.activityLog] : [];
+          if (agent.status === 'Active' && Math.random() < 0.1) {
+              const commonMessages = [
+                `Rule "${agent.id.split('-')[0]}-Rule-${Math.floor(Math.random()*5+1)}" checked. 0 triggers.`,
+                `Processed batch of ${Math.floor(Math.random()*100+10)} events.`,
+                `Data stream for ${agent.id.split('-')[0]} nominal.`,
+              ];
+              newActivityLog.push({
+                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                  message: commonMessages[Math.floor(Math.random() * commonMessages.length)],
+                  type: 'Debug'
+              });
+              if (newActivityLog.length > 10) newActivityLog.shift(); // Keep log size manageable
+          }
+
+
+          // Simulate workload queue updates for processing agents
+          let newWorkloadQueue = agent.workloadQueue ? [...agent.workloadQueue] : [];
+          if (agent.status === 'Processing' && newWorkloadQueue.find(item => item.status === 'Processing')) {
+              const processingItemIndex = newWorkloadQueue.findIndex(item => item.status === 'Processing');
+              if (Math.random() < 0.3) { // Chance to complete a processing item
+                  newWorkloadQueue[processingItemIndex] = { ...newWorkloadQueue[processingItemIndex], status: 'Completed' };
+                  newActivityLog.push({
+                      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                      message: `Task "${newWorkloadQueue[processingItemIndex].description}" completed.`,
+                      type: 'Success'
+                  });
+                  if (newActivityLog.length > 10) newActivityLog.shift();
+                  
+                  // If a pending item exists, start processing it
+                  const pendingItemIndex = newWorkloadQueue.findIndex(item => item.status === 'Pending');
+                  if (pendingItemIndex !== -1) {
+                      newWorkloadQueue[pendingItemIndex] = { ...newWorkloadQueue[pendingItemIndex], status: 'Processing' };
+                  } else {
+                      newStatus = 'Idle'; // No more pending items
+                  }
+              }
+          }
+
+
+          return { ...agent, lastActive: newLastActive, status: newStatus, activityLog: newActivityLog, workloadQueue: newWorkloadQueue };
         })
       );
-    }, 5000); 
+    }, 7000); // Increased interval for less frequent updates
 
     return () => clearInterval(interval);
   }, []);
@@ -201,10 +281,15 @@ export default function OperationsCenterPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"> {/* Adjusted for potentially more cards */}
         {agents.map((agent) => {
           const config = statusConfig[agent.status];
           const StatusIcon = config.icon;
+          const AgentIcon = 
+            agent.id === 'report-generator' ? LineChart : 
+            agent.id === 'alert-monitor' ? BellRing : 
+            Bot; // Fallback for other agents
+          
           return (
             <Card key={agent.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
               <CardHeader className="pb-4">
@@ -325,7 +410,7 @@ export default function OperationsCenterPage() {
                   {selectedAgentDetails.activityLog && selectedAgentDetails.activityLog.length > 0 ? (
                     <ScrollArea className="h-[200px] p-3 border rounded-md bg-muted/20">
                       <div className="space-y-2.5">
-                        {selectedAgentDetails.activityLog.slice().reverse().map((log, index) => (
+                        {selectedAgentDetails.activityLog.slice().reverse().map((log, index) => ( // Display newest first
                           <div key={index} className="text-xs flex items-start">
                             <span className="font-semibold text-muted-foreground mr-2 whitespace-nowrap tabular-nums">{log.timestamp}</span>
                             <div className="flex items-center flex-wrap">
@@ -353,3 +438,5 @@ export default function OperationsCenterPage() {
     </div>
   );
 }
+
+    
