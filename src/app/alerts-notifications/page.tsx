@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -9,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Eye, AlertTriangle, Send, Info, Zap, Activity } from 'lucide-react';
+import { Bell, Eye, AlertTriangle, Send, Info, Zap, Activity, BellOff } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const initialAlerts: AlertNotificationItem[] = [
@@ -137,11 +136,24 @@ export default function AlertsNotificationsPage() {
     // In a real app, this would call an API to re-trigger the alert/notification
   };
 
+  const handleMuteAlert = (alertId: string) => {
+    setAlerts(prevAlerts =>
+      prevAlerts.map(alert =>
+        alert.id === alertId ? { ...alert, status: 'Muted' as AlertStatus } : alert
+      )
+    );
+    toast({
+      title: "Alert Muted",
+      description: `Alert ${alertId} has been muted.`,
+      variant: "default",
+    });
+  };
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight flex items-center">
         <Bell className="mr-3 h-8 w-8 text-primary" />
-        Alerts & Notifications Hub
+        Alerts &amp; Notifications Hub
       </h1>
 
       <Card className="shadow-lg">
@@ -190,15 +202,24 @@ export default function AlertsNotificationsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''}`}>
+                        <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${alert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
                           {alert.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs">{alert.mappedRisk}</TableCell>
                       <TableCell className="text-xs">{alert.objective}</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)}>
+                      <TableCell className="space-x-1 whitespace-nowrap">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)} title="View Details">
                           <Eye className="mr-1.5 h-4 w-4" /> View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMuteAlert(alert.id)}
+                          disabled={alert.status === 'Muted' || alert.status === 'Resolved'}
+                          title="Mute Alert"
+                        >
+                          <BellOff className="mr-1.5 h-4 w-4" /> Mute
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -233,7 +254,7 @@ export default function AlertsNotificationsPage() {
                 </div>
                 <div className="grid grid-cols-[1fr_3fr] items-center gap-2">
                   <span className="font-semibold text-muted-foreground">Status:</span>
-                  <Badge variant={statusVariantMap[selectedAlert.status]} className={`w-fit capitalize ${selectedAlert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''}`}>
+                  <Badge variant={statusVariantMap[selectedAlert.status]} className={`w-fit capitalize ${selectedAlert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${selectedAlert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
                     {selectedAlert.status}
                   </Badge>
                 </div>
