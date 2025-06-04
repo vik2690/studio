@@ -151,6 +151,7 @@ export interface WorkloadItem {
   description: string;
   status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
   submittedAt: string;
+  regulatoryBody?: string; // Added for reporter agent
 }
 
 export interface ActivityLogEntry {

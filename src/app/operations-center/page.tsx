@@ -5,13 +5,14 @@ import { useState, useEffect } from 'react';
 import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing } from 'lucide-react';
+import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
 
 const initialAgents: AIAgent[] = [
   {
@@ -121,8 +122,10 @@ const initialAgents: AIAgent[] = [
     details: 'Awaiting next scheduled report: "Daily AML Transaction Summary".',
     llmModel: 'Gemini 1.5 Flash (Vertex AI)',
     workloadQueue: [
-      { id: 'daily_aml_summary_next', description: 'Generate Daily AML Transaction Summary', status: 'Pending', submittedAt: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-      { id: 'weekly_risk_overview_prev', description: 'Generate Weekly Risk Overview (Completed)', status: 'Completed', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) },
+      { id: 'daily_aml_summary_next', description: 'Generate Daily AML Transaction Summary', status: 'Pending', submittedAt: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), regulatoryBody: 'Internal' },
+      { id: 'mifid_q3_compliance_rpt', description: 'MiFID II Q3 Compliance Report', status: 'Completed', submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { day: '2-digit', month: 'short' }), regulatoryBody: 'ESMA' },
+      { id: 'fincen_sar_trends_july', description: 'FinCEN SAR Trends - July', status: 'Completed', submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { day: '2-digit', month: 'short' }), regulatoryBody: 'FinCEN' },
+      { id: 'weekly_risk_overview_prev', description: 'Generate Weekly Risk Overview', status: 'Completed', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleTimeString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }), regulatoryBody: 'Aggregated' },
     ],
     activityLog: [
       { timestamp: new Date(Date.now() - 125 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Agent started, loaded report templates.', type: 'Info' },
@@ -139,8 +142,8 @@ const initialAgents: AIAgent[] = [
     lastActive: new Date(Date.now() - 15 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     nextRun: 'Continuous',
     details: 'Monitoring 12 active alert rules. No critical alerts triggered in last 5 minutes.',
-    llmModel: 'N/A (Rule-based)', // Can be N/A or describe the engine
-    workloadQueue: [], // Typically event-driven, queue might not be primary
+    llmModel: 'N/A (Rule-based)', 
+    workloadQueue: [], 
     activityLog: [
       { timestamp: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'System check: All notification channels (Email, SMS) are operational.', type: 'Info' },
       { timestamp: new Date(Date.now() - 3 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), message: 'Rule "High-Value Transaction" (ID: AVT-001) checked. 0 triggers.', type: 'Debug' },
@@ -163,6 +166,7 @@ export default function OperationsCenterPage() {
   const [agents, setAgents] = useState<AIAgent[]>(initialAgents);
   const [selectedAgentDetails, setSelectedAgentDetails] = useState<AIAgent | null>(null);
   const [isAgentDetailDialogOpen, setIsAgentDetailDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -174,15 +178,14 @@ export default function OperationsCenterPage() {
           }
           let newStatus = agent.status;
           if (agent.status === 'Processing' && Math.random() < 0.1) {
-            newStatus = Math.random() < 0.5 ? 'Idle' : 'Active'; // Finished processing, could go idle or active
-          } else if (agent.status === 'Idle' && Math.random() < 0.05 && agent.id !== 'report-generator') { // Keep report generator idle unless explicitly changed
+            newStatus = Math.random() < 0.5 ? 'Idle' : 'Active'; 
+          } else if (agent.status === 'Idle' && Math.random() < 0.05 && agent.id !== 'report-generator') { 
             newStatus = 'Processing';
           } else if (agent.status === 'Error' && Math.random() < 0.2) {
             newStatus = 'Active';
           }
 
 
-          // Simulate activity log updates for active agents
           let newActivityLog = agent.activityLog ? [...agent.activityLog] : [];
           if (agent.status === 'Active' && Math.random() < 0.1) {
               const commonMessages = [
@@ -195,15 +198,14 @@ export default function OperationsCenterPage() {
                   message: commonMessages[Math.floor(Math.random() * commonMessages.length)],
                   type: 'Debug'
               });
-              if (newActivityLog.length > 10) newActivityLog.shift(); // Keep log size manageable
+              if (newActivityLog.length > 10) newActivityLog.shift(); 
           }
 
 
-          // Simulate workload queue updates for processing agents
           let newWorkloadQueue = agent.workloadQueue ? [...agent.workloadQueue] : [];
           if (agent.status === 'Processing' && newWorkloadQueue.find(item => item.status === 'Processing')) {
               const processingItemIndex = newWorkloadQueue.findIndex(item => item.status === 'Processing');
-              if (Math.random() < 0.3) { // Chance to complete a processing item
+              if (Math.random() < 0.3) { 
                   newWorkloadQueue[processingItemIndex] = { ...newWorkloadQueue[processingItemIndex], status: 'Completed' };
                   newActivityLog.push({
                       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -212,12 +214,11 @@ export default function OperationsCenterPage() {
                   });
                   if (newActivityLog.length > 10) newActivityLog.shift();
                   
-                  // If a pending item exists, start processing it
                   const pendingItemIndex = newWorkloadQueue.findIndex(item => item.status === 'Pending');
                   if (pendingItemIndex !== -1) {
                       newWorkloadQueue[pendingItemIndex] = { ...newWorkloadQueue[pendingItemIndex], status: 'Processing' };
                   } else {
-                      newStatus = 'Idle'; // No more pending items
+                      newStatus = 'Idle'; 
                   }
               }
           }
@@ -226,7 +227,7 @@ export default function OperationsCenterPage() {
           return { ...agent, lastActive: newLastActive, status: newStatus, activityLog: newActivityLog, workloadQueue: newWorkloadQueue };
         })
       );
-    }, 7000); // Increased interval for less frequent updates
+    }, 7000); 
 
     return () => clearInterval(interval);
   }, []);
@@ -234,6 +235,14 @@ export default function OperationsCenterPage() {
   const handleViewAgentDetails = (agent: AIAgent) => {
     setSelectedAgentDetails(agent);
     setIsAgentDetailDialogOpen(true);
+  };
+
+  const handleDownloadReport = (item: WorkloadItem) => {
+    toast({
+      title: "Download Initiated",
+      description: `Preparing report: "${item.description}" for ${item.regulatoryBody || 'N/A'}. (Placeholder)`,
+    });
+    // Actual download logic would go here in a real application
   };
 
   const getWorkloadStatusBadge = (status: WorkloadItem['status']) => {
@@ -276,19 +285,15 @@ export default function OperationsCenterPage() {
           <ActivityIcon className="mr-3 h-8 w-8 text-primary" />
           AI Operations Center
         </h1>
-         <Button variant="outline" size="sm" onClick={() => window.location.reload()}> {/* Simple refresh */}
+         <Button variant="outline" size="sm" onClick={() => window.location.reload()}> 
             Refresh All
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"> {/* Adjusted for potentially more cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"> 
         {agents.map((agent) => {
           const config = statusConfig[agent.status];
           const StatusIcon = config.icon;
-          const AgentIcon = 
-            agent.id === 'report-generator' ? LineChart : 
-            agent.id === 'alert-monitor' ? BellRing : 
-            Bot; // Fallback for other agents
           
           return (
             <Card key={agent.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
@@ -379,8 +384,10 @@ export default function OperationsCenterPage() {
                           <TableRow>
                             <TableHead className="w-[100px]">ID</TableHead>
                             <TableHead>Description</TableHead>
+                            {selectedAgentDetails.id === 'report-generator' && <TableHead>Regulatory Body</TableHead>}
                             <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Submitted</TableHead>
+                            <TableHead>Submitted</TableHead>
+                            {selectedAgentDetails.id === 'report-generator' && <TableHead className="text-right">Actions</TableHead>}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -388,8 +395,24 @@ export default function OperationsCenterPage() {
                             <TableRow key={item.id}>
                               <TableCell className="font-mono text-xs py-1.5">{item.id.slice(0,12)}</TableCell>
                               <TableCell className="text-xs py-1.5">{item.description}</TableCell>
+                              {selectedAgentDetails.id === 'report-generator' && <TableCell className="text-xs py-1.5">{item.regulatoryBody || 'N/A'}</TableCell>}
                               <TableCell className="py-1.5">{getWorkloadStatusBadge(item.status)}</TableCell>
-                              <TableCell className="text-xs text-right py-1.5">{item.submittedAt}</TableCell>
+                              <TableCell className="text-xs py-1.5">{item.submittedAt}</TableCell>
+                              {selectedAgentDetails.id === 'report-generator' && (
+                                <TableCell className="text-right py-1.5">
+                                  {item.status === 'Completed' && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-auto px-2 py-1"
+                                      onClick={() => handleDownloadReport(item)}
+                                    >
+                                      <Download className="mr-1.5 h-3.5 w-3.5" />
+                                      Download
+                                    </Button>
+                                  )}
+                                </TableCell>
+                              )}
                             </TableRow>
                           ))}
                         </TableBody>
@@ -410,7 +433,7 @@ export default function OperationsCenterPage() {
                   {selectedAgentDetails.activityLog && selectedAgentDetails.activityLog.length > 0 ? (
                     <ScrollArea className="h-[200px] p-3 border rounded-md bg-muted/20">
                       <div className="space-y-2.5">
-                        {selectedAgentDetails.activityLog.slice().reverse().map((log, index) => ( // Display newest first
+                        {selectedAgentDetails.activityLog.slice().reverse().map((log, index) => ( 
                           <div key={index} className="text-xs flex items-start">
                             <span className="font-semibold text-muted-foreground mr-2 whitespace-nowrap tabular-nums">{log.timestamp}</span>
                             <div className="flex items-center flex-wrap">
@@ -439,4 +462,3 @@ export default function OperationsCenterPage() {
   );
 }
 
-    
