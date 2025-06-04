@@ -17,76 +17,77 @@ const initialAlerts: AlertNotificationItem[] = [
     id: 'ALERT-001',
     assignmentGroup: 'Compliance Team',
     lastSentTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    natureOfAlert: 'Regulatory Deadline Approaching',
+    natureOfAlert: 'Regulatory Deadline Approaching: MiFID II Q3 Report Submission',
     mappedRisk: 'RISK-REG-003',
-    objective: 'Ensure timely submission of MiFID II Q3 report.',
+    objective: 'Ensure timely submission of MiFID II Q3 report to avoid penalties and maintain regulatory standing.',
     status: 'Active',
     severity: 'High',
     description: 'MiFID II Q3 transparency report due in 7 days.',
-    triggerCondition: 'Report submission deadline < T-7 days.',
-    recipients: ['compliance-leads@example.com', 'trading-desk-supervisor@example.com'],
-    escalationPath: 'Compliance Officer -> Head of Compliance -> CRO',
+    triggerCondition: 'Report submission deadline < T-7 days and status is not "Submitted".',
+    recipients: ['compliance-leads@example.com', 'trading-desk-supervisor@example.com', 'head.compliance@example.com'],
+    escalationPath: 'Compliance Officer -> Head of Compliance -> Chief Risk Officer (CRO)',
     dialogDetails: {
-      fullDescription: 'The quarterly MiFID II transparency report for Q3 is approaching its submission deadline. All relevant data must be compiled and validated. Failure to submit on time can lead to regulatory penalties.',
-      recommendedActions: ['Verify data completeness from all trading systems.', 'Review draft report with Legal team.', 'Obtain final sign-off from Head of Compliance.'],
-      historicalDataLink: '/reports/archive/mifid?q=Q3',
-      notes: 'Last quarter submission was delayed by 1 day due to data validation issues.'
+      fullDescription: 'The quarterly MiFID II transparency report for Q3 is approaching its submission deadline of [Deadline Date]. All relevant trading data must be compiled, validated, and cross-referenced with internal policies. Failure to submit on time can lead to significant regulatory penalties and reputational damage.',
+      recommendedActions: ['Verify data completeness from all trading systems (e.g., OMS, EMS).', 'Perform reconciliation with custodian records.', 'Review draft report with Legal and Senior Management.', 'Obtain final sign-off from Head of Compliance at least 2 days prior to deadline.'],
+      historicalDataLink: '/reports/archive/mifid?q=Q3&year=previous',
+      notes: 'Last quarter submission (Q2) was delayed by 1 day due to data validation issues in the non-equity instruments section. Ensure extra scrutiny there.'
     }
   },
   {
     id: 'ALERT-002',
-    assignmentGroup: 'IT Security',
+    assignmentGroup: 'IT Security Operations Center',
     lastSentTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    natureOfAlert: 'Critical System Anomaly',
+    natureOfAlert: 'Critical System Anomaly: Payment Gateway Compromise Suspected',
     mappedRisk: 'RISK-CYBER-001',
-    objective: 'Investigate and remediate potential security breach on payment gateway.',
+    objective: 'Immediately investigate and remediate potential security breach on payment gateway PGW-02 to prevent financial loss and data exfiltration.',
     status: 'Acknowledged',
     severity: 'Critical',
-    description: 'Unusual outbound traffic detected from payment gateway server PGW-02.',
-    triggerCondition: 'Outbound traffic > 500MB/hr from non-standard ports on PGW-02.',
-    recipients: ['soc@example.com', 'it-security-manager@example.com'],
-    escalationPath: 'SOC Lead -> CISO -> CTO',
+    description: 'Unusual outbound traffic (approx. 1.2 GB/hr) detected from payment gateway server PGW-02 to multiple unknown IP addresses in a high-risk region.',
+    triggerCondition: 'Outbound traffic > 500MB/hr from non-standard ports on PGW-02 OR communication with blacklisted IPs.',
+    recipients: ['soc@example.com', 'it-security-manager@example.com', 'incident-response-team@example.com'],
+    escalationPath: 'SOC Lead -> CISO -> CTO -> CEO (if confirmed breach with major impact)',
     dialogDetails: {
-      fullDescription: 'The monitoring system flagged anomalous outbound network activity on payment gateway server PGW-02. This could indicate a compromised system or data exfiltration attempt. Immediate investigation is required.',
-      recommendedActions: ['Isolate server PGW-02 from the network.', 'Perform forensic analysis of server logs.', 'Check for known vulnerabilities.'],
-      notes: 'Similar activity pattern observed last year during a minor incident.'
+      fullDescription: 'The Security Information and Event Management (SIEM) system flagged highly anomalous outbound network activity on critical payment gateway server PGW-02. This pattern is consistent with potential data exfiltration following a system compromise. Immediate investigation and containment are required as per IRP-004.',
+      recommendedActions: ['Isolate server PGW-02 from the network immediately.', 'Initiate forensic analysis of server logs, network traffic, and memory dumps.', 'Check for known vulnerabilities (e.g., CVEs) on PGW-02 and related systems.', 'Notify legal and compliance teams of potential data breach.'],
+      notes: 'Similar activity pattern (though smaller scale) observed last year during a minor incident involving malware on an adjacent server. Check if related IOCs are present.'
     }
   },
   {
     id: 'ALERT-003',
-    assignmentGroup: 'Risk Management',
+    assignmentGroup: 'AML Analytics Unit',
     lastSentTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    natureOfAlert: 'AML Threshold Breach',
+    natureOfAlert: 'High-Risk AML Transaction Threshold Breach',
     mappedRisk: 'RISK-AML-007',
-    objective: 'Review high-value transaction flagged by AML system.',
+    objective: 'Conduct enhanced due diligence on transaction TXN-8439201 to determine legitimacy and file SAR if necessary.',
     status: 'Active',
     severity: 'Medium',
-    description: 'Transaction TXN-8439201 ($150,000 USD) flagged for review.',
-    triggerCondition: 'Single transaction amount > $100,000 USD to high-risk jurisdiction.',
-    recipients: ['aml-analysts@example.com'],
-    escalationPath: 'Senior AML Analyst -> MLRO',
+    description: 'Transaction TXN-8439201 ($150,000 USD) from Customer CUST-5872 to a VASP in a high-risk jurisdiction has been flagged by the AML monitoring system.',
+    triggerCondition: 'Single transaction amount > $100,000 USD to high-risk jurisdiction OR cumulative daily transactions > $250,000 to VASPs.',
+    recipients: ['aml-analysts@example.com', 'mlro-office@example.com'],
+    escalationPath: 'Senior AML Analyst -> Money Laundering Reporting Officer (MLRO)',
     dialogDetails: {
-      fullDescription: 'A large value transaction (TXN-8439201) has been automatically flagged by the AML monitoring system due to exceeding the defined threshold for transactions involving a high-risk jurisdiction. Analyst review is required to determine if a SAR filing is necessary.',
-      recommendedActions: ['Review customer KYC profile.', 'Analyze transaction history for patterns.', 'Verify source of funds if possible.'],
+      fullDescription: 'A large value transaction (TXN-8439201 for $150,000 USD) has been automatically flagged by the AML monitoring system. The transaction involves Customer ID CUST-5872 (risk rating: High) sending funds to a Virtual Asset Service Provider located in a jurisdiction flagged as high-risk for money laundering (Jurisdiction ID: J-HR-012). Analyst review is required within 4 business hours to determine if a Suspicious Activity Report (SAR) filing is necessary.',
+      recommendedActions: ['Review customer KYC/CDD profile and source of wealth documentation.', 'Analyze historical transaction patterns for CUST-5872.', 'Verify the legitimacy of the recipient VASP if possible.', 'Document findings and decision rationale thoroughly in the case management system.'],
+      historicalDataLink: '/aml/cases?customerId=CUST-5872',
     }
   },
   {
     id: 'ALERT-004',
-    assignmentGroup: 'Operations Team',
+    assignmentGroup: 'Data Operations Team',
     lastSentTime: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    natureOfAlert: 'Data Feed Interruption',
+    natureOfAlert: 'Data Feed Interruption: FATF Sanctions List Update',
     mappedRisk: 'RISK-OP-012',
-    objective: 'Restore and validate FATF sanctions list data feed.',
+    objective: 'Restore and validate FATF sanctions list data feed to ensure up-to-date screening capabilities.',
     status: 'Resolved',
     severity: 'Low',
-    description: 'FATF sanctions data feed was interrupted for 30 mins. Now restored.',
-    triggerCondition: 'No new data received from FATF feed for > 15 minutes.',
-    recipients: ['data-ops@example.com'],
-    escalationPath: 'Data Ops Lead -> Head of Operations',
+    description: 'The automated data feed for FATF sanctions list updates was interrupted for 30 minutes. The feed has now been restored and data integrity checks are complete.',
+    triggerCondition: 'No new data received from FATF feed for > 15 minutes during expected update window.',
+    recipients: ['data-ops@example.com', 'compliance-systems-support@example.com'],
+    escalationPath: 'Data Ops Lead -> Head of Operations -> Head of Compliance (if outage > 2 hours)',
     dialogDetails: {
-        fullDescription: 'The automated data feed for FATF sanctions list updates experienced an interruption. The feed has since been restored and data integrity checks are underway.',
-        recommendedActions: ['Monitor feed for stability.', 'Confirm no sanctions updates were missed during the outage.'],
-        notes: 'Root cause identified as a temporary network hiccup at the provider side.'
+        fullDescription: 'The automated data feed for FATF sanctions list updates (Source ID: FATF-XML-FEED-01) experienced an interruption from 02:15 AM to 02:45 AM UTC. The feed has since been restored. Data integrity checks have been performed against a control file, and no sanctions updates were missed during the outage.',
+        recommendedActions: ['Continue monitoring feed stability for the next 24 hours.', 'Document the incident and resolution in the operational log.', 'Review provider SLA for potential credits if applicable.'],
+        notes: 'Root cause identified as a temporary network hiccup at the data provider\'s end. Provider has confirmed resolution and stability.'
     }
   },
 ];
@@ -165,69 +166,71 @@ export default function AlertsNotificationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="max-h-[600px] overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Assignment Group</TableHead>
-                  <TableHead>Last Sent</TableHead>
-                  <TableHead>Nature of Alert</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Mapped Risk</TableHead>
-                  <TableHead className="min-w-[200px]">Objective</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {alerts.length === 0 ? (
+          <ScrollArea className="max-h-[600px] w-full">
+            <div className="min-w-max">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={9} className="h-24 text-center">
-                      No alerts or notifications at the moment.
-                    </TableCell>
+                    <TableHead className="min-w-[120px]">ID</TableHead>
+                    <TableHead className="min-w-[200px]">Assignment Group</TableHead>
+                    <TableHead className="min-w-[180px]">Last Sent</TableHead>
+                    <TableHead className="min-w-[300px]">Nature of Alert</TableHead>
+                    <TableHead className="min-w-[120px]">Severity</TableHead>
+                    <TableHead className="min-w-[120px]">Status</TableHead>
+                    <TableHead className="min-w-[150px]">Mapped Risk</TableHead>
+                    <TableHead className="min-w-[350px]">Objective</TableHead>
+                    <TableHead className="min-w-[220px]">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  alerts.map((alert) => {
-                    const SeverityIcon = getSeverityIcon(alert.severity);
-                    return (
-                    <TableRow key={alert.id}>
-                      <TableCell className="font-medium text-xs">{alert.id}</TableCell>
-                      <TableCell className="text-xs">{alert.assignmentGroup}</TableCell>
-                      <TableCell className="text-xs whitespace-nowrap">{new Date(alert.lastSentTime).toLocaleString()}</TableCell>
-                      <TableCell className="text-xs">{alert.natureOfAlert}</TableCell>
-                      <TableCell>
-                        <Badge variant={severityVariantMap[alert.severity]} className="text-xs capitalize">
-                           <SeverityIcon className="mr-1 h-3.5 w-3.5" />
-                          {alert.severity}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${alert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
-                          {alert.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs">{alert.mappedRisk}</TableCell>
-                      <TableCell className="text-xs">{alert.objective}</TableCell>
-                      <TableCell className="space-x-1 whitespace-nowrap">
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)} title="View Details">
-                          <Eye className="mr-1.5 h-4 w-4" /> View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleMuteAlert(alert.id)}
-                          disabled={alert.status === 'Muted' || alert.status === 'Resolved'}
-                          title="Mute Alert"
-                        >
-                          <BellOff className="mr-1.5 h-4 w-4" /> Mute
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {alerts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={9} className="h-24 text-center">
+                        No alerts or notifications at the moment.
                       </TableCell>
                     </TableRow>
-                  )})
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    alerts.map((alert) => {
+                      const SeverityIcon = getSeverityIcon(alert.severity);
+                      return (
+                      <TableRow key={alert.id}>
+                        <TableCell className="font-medium text-xs">{alert.id}</TableCell>
+                        <TableCell className="text-xs">{alert.assignmentGroup}</TableCell>
+                        <TableCell className="text-xs whitespace-nowrap">{new Date(alert.lastSentTime).toLocaleString()}</TableCell>
+                        <TableCell className="text-xs">{alert.natureOfAlert}</TableCell>
+                        <TableCell>
+                          <Badge variant={severityVariantMap[alert.severity]} className="text-xs capitalize">
+                             <SeverityIcon className="mr-1 h-3.5 w-3.5" />
+                            {alert.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${alert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
+                            {alert.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">{alert.mappedRisk}</TableCell>
+                        <TableCell className="text-xs">{alert.objective}</TableCell>
+                        <TableCell className="space-x-1 whitespace-nowrap">
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)} title="View Details">
+                            <Eye className="mr-1.5 h-4 w-4" /> View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMuteAlert(alert.id)}
+                            disabled={alert.status === 'Muted' || alert.status === 'Resolved'}
+                            title="Mute Alert"
+                          >
+                            <BellOff className="mr-1.5 h-4 w-4" /> Mute
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )})
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </ScrollArea>
         </CardContent>
       </Card>
@@ -277,7 +280,7 @@ export default function AlertsNotificationsPage() {
                 </div>
                  <div className="grid grid-cols-[1fr_3fr] items-start gap-2">
                   <span className="font-semibold text-muted-foreground pt-0.5">Trigger Condition:</span>
-                  <span>{selectedAlert.triggerCondition || 'N/A'}</span>
+                  <span className="whitespace-pre-wrap">{selectedAlert.triggerCondition || 'N/A'}</span>
                 </div>
                  <div className="grid grid-cols-[1fr_3fr] items-start gap-2">
                   <span className="font-semibold text-muted-foreground pt-0.5">Recipients:</span>
@@ -338,6 +341,3 @@ export default function AlertsNotificationsPage() {
     </div>
   );
 }
-
-
-    
