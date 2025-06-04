@@ -11,57 +11,73 @@ import { ExternalLink } from 'lucide-react';
 
 interface MetricCardProps extends Metric {}
 
-export function MetricCard({ title, value, change, changeType, icon: Icon, description, breakdown, detailsUrl, breakdownAction }: MetricCardProps) {
+export function MetricCard({ title, value, change, changeType, icon: Icon, description, breakdown, breakdownDetailsUrl, navUrl, breakdownAction }: MetricCardProps) {
   const [showBreakdown, setShowBreakdown] = useState(false);
 
   const cardMinHeight = "170px"; 
 
-  // Determine if any breakdown item has an action. If so, we won't show the global breakdownAction button.
   const hasIndividualItemActions = breakdown?.some(item => !!item.action);
+  const canShowBreakdown = (breakdown && breakdown.length > 0) || breakdownAction;
+
+  const MainViewInnerContent = () => (
+    <>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 !p-0">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
+        {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
+      </CardHeader>
+      <CardContent className="!p-0 !pt-2 flex-grow flex flex-col">
+        <div className="flex-grow">
+          <div className="text-3xl font-bold text-foreground">{value}</div>
+          {change && (
+            <p className={cn(
+              "text-xs mt-1",
+              changeType === 'positive' ? 'text-green-600' : changeType === 'negative' ? 'text-red-600' : 'text-muted-foreground'
+            )}>
+              {change}
+            </p>
+          )}
+          {description && (
+            <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          )}
+        </div>
+      </CardContent>
+    </>
+  );
+
+  const mainViewClasses = cn(
+    "absolute inset-0 transition-transform duration-300 ease-in-out bg-card p-6 flex flex-col",
+    {
+      "-translate-x-full": showBreakdown && canShowBreakdown,
+      "translate-x-0": !showBreakdown || !canShowBreakdown,
+    }
+  );
+  
+  const mainViewLinkClasses = cn(mainViewClasses, "no-underline text-current focus:outline-none cursor-pointer");
+
 
   return (
     <Card
       className="shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-border/60 hover:border-primary/60 relative overflow-hidden"
       style={{ minHeight: cardMinHeight }}
-      onMouseEnter={(breakdown && breakdown.length > 0) || breakdownAction ? () => setShowBreakdown(true) : undefined}
-      onMouseLeave={(breakdown && breakdown.length > 0) || breakdownAction ? () => setShowBreakdown(false) : undefined}
+      onMouseEnter={canShowBreakdown ? () => setShowBreakdown(true) : undefined}
+      onMouseLeave={canShowBreakdown ? () => setShowBreakdown(false) : undefined}
     >
-      {/* Main Metric View */}
-      <div
-        className={cn(
-          "absolute inset-0 transition-transform duration-300 ease-in-out bg-card p-6 flex flex-col",
-          {
-            "-translate-x-full": showBreakdown && ((breakdown && breakdown.length > 0) || breakdownAction),
-            "translate-x-0": !showBreakdown || !((breakdown && breakdown.length > 0) || breakdownAction),
-          }
-        )}
-      >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 !p-0">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
-          {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
-        </CardHeader>
-        <CardContent className="!p-0 !pt-2 flex-grow flex flex-col">
-          <div className="flex-grow">
-            <div className="text-3xl font-bold text-foreground">{value}</div>
-            {change && (
-              <p className={cn(
-                "text-xs mt-1",
-                changeType === 'positive' ? 'text-green-600' : changeType === 'negative' ? 'text-red-600' : 'text-muted-foreground'
-              )}>
-                {change}
-              </p>
-            )}
-            {description && (
-              <p className="text-xs text-muted-foreground mt-1">{description}</p>
-            )}
-          </div>
-        </CardContent>
-      </div>
+      {navUrl ? (
+        <Link href={navUrl} legacyBehavior>
+          <a className={mainViewLinkClasses}>
+            <MainViewInnerContent />
+          </a>
+        </Link>
+      ) : (
+        <div className={mainViewClasses}>
+          <MainViewInnerContent />
+        </div>
+      )}
 
       {/* Breakdown View - This will slide in */}
-      {((breakdown && breakdown.length > 0) || breakdownAction) && (
+      {canShowBreakdown && (
         <div
           className={cn(
             "absolute inset-0 transition-transform duration-300 ease-in-out bg-card p-6 flex flex-col",
@@ -77,9 +93,9 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
             </CardTitle>
           </CardHeader>
 
-          {detailsUrl && showBreakdown && (
+          {breakdownDetailsUrl && showBreakdown && (
             <div className="py-1.5"> 
-              <Link href={detailsUrl} passHref legacyBehavior>
+              <Link href={breakdownDetailsUrl} passHref legacyBehavior>
                 <a className="text-xs text-primary hover:underline flex items-center">
                   View Details <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
@@ -89,7 +105,7 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
 
           <CardContent className={cn(
             "flex-grow !p-0 overflow-y-auto flex flex-col",
-            { "!pt-2": !(detailsUrl && showBreakdown) } 
+            { "!pt-2": !(breakdownDetailsUrl && showBreakdown) } 
           )}>
             {breakdown && breakdown.length > 0 && (
               <ul className="space-y-1 text-sm flex-grow">
@@ -104,8 +120,8 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
                          onClick={item.action.onClick} 
                          size="sm" 
                          variant="ghost" 
-                         className="ml-2 px-1.5 py-1 h-auto" // Adjusted padding for icon-only
-                         title={item.action.label} // Tooltip for icon button
+                         className="ml-2 px-1.5 py-1 h-auto"
+                         title={item.action.label}
                          disabled={item.action.disabled}
                        >
                          <item.action.icon className="h-4 w-4" />

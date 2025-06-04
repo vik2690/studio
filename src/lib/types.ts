@@ -20,7 +20,8 @@ export interface Metric {
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
-  detailsUrl?: string;
+  breakdownDetailsUrl?: string; // Renamed from detailsUrl
+  navUrl?: string; // New: URL for card navigation
   breakdownAction?: {
     label: string;
     onClick: () => void;

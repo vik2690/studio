@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -36,6 +37,7 @@ export default function ReviewApprovalsPage() {
       icon: CheckCircle2,
       description: "Total items successfully approved.",
       changeType: "positive",
+      navUrl: "/review-approvals/queue/completed-approvals",
     },
     {
       title: "Pending Approvals",
@@ -43,6 +45,7 @@ export default function ReviewApprovalsPage() {
       icon: Clock3,
       description: "Items awaiting approval.",
       changeType: pendingApprovals > 20 ? "negative" : "default",
+      navUrl: "/review-approvals/queue/pending-approvals",
     },
     {
       title: "Approvals Needing Discussion",
@@ -50,6 +53,7 @@ export default function ReviewApprovalsPage() {
       icon: MessageSquareWarning,
       description: "Approvals flagged for further discussion or clarification.",
        changeType: approvalsNeedDiscussion > 5 ? "negative" : "default",
+       navUrl: "/review-approvals/queue/discussion-approvals",
     },
   ];
 
@@ -60,6 +64,7 @@ export default function ReviewApprovalsPage() {
       icon: ListTodo,
       description: "Total items successfully reviewed.",
       changeType: "positive",
+      navUrl: "/review-approvals/queue/completed-reviews",
     },
     {
       title: "Pending Reviews",
@@ -67,6 +72,7 @@ export default function ReviewApprovalsPage() {
       icon: FileClock,
       description: "Items awaiting review.",
       changeType: pendingReviews > 30 ? "negative" : "default",
+      navUrl: "/review-approvals/queue/pending-reviews",
     },
     {
       title: "Reviews Needing Discussion",
@@ -74,6 +80,7 @@ export default function ReviewApprovalsPage() {
       icon: HelpCircle,
       description: "Reviews flagged for discussion or requiring more information.",
       changeType: reviewsNeedDiscussion > 10 ? "negative" : "default",
+      navUrl: "/review-approvals/queue/discussion-reviews",
     },
   ];
 
