@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing, Download } from 'lucide-react';
+import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing, Download, LucideIcon, WalletCards } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -100,6 +100,27 @@ const initialAgents: AIAgent[] = [
     nextRun: 'On-demand',
     details: 'Currently assisting User_JaneS with query: "Summarize MiFID II impact on SME advisory services."',
     llmModel: 'Gemini 1.5 Pro (Vertex AI) with RAG',
+  },
+  {
+    id: 'aml-transaction-screener',
+    emoji: '💸',
+    name: 'AML Transaction Screener',
+    role: 'Monitors all incoming and outgoing transactions to identify potential AML hits based on rules and patterns.',
+    status: 'Active',
+    lastActive: new Date(Date.now() - 15 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}),
+    nextRun: 'Continuous',
+    details: 'Screening live transaction feed. Last hit identified: TXN-SUS-00123 (Large unusual international transfer)',
+    llmModel: 'Gemini 1.5 Flash with AML Rule Engine',
+    workloadQueue: [
+      { id: 'txn_batch_live_001', description: 'Process live transaction stream segment', status: 'Processing', submittedAt: new Date(Date.now() - 10 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
+      { id: 'sar_review_txn_00123', description: 'Review flagged transaction TXN-SUS-00123', status: 'Pending', submittedAt: new Date(Date.now() - 5 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
+    ],
+    activityLog: [
+      { timestamp: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Connected to transaction firehose.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 45 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Transaction TXN-NORM-58291 cleared. No flags.', type: 'Debug' },
+      { timestamp: new Date(Date.now() - 30 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Transaction TXN-SUS-00123 flagged: Large unusual international transfer. Risk Score: 85', type: 'Warning' },
+      { timestamp: new Date(Date.now() - 15 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Queued TXN-SUS-00123 for SAR review.', type: 'Info' },
+    ]
   },
   {
     id: 'data-ingestion-monitor',
