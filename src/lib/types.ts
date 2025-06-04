@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 export interface MetricBreakdownItem {
   category: string;
   value: string | number;
-  action?: { 
+  action?: {
     label: string;
     onClick: () => void;
     icon?: LucideIcon;
@@ -15,23 +15,23 @@ export interface MetricBreakdownItem {
 export interface Metric {
   title: string;
   value: string;
-  change?: string; 
+  change?: string;
   changeType?: 'positive' | 'negative';
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
   detailsUrl?: string;
-  breakdownAction?: { 
+  breakdownAction?: {
     label: string;
-    onClick: () => void; 
+    onClick: () => void;
     icon?: LucideIcon;
   };
 }
 
 export interface ChartDataPoint {
-  name: string; 
-  value: number; 
-  fill?: string; 
+  name: string;
+  value: number;
+  fill?: string;
 }
 
 export interface FlaggedTransaction {
@@ -42,9 +42,9 @@ export interface FlaggedTransaction {
   sender: string;
   receiver: string;
   status: 'flagged' | 'reviewed' | 'sar_filed' | 'escalated';
-  riskScore?: number; 
-  details?: string; 
-  userProfile?: string; 
+  riskScore?: number;
+  details?: string;
+  userProfile?: string;
 }
 
 export interface RegulationDocument {
@@ -52,8 +52,8 @@ export interface RegulationDocument {
   title: string;
   source?: string;
   uploadDate: string;
-  content: string; 
-  summary?: string; 
+  content: string;
+  summary?: string;
 }
 
 export interface ListedRegulationDocument {
@@ -126,9 +126,9 @@ export interface ExistingControl {
   objective: string;
   controlCategory: 'Financial Reporting' | 'Operational' | 'IT General Controls' | 'Compliance' | 'Data Privacy' | 'Physical Security';
   frequency: 'Continuous' | 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'Annually' | 'Ad-hoc' | 'Event-driven';
-  owner: string; 
-  reviewer: string; 
-  lastReviewedDate?: string; 
+  owner: string;
+  reviewer: string;
+  lastReviewedDate?: string;
   controlMaturityLevel?: 'Initial' | 'Developing' | 'Defined' | 'Managed' | 'Optimized' | string;
   effectivenessRating?: 'Highly Effective' | 'Effective' | 'Partially Effective' | 'Ineffective' | 'Not Assessed' | string;
   residualRisk?: 'Low' | 'Medium' | 'High' | 'Critical' | string;
@@ -140,7 +140,19 @@ export interface ExistingControl {
   latestAICheck?: {
     status: 'Covered' | 'Needs Review' | 'Gap Identified' | 'Not Assessed';
     date: string;
-    summary?: string; 
+    summary?: string;
   };
 }
 
+export type AIAgentStatusValue = 'Active' | 'Idle' | 'Processing' | 'Error' | 'Disabled';
+
+export interface AIAgent {
+  id: string;
+  emoji: string;
+  name: string;
+  role: string;
+  status: AIAgentStatusValue;
+  lastActive: string; // Could be a timestamp string or a relative time string like "2 mins ago"
+  nextRun?: string;   // Could be a timestamp string or a relative time string like "In 5 mins"
+  details?: string;   // e.g., current task for 'Processing', or error message for 'Error'
+}
