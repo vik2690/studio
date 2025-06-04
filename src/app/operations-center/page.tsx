@@ -2,10 +2,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
+import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types'; // Added ActivityLogEntry
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing, Download, LucideIcon, WalletCards } from 'lucide-react';
+import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, LineChart, BellRing, Download, LucideIcon, WalletCards, StopCircle } from 'lucide-react'; // Added StopCircle
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -258,6 +258,16 @@ export default function OperationsCenterPage() {
     setIsAgentDetailDialogOpen(true);
   };
 
+  const handleStopAgent = (agentId: string, agentName: string) => {
+    toast({
+      title: "Agent Stop Command",
+      description: `Stop command issued for ${agentName} (ID: ${agentId}). Agent status will update shortly. (Placeholder)`,
+      variant: "destructive",
+    });
+    // Optionally, update local state to reflect 'Stopping...' or 'Disabled'
+    // setAgents(prev => prev.map(a => a.id === agentId ? {...a, status: 'Disabled'} : a));
+  };
+
   const handleDownloadReport = (item: WorkloadItem) => {
     toast({
       title: "Download Initiated",
@@ -355,9 +365,18 @@ export default function OperationsCenterPage() {
                   </div>
                 )}
               </CardContent>
-              <div className="p-4 pt-2 border-t border-border/50 mt-auto">
-                <Button variant="ghost" size="sm" className="w-full justify-start text-primary hover:text-primary/90" onClick={() => handleViewAgentDetails(agent)}>
-                    View Logs & Details <ChevronRight className="ml-auto h-4 w-4" />
+              <div className="p-4 pt-2 border-t border-border/50 mt-auto flex flex-col sm:flex-row sm:justify-between gap-2">
+                <Button variant="ghost" size="sm" className="justify-start text-primary hover:text-primary/90 flex-1" onClick={() => handleViewAgentDetails(agent)}>
+                  View Logs & Details <ChevronRight className="ml-auto h-4 w-4" />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                  onClick={() => handleStopAgent(agent.id, agent.name)}
+                  disabled={agent.status === 'Disabled'}
+                >
+                  <StopCircle className="mr-1.5 h-4 w-4" /> Stop Agent
                 </Button>
               </div>
             </Card>
