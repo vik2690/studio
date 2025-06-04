@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -164,7 +165,7 @@ export default function AlertsNotificationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="max-h-[600px] overflow-y-auto">
+          <ScrollArea className="max-h-[600px] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -337,3 +338,6 @@ export default function AlertsNotificationsPage() {
     </div>
   );
 }
+
+
+    
