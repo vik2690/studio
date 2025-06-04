@@ -13,7 +13,8 @@ export interface Metric {
   changeType?: 'positive' | 'negative';
   icon?: LucideIcon;
   description?: string;
-  breakdown?: MetricBreakdownItem[]; // New field for hover breakdown
+  breakdown?: MetricBreakdownItem[];
+  detailsUrl?: string; // New field for linking to more details
 }
 
 export interface ChartDataPoint {
@@ -52,8 +53,8 @@ export interface ListedRegulationDocument {
   effectiveDate: string;
   jurisdictions: string[];
   shortSummary: string;
-  changeCount: number; 
-  fullText?: string; 
+  changeCount: number;
+  fullText?: string;
 }
 
 export interface PolicyDocument {
@@ -83,11 +84,11 @@ export interface RiskData {
 export interface ProcessingQueueItem {
   id: string;
   fileName: string;
-  sourceSystem: 'GDPR Stream' | 'FATF Bulk Upload' | 'Internal System' | string; 
+  sourceSystem: 'GDPR Stream' | 'FATF Bulk Upload' | 'Internal System' | string;
   status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
   submittedAt: string;
-  progress?: number; 
-  failureReason?: string; 
+  progress?: number;
+  failureReason?: string;
 }
 
 export interface RiskIssueItem {
@@ -99,8 +100,7 @@ export interface RiskIssueItem {
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   riskType: 'Operational' | 'Reputational' | 'Financial' | 'Compliance' | 'Strategic' | 'Cybersecurity' | 'Third-Party' | 'Other';
   status: 'Open' | 'In Progress' | 'Mitigated' | 'Closed' | 'Requires Attention';
-  violatedRegulation?: string; 
-  regulatoryImplications?: string; 
-  suggestedControls?: string[]; 
+  violatedRegulation?: string;
+  regulatoryImplications?: string;
+  suggestedControls?: string[];
 }
-    

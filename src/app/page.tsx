@@ -23,39 +23,40 @@ const controlsBreakdown: MetricBreakdownItem[] = [
 ];
 
 const riskScoreCalculationBreakdown: MetricBreakdownItem[] = [
-  { category: "Formula", value: "Risk Score = Σ(Likelihood_i × Impact_i × Weight_i)" },
+  { category: "Formula", value: "Risk Score = Σ(Likelihoodᵢ × Impactᵢ × Weightᵢ)" },
   { category: "Likelihood (Lᵢ)", value: "Probability of risk event occurring (e.g., 1-5 scale)." },
   { category: "Impact (Iᵢ)", value: "Severity of risk if it occurs (e.g., 1-5 scale)." },
   { category: "Weight (Wᵢ)", value: "Relative importance of risk domain or item." },
 ];
 
 const overviewMetrics: Metric[] = [
-  { 
-    title: "Identified Risks", 
-    value: "125", 
-    change: "+12 last month", 
-    changeType: "negative", 
-    icon: AlertTriangle, 
+  {
+    title: "Identified Risks",
+    value: "125",
+    change: "+12 last month",
+    changeType: "negative",
+    icon: AlertTriangle,
     description: "Total open risks across the organization.",
     breakdown: riskBreakdown,
   },
-  { 
-    title: "Applied Controls", 
-    value: "850", 
-    change: "+50 last month", 
-    changeType: "positive", 
-    icon: ShieldCheck, 
+  {
+    title: "Applied Controls",
+    value: "850",
+    change: "+50 last month",
+    changeType: "positive",
+    icon: ShieldCheck,
     description: "Total active compliance controls.",
     breakdown: controlsBreakdown,
   },
-  { 
-    title: "Organization Risk Score", 
-    value: "68%", 
-    change: "-3% last month", 
-    changeType: "positive", 
-    icon: BarChartHorizontalBig, 
+  {
+    title: "Organization Risk Score",
+    value: "68%",
+    change: "-3% last month",
+    changeType: "positive",
+    icon: BarChartHorizontalBig,
     description: "Overall calculated risk exposure.",
     breakdown: riskScoreCalculationBreakdown,
+    detailsUrl: "/risk-score-details", // Added details URL
   },
   { title: "AML Hits", value: "15", change: "+2 this week", changeType: "negative", icon: FileWarning, description: "Suspicious transactions flagged." },
 ];
@@ -70,7 +71,7 @@ const riskTrendData: ChartDataPoint[] = [
 ];
 
 const riskTrendChartConfig = {
-  value: { 
+  value: {
     label: "Identified Risks",
     color: "hsl(var(--chart-1))",
   },
@@ -84,7 +85,7 @@ const controlEffectivenessData: ChartDataPoint[] = [
 ];
 
 const controlEffectivenessChartConfig = {
-  value: { 
+  value: {
     label: "Effectiveness (%)",
     color: "hsl(var(--chart-2))",
   },
@@ -98,10 +99,10 @@ const riskDistributionData: ChartDataPoint[] = [
 ];
 
 const riskDistributionChartConfig = {
-  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" }, 
-  "High": { label: "High", color: "hsl(var(--chart-1))" },     
-  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" }, 
-  "Low": { label: "Low", color: "hsl(var(--chart-3))" },      
+  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" },
+  "High": { label: "High", color: "hsl(var(--chart-1))" },
+  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" },
+  "Low": { label: "Low", color: "hsl(var(--chart-3))" },
 } satisfies ChartConfig;
 
 const controlStatusData: ChartDataPoint[] = [
@@ -111,15 +112,15 @@ const controlStatusData: ChartDataPoint[] = [
 ];
 
 const controlStatusChartConfig = {
-  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" }, 
-  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" }, 
-  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },     
+  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" },
+  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" },
+  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
 
 
 export default function OverviewPage() {
   return (
-    <div className="space-y-6"> 
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview Dashboard</h1>
       </div>
@@ -131,13 +132,13 @@ export default function OverviewPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <OverviewChart 
-          data={riskTrendData} 
+        <OverviewChart
+          data={riskTrendData}
           title="Risk Trend Analysis"
           description="Monthly trend of identified risks."
-          dataKey="value" 
-          xAxisKey="name" 
-          chartConfig={riskTrendChartConfig} 
+          dataKey="value"
+          xAxisKey="name"
+          chartConfig={riskTrendChartConfig}
         />
         <PieChartCard
           data={riskDistributionData}
@@ -147,8 +148,8 @@ export default function OverviewPage() {
           nameKey="name"
           chartConfig={riskDistributionChartConfig}
         />
-        <OverviewChart 
-          data={controlEffectivenessData} 
+        <OverviewChart
+          data={controlEffectivenessData}
           title="Control Effectiveness"
           description="Quarterly control effectiveness score."
           dataKey="value"
@@ -164,8 +165,7 @@ export default function OverviewPage() {
           chartConfig={controlStatusChartConfig}
         />
       </div>
-      
+
     </div>
   );
 }
-
