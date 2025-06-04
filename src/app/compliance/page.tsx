@@ -15,7 +15,7 @@ import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Ed
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 
 const initialExistingControls: ExistingControl[] = [
   {
@@ -233,7 +233,6 @@ export default function ComplianceHubPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Compliance & Controls Hub</h1>
       
       <Card className="shadow-lg">
         <CardHeader>
@@ -322,9 +321,11 @@ export default function ComplianceHubPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
-                        <Eye className="mr-1 h-3.5 w-3.5" /> View
-                      </Button>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
+                          <Eye className="mr-1 h-3.5 w-3.5" /> View
+                        </Button>
+                      </DialogTrigger>
                     </TableCell>
                   </TableRow>
                 ))
@@ -522,9 +523,6 @@ export default function ComplianceHubPage() {
               <Button variant="outline" onClick={() => handleInitiateDiscussion(selectedControlDetail?.id)}>
                 <MessageSquare className="mr-2 h-4 w-4" /> Initiate Discussion
               </Button>
-              <DialogClose asChild>
-                <Button type="button">Close</Button>
-              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
