@@ -166,71 +166,69 @@ export default function AlertsNotificationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="max-h-[600px] w-full">
-            <div className="min-w-max">
-              <Table>
-                <TableHeader>
+          <ScrollArea className="max-h-[600px] w-full overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">ID</TableHead>
+                  <TableHead className="min-w-[200px]">Assignment Group</TableHead>
+                  <TableHead className="min-w-[180px]">Last Sent</TableHead>
+                  <TableHead className="min-w-[300px]">Nature of Alert</TableHead>
+                  <TableHead className="min-w-[120px]">Severity</TableHead>
+                  <TableHead className="min-w-[120px]">Status</TableHead>
+                  <TableHead className="min-w-[150px]">Mapped Risk</TableHead>
+                  <TableHead className="min-w-[350px]">Objective</TableHead>
+                  <TableHead className="min-w-[220px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {alerts.length === 0 ? (
                   <TableRow>
-                    <TableHead className="min-w-[120px]">ID</TableHead>
-                    <TableHead className="min-w-[200px]">Assignment Group</TableHead>
-                    <TableHead className="min-w-[180px]">Last Sent</TableHead>
-                    <TableHead className="min-w-[300px]">Nature of Alert</TableHead>
-                    <TableHead className="min-w-[120px]">Severity</TableHead>
-                    <TableHead className="min-w-[120px]">Status</TableHead>
-                    <TableHead className="min-w-[150px]">Mapped Risk</TableHead>
-                    <TableHead className="min-w-[350px]">Objective</TableHead>
-                    <TableHead className="min-w-[220px]">Actions</TableHead>
+                    <TableCell colSpan={9} className="h-24 text-center">
+                      No alerts or notifications at the moment.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {alerts.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="h-24 text-center">
-                        No alerts or notifications at the moment.
+                ) : (
+                  alerts.map((alert) => {
+                    const SeverityIcon = getSeverityIcon(alert.severity);
+                    return (
+                    <TableRow key={alert.id}>
+                      <TableCell className="font-medium text-xs">{alert.id}</TableCell>
+                      <TableCell className="text-xs">{alert.assignmentGroup}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{new Date(alert.lastSentTime).toLocaleString()}</TableCell>
+                      <TableCell className="text-xs">{alert.natureOfAlert}</TableCell>
+                      <TableCell>
+                        <Badge variant={severityVariantMap[alert.severity]} className="text-xs capitalize">
+                           <SeverityIcon className="mr-1 h-3.5 w-3.5" />
+                          {alert.severity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${alert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
+                          {alert.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{alert.mappedRisk}</TableCell>
+                      <TableCell className="text-xs">{alert.objective}</TableCell>
+                      <TableCell className="space-x-1 whitespace-nowrap">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)} title="View Details">
+                          <Eye className="mr-1.5 h-4 w-4" /> View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMuteAlert(alert.id)}
+                          disabled={alert.status === 'Muted' || alert.status === 'Resolved'}
+                          title="Mute Alert"
+                        >
+                          <BellOff className="mr-1.5 h-4 w-4" /> Mute
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    alerts.map((alert) => {
-                      const SeverityIcon = getSeverityIcon(alert.severity);
-                      return (
-                      <TableRow key={alert.id}>
-                        <TableCell className="font-medium text-xs">{alert.id}</TableCell>
-                        <TableCell className="text-xs">{alert.assignmentGroup}</TableCell>
-                        <TableCell className="text-xs whitespace-nowrap">{new Date(alert.lastSentTime).toLocaleString()}</TableCell>
-                        <TableCell className="text-xs">{alert.natureOfAlert}</TableCell>
-                        <TableCell>
-                          <Badge variant={severityVariantMap[alert.severity]} className="text-xs capitalize">
-                             <SeverityIcon className="mr-1 h-3.5 w-3.5" />
-                            {alert.severity}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariantMap[alert.status]} className={`text-xs capitalize ${alert.status === 'Resolved' ? 'bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300' : ''} ${alert.status === 'Muted' ? 'text-muted-foreground border-muted-foreground/50' : ''}`}>
-                            {alert.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{alert.mappedRisk}</TableCell>
-                        <TableCell className="text-xs">{alert.objective}</TableCell>
-                        <TableCell className="space-x-1 whitespace-nowrap">
-                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(alert)} title="View Details">
-                            <Eye className="mr-1.5 h-4 w-4" /> View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleMuteAlert(alert.id)}
-                            disabled={alert.status === 'Muted' || alert.status === 'Resolved'}
-                            title="Mute Alert"
-                          >
-                            <BellOff className="mr-1.5 h-4 w-4" /> Mute
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )})
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  )})
+                )}
+              </TableBody>
+            </Table>
           </ScrollArea>
         </CardContent>
       </Card>
