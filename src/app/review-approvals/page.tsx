@@ -186,7 +186,7 @@ export default function ReviewApprovalsPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-xl">Approvals Dashboard</CardTitle>
+          <CardTitle className="text-xl">My Dashboard</CardTitle>
           <CardDescription>Overview of current approval statuses{selectedUser && selectedUser !== 'all' ? ` for ${selectedUserName}` : ''}.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
