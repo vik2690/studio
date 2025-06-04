@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { FlaggedTransaction } from '@/lib/types';
 import { flagAMLTransactionAction } from '@/lib/actions';
 import type { FlagAMLTransactionsInput, FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
@@ -13,14 +14,57 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, CheckCircle, Eye, Loader2, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
+import { OverviewChart } from '@/components/dashboard/OverviewChart';
+import type { ChartConfig } from '@/components/ui/chart';
 
 const initialTransactions: FlaggedTransaction[] = [
   { id: 'txn_001', date: '2024-05-01', amount: 15000, currency: 'USD', sender: 'Acc00123', receiver: 'Acc99876', status: 'flagged', riskScore: 85, details: 'Large cash deposit followed by international transfer.', userProfile: 'New customer, high-risk jurisdiction.' },
   { id: 'txn_002', date: '2024-05-03', amount: 500, currency: 'EUR', sender: 'Acc00456', receiver: 'Acc77654', status: 'reviewed', riskScore: 40, details: 'Regular business transaction, previously flagged due to name match.', userProfile: 'Established business, low-risk profile.' },
   { id: 'txn_003', date: '2024-05-05', amount: 25000, currency: 'USD', sender: 'Acc00789', receiver: 'Acc66543', status: 'sar_filed', riskScore: 95, details: 'Structuring multiple small transactions, rapid movement of funds.', userProfile: 'PEP related entity, complex ownership.' },
 ];
+
+type ChartTimeView = 'daily' | 'monthly' | 'yearly';
+
+const generateMockTrendData = (granularity: ChartTimeView) => {
+  const data = [];
+  const now = new Date();
+  if (granularity === 'daily') {
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - i);
+      data.push({
+        name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        hits: Math.floor(Math.random() * 20) + 5,
+        sars: Math.floor(Math.random() * 5),
+      });
+    }
+  } else if (granularity === 'monthly') {
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      data.push({
+        name: date.toLocaleDateString('en-US', { month: 'short' }),
+        hits: Math.floor(Math.random() * 300) + 50,
+        sars: Math.floor(Math.random() * 20) + 5,
+      });
+    }
+  } else { // yearly
+    for (let i = 4; i >= 0; i--) {
+      data.push({
+        name: (now.getFullYear() - i).toString(),
+        hits: Math.floor(Math.random() * 1000) + 200,
+        sars: Math.floor(Math.random() * 100) + 20,
+      });
+    }
+  }
+  return data;
+};
+
+const amlTrendChartConfig = {
+  hits: { label: "AML Hits", color: "hsl(var(--chart-1))" },
+  sars: { label: "SARs Filed", color: "hsl(var(--chart-2))" },
+} satisfies ChartConfig;
 
 export default function AMLDashboardPage() {
   const [transactions, setTransactions] = useState<FlaggedTransaction[]>(initialTransactions);
@@ -33,6 +77,34 @@ export default function AMLDashboardPage() {
   const [manualTxnDetails, setManualTxnDetails] = useState('');
   const [manualUserProfile, setManualUserProfile] = useState('');
   const [isManualFlagging, setIsManualFlagging] = useState(false);
+
+  // State for new dashboard metrics
+  const [totalProcessed, setTotalProcessed] = useState(125670);
+  const [amlHits, setAmlHits] = useState(235);
+  const [truePositives, setTruePositives] = useState(45);
+  const [falsePositives, setFalsePositives] = useState(190);
+  const [pendingReview, setPendingReview] = useState(30);
+  const [sarsFiled, setSarsFiled] = useState(initialTransactions.filter(t => t.status === 'sar_filed').length);
+  const [closedCases, setClosedCases] = useState(150);
+
+  // State for chart
+  const [chartTimeView, setChartTimeView] = useState<ChartTimeView>('monthly');
+  const [trendData, setTrendData] = useState(generateMockTrendData('monthly'));
+
+  useEffect(() => {
+    setTrendData(generateMockTrendData(chartTimeView));
+  }, [chartTimeView]);
+
+  useEffect(() => {
+    // Update SARs filed count if transactions list changes (e.g. after table actions)
+    setSarsFiled(transactions.filter(t => t.status === 'sar_filed').length);
+    // Mock updates for other metrics based on table changes for demonstration
+    setAmlHits(transactions.filter(t => t.status === 'flagged' || t.status === 'sar_filed').length);
+    // This is a very rough estimation for demo. Real logic would be more complex.
+    setPendingReview(transactions.filter(t => t.status === 'flagged').length);
+
+  }, [transactions]);
+
 
   const handleReviewTransaction = async (transaction: FlaggedTransaction) => {
     setSelectedTransaction(transaction);
@@ -78,18 +150,17 @@ export default function AMLDashboardPage() {
         toast({ title: "AI Flagging Error", description: result.error, variant: "destructive" });
       } else {
         toast({ title: "Transaction Flagged by AI", description: `Suspicious: ${result.isSuspicious}. Reason: ${result.reason}`, variant: result.isSuspicious ? "default" : "destructive" });
-        // Optionally add to transactions list or update UI
         const newFlaggedTxn: FlaggedTransaction = {
           id: `manual_${Date.now()}`,
           date: new Date().toISOString().split('T')[0],
-          amount: 0, // Or parse from details
+          amount: 0, 
           currency: 'N/A',
           sender: 'Manual Input',
           receiver: 'Manual Input',
           status: result.isSuspicious ? 'flagged' : 'reviewed',
           details: manualTxnDetails,
           userProfile: manualUserProfile,
-          riskScore: result.isSuspicious ? 90 : 20, // Example risk score
+          riskScore: result.isSuspicious ? 90 : 20,
         };
         setTransactions(prev => [newFlaggedTxn, ...prev]);
         setManualTxnDetails('');
@@ -102,19 +173,62 @@ export default function AMLDashboardPage() {
     }
   };
   
-  const totalFlagged = transactions.filter(t => t.status === 'flagged').length;
-  const totalReviewed = transactions.filter(t => t.status === 'reviewed').length;
-  const totalSARs = transactions.filter(t => t.status === 'sar_filed').length;
+  const amlMetrics = useMemo(() => [
+    { title: "Total Transactions Processed", value: totalProcessed.toLocaleString(), icon: DatabaseZap, description: "All transactions analyzed." },
+    { title: "AML Hits", value: amlHits.toString(), icon: AlertTriangle, description: "Transactions flagged as potentially suspicious." },
+    { title: "True Positives", value: truePositives.toString(), icon: BadgeCheck, description: "Confirmed suspicious activities." },
+    { title: "False Positives", value: falsePositives.toString(), icon: BadgeX, description: "Incorrectly flagged transactions." },
+    { title: "Pending Review", value: pendingReview.toString(), icon: Clock3, description: "Flagged cases awaiting analyst review." },
+    { title: "SARs Filed", value: sarsFiled.toString(), icon: FileText, description: "Suspicious Activity Reports submitted." },
+    { title: "Closed (Resolved)", value: closedCases.toString(), icon: ShieldCheckIcon, description: "Cases reviewed and closed without SAR." },
+  ], [totalProcessed, amlHits, truePositives, falsePositives, pendingReview, sarsFiled, closedCases]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">AML Dashboard</h1>
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold tracking-tight">AML Hub</h1>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <MetricCard title="Flagged Transactions" value={totalFlagged.toString()} icon={AlertCircle} description="Requires immediate attention."/>
-        <MetricCard title="Reviewed Transactions" value={totalReviewed.toString()} icon={CheckCircle} description="Manually verified cases."/>
-        <MetricCard title="SARs Filed" value={totalSARs.toString()} icon={FileText} description="Suspicious Activity Reports."/>
-      </div>
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <LineChartIcon className="mr-2 h-6 w-6 text-primary" />
+            AML Interactive Dashboard
+          </CardTitle>
+          <CardDescription>Overview of AML screening activities and trends.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {amlMetrics.map(metric => (
+              <MetricCard key={metric.title} {...metric} />
+            ))}
+          </div>
+
+          <div>
+            <h3 className="text-xl font-semibold mb-1">AML Trends</h3>
+            <p className="text-sm text-muted-foreground mb-3">Track AML Hits and SARs Filed over time.</p>
+            <div className="flex space-x-2 mb-4">
+              {(['daily', 'monthly', 'yearly'] as ChartTimeView[]).map(view => (
+                <Button
+                  key={view}
+                  variant={chartTimeView === view ? 'default' : 'outline'}
+                  onClick={() => setChartTimeView(view)}
+                  size="sm"
+                >
+                  {view.charAt(0).toUpperCase() + view.slice(1)}
+                </Button>
+              ))}
+            </div>
+            <OverviewChart
+              data={trendData}
+              title="" // Title is handled above
+              description="" // Description is handled above
+              xAxisKey="name"
+              chartConfig={amlTrendChartConfig}
+              chartType="line"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
 
       <Card>
         <CardHeader>
@@ -210,14 +324,11 @@ export default function AMLDashboardPage() {
                           </div>
                           <DialogFooter>
                             <Button variant="outline" onClick={() => {
-                                // Update transaction status - Placeholder
-                                setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'reviewed'} : t));
+                                setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'reviewed', riskScore: t.riskScore ? Math.max(10, t.riskScore - 20) : 30} : t));
                                 toast({title: "Status Updated", description: `${selectedTransaction.id} marked as reviewed.`});
-                                // No DialogClose here, let the user close manually or add specific action buttons
                             }}>Mark as Reviewed</Button>
                              <Button variant="destructive" onClick={() => {
-                                // Update transaction status - Placeholder
-                                setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'sar_filed'} : t));
+                                setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'sar_filed', riskScore: t.riskScore ? Math.min(100, t.riskScore + 20) : 95} : t));
                                 toast({title: "Status Updated", description: `${selectedTransaction.id} marked for SAR filing.`});
                             }}>File SAR</Button>
                             <DialogClose asChild><Button type="button">Close</Button></DialogClose>
