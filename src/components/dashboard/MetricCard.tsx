@@ -53,15 +53,7 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
               <p className="text-xs text-muted-foreground mt-1">{description}</p>
             )}
           </div>
-          {detailsUrl && ( // Show link if detailsUrl is provided and breakdown is NOT shown (or no breakdown exists)
-            <div className="mt-2">
-              <Link href={detailsUrl} passHref legacyBehavior>
-                <a className="text-xs text-primary hover:underline flex items-center">
-                  View Details <ExternalLink className="ml-1 h-3 w-3" />
-                </a>
-              </Link>
-            </div>
-          )}
+          {/* "View Details" link removed from here */}
         </CardContent>
       </div>
 
