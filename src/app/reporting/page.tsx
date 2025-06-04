@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow } from 'lucide-react';
+import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download } from 'lucide-react';
 
 const initialReportItems: ReportItem[] = [
   {
@@ -104,6 +104,14 @@ export default function ReportingHubPage() {
     setIsComparisonDialogOpen(true);
   };
 
+  const handleDownloadReport = (reportId: string, reportType: string) => {
+    toast({
+      title: "Download Initiated",
+      description: `Preparing report "${reportType}" (ID: ${reportId}) for download. (Placeholder)`,
+    });
+    // Actual download logic would go here
+  };
+
   const renderChangeValue = (value: string | string[] | undefined) => {
     if (Array.isArray(value)) {
       return value.join(', ');
@@ -176,9 +184,14 @@ export default function ReportingHubPage() {
                     <TableCell className="text-xs max-w-[180px]">
                         {item.impactedCitations?.map(cite => <Badge key={cite} variant="secondary" className="mr-1 mb-1 text-xs">{cite}</Badge>) ?? 'N/A'}
                     </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handlePreviewComparison(item)} title="Preview Change History">
-                        <GitCompareArrows className="mr-1.5 h-4 w-4" /> Compare
+                    <TableCell className="space-x-1">
+                      <Button variant="outline" size="sm" onClick={() => handlePreviewComparison(item)} title="Check old report versions">
+                        <GitCompareArrows className="mr-1.5 h-4 w-4" /> 
+                        <span className="sm:hidden md:inline">Versions</span>
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDownloadReport(item.reportId, item.typeOfReport)} title="Download Report">
+                        <Download className="mr-1.5 h-4 w-4" />
+                         <span className="sm:hidden md:inline">Download</span>
                       </Button>
                     </TableCell>
                   </TableRow>
