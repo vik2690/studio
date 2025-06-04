@@ -17,8 +17,8 @@ const navItems = [
   { href: "/reporting", label: "Reporting Hub", icon: FileSpreadsheet },
   { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
   { href: "/alerts-notifications", label: "Alerts & Notifications", icon: Bell },
-  // { href: "/audit-support", label: "Audit Support", icon: ClipboardCheck }, // Intentionally commented out as per user's existing file
-  // { href: "/live-tracker", label: "Live World Tracker", icon: Globe }, // Intentionally commented out as per user's existing file
+  { href: "/audit-hub", label: "Audit Hub", icon: ClipboardCheck },
+  { href: "/live-tracker", label: "Live Tracker", icon: Globe },
   { href: "/admin", label: "Admin Hub", icon: Settings2 },
 ];
 
@@ -47,3 +47,4 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
+
