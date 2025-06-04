@@ -4,8 +4,17 @@
 import { useState, useEffect } from 'react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { CheckCircle2, Clock3, MessageSquareWarning, ListTodo, FileClock, HelpCircle, CheckSquare as CheckSquareIcon } from 'lucide-react';
 import type { Metric } from '@/lib/types';
+
+const mockUsers = [
+  { id: 'user_alice', name: 'Alice Wonderland' },
+  { id: 'user_bob', name: 'Bob The Builder' },
+  { id: 'user_charlie', name: 'Charlie Chaplin' },
+  { id: 'user_diana', name: 'Diana Prince' },
+];
 
 export default function ReviewApprovalsPage() {
   const [completedApprovals, setCompletedApprovals] = useState(128);
@@ -15,6 +24,8 @@ export default function ReviewApprovalsPage() {
   const [completedReviews, setCompletedReviews] = useState(345);
   const [pendingReviews, setPendingReviews] = useState(42);
   const [reviewsNeedDiscussion, setReviewsNeedDiscussion] = useState(11);
+
+  const [selectedUser, setSelectedUser] = useState<string | undefined>(undefined);
 
   // Simulate dynamic updates for demonstration
   useEffect(() => {
@@ -37,7 +48,7 @@ export default function ReviewApprovalsPage() {
       icon: CheckCircle2,
       description: "Total items successfully approved.",
       changeType: "positive",
-      navUrl: "/review-approvals/queue/completed-approvals",
+      navUrl: `/review-approvals/queue/completed-approvals${selectedUser ? '?user=' + selectedUser : ''}`,
     },
     {
       title: "Pending Approvals",
@@ -45,7 +56,7 @@ export default function ReviewApprovalsPage() {
       icon: Clock3,
       description: "Items awaiting approval.",
       changeType: pendingApprovals > 20 ? "negative" : "default",
-      navUrl: "/review-approvals/queue/pending-approvals",
+      navUrl: `/review-approvals/queue/pending-approvals${selectedUser ? '?user=' + selectedUser : ''}`,
     },
     {
       title: "Approvals Needing Discussion",
@@ -53,7 +64,7 @@ export default function ReviewApprovalsPage() {
       icon: MessageSquareWarning,
       description: "Approvals flagged for further discussion or clarification.",
        changeType: approvalsNeedDiscussion > 5 ? "negative" : "default",
-       navUrl: "/review-approvals/queue/discussion-approvals",
+       navUrl: `/review-approvals/queue/discussion-approvals${selectedUser ? '?user=' + selectedUser : ''}`,
     },
   ];
 
@@ -64,7 +75,7 @@ export default function ReviewApprovalsPage() {
       icon: ListTodo,
       description: "Total items successfully reviewed.",
       changeType: "positive",
-      navUrl: "/review-approvals/queue/completed-reviews",
+      navUrl: `/review-approvals/queue/completed-reviews${selectedUser ? '?user=' + selectedUser : ''}`,
     },
     {
       title: "Pending Reviews",
@@ -72,7 +83,7 @@ export default function ReviewApprovalsPage() {
       icon: FileClock,
       description: "Items awaiting review.",
       changeType: pendingReviews > 30 ? "negative" : "default",
-      navUrl: "/review-approvals/queue/pending-reviews",
+      navUrl: `/review-approvals/queue/pending-reviews${selectedUser ? '?user=' + selectedUser : ''}`,
     },
     {
       title: "Reviews Needing Discussion",
@@ -80,9 +91,21 @@ export default function ReviewApprovalsPage() {
       icon: HelpCircle,
       description: "Reviews flagged for discussion or requiring more information.",
       changeType: reviewsNeedDiscussion > 10 ? "negative" : "default",
-      navUrl: "/review-approvals/queue/discussion-reviews",
+      navUrl: `/review-approvals/queue/discussion-reviews${selectedUser ? '?user=' + selectedUser : ''}`,
     },
   ];
+
+  // Update navUrls when selectedUser changes
+  const metricsWithUserFilter = (metrics: Metric[]): Metric[] => {
+    return metrics.map(metric => ({
+      ...metric,
+      navUrl: metric.navUrl?.split('?')[0] + (selectedUser ? `?user=${selectedUser}` : ''),
+    }));
+  };
+  
+  const currentApprovalMetrics = metricsWithUserFilter(approvalMetrics);
+  const currentReviewMetrics = metricsWithUserFilter(reviewMetrics);
+
 
   return (
     <div className="space-y-8">
@@ -93,13 +116,36 @@ export default function ReviewApprovalsPage() {
         </h1>
       </div>
 
+      <div className="mb-6">
+        <Label htmlFor="user-filter-select" className="text-base font-semibold mb-2 block">Filter by User</Label>
+        <Select value={selectedUser} onValueChange={setSelectedUser}>
+          <SelectTrigger id="user-filter-select" className="w-full md:w-[300px]">
+            <SelectValue placeholder="Select a user to filter tasks" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Users</SelectItem>
+            {mockUsers.map(user => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selectedUser && selectedUser !== 'all' && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Showing tasks for: {mockUsers.find(u => u.id === selectedUser)?.name || 'Selected User'}. 
+            Clear selection to see all tasks.
+          </p>
+        )}
+      </div>
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl">Approvals Dashboard</CardTitle>
-          <CardDescription>Overview of current approval statuses.</CardDescription>
+          <CardDescription>Overview of current approval statuses{selectedUser && selectedUser !== 'all' ? ` for ${mockUsers.find(u => u.id === selectedUser)?.name}` : ''}.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {approvalMetrics.map((metric) => (
+          {currentApprovalMetrics.map((metric) => (
             <MetricCard key={metric.title} {...metric} />
           ))}
         </CardContent>
@@ -108,10 +154,10 @@ export default function ReviewApprovalsPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl">Reviews Dashboard</CardTitle>
-          <CardDescription>Overview of current review task statuses.</CardDescription>
+          <CardDescription>Overview of current review task statuses{selectedUser && selectedUser !== 'all' ? ` for ${mockUsers.find(u => u.id === selectedUser)?.name}` : ''}.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {reviewMetrics.map((metric) => (
+          {currentReviewMetrics.map((metric) => (
             <MetricCard key={metric.title} {...metric} />
           ))}
         </CardContent>
