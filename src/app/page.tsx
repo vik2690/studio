@@ -30,9 +30,10 @@ const riskScoreCalculationBreakdown: MetricBreakdownItem[] = [
 ];
 
 const amlHitsBreakdown: MetricBreakdownItem[] = [
-  { category: "Country X (Sanctioned)", value: 5 },
-  { category: "Country Y (Sanctioned)", value: 7 },
-  { category: "Country Z (Watchlist)", value: 3 },
+  { category: "Iran (Sanctioned)", value: 5 },
+  { category: "Russia (Sanctioned)", value: 7 },
+  { category: "Afghanistan (Watchlist)", value: 3 },
+  { category: "Pakistan (Watchlist)", value: 2 },
 ];
 
 const overviewMetrics: Metric[] = [
