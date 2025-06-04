@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from 'react'; // Added this line
 import { useState } from 'react';
 import { suggestControlsAction } from '@/lib/actions';
 import type { SuggestControlsInput, SuggestControlsOutput } from '@/ai/flows/suggest-controls';
