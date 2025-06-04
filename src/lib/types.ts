@@ -203,3 +203,28 @@ export interface ReportItem {
   versionHistory?: ReportVersionMetadata[];
 }
 
+export type AlertSeverity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Informational';
+export type AlertStatus = 'Active' | 'Acknowledged' | 'Resolved' | 'Muted';
+
+export interface AlertNotificationItem {
+  id: string;
+  assignmentGroup: string;
+  lastSentTime: string; // ISO string or formatted date string
+  natureOfAlert: string; // e.g., 'Compliance Deadline', 'Risk Threshold Exceeded'
+  mappedRisk: string; // e.g., 'RISK-CYBER-001'
+  objective: string; // Purpose of the alert
+  status: AlertStatus; // Current status
+  severity: AlertSeverity; // Severity level
+  description?: string; // More detailed description of the alert itself
+  triggerCondition?: string; // What condition triggers this alert
+  recipients?: string[]; // Who receives this alert
+  escalationPath?: string; // What's the escalation procedure
+  // Additional details specific to the alert to be shown in the dialog
+  dialogDetails?: {
+    fullDescription?: string;
+    recommendedActions?: string[];
+    historicalDataLink?: string; // Link to historical occurrences
+    notes?: string;
+  };
+}
+
