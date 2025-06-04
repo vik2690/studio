@@ -112,8 +112,8 @@ const initialAgents: AIAgent[] = [
     details: 'Screening live transaction feed. Last hit identified: TXN-SUS-00123 (Large unusual international transfer)',
     llmModel: 'Gemini 1.5 Flash with AML Rule Engine',
     workloadQueue: [
-      { id: 'txn_batch_live_001', description: 'Process live transaction stream segment', status: 'Processing', submittedAt: new Date(Date.now() - 10 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
-      { id: 'sar_review_txn_00123', description: 'Review flagged transaction TXN-SUS-00123', status: 'Pending', submittedAt: new Date(Date.now() - 5 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
+      { id: 'txn_batch_live_001', description: 'Process live transaction stream segment', status: 'Processing', regulatoryBody: 'Internal Stream', submittedAt: new Date(Date.now() - 10 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
+      { id: 'sar_review_txn_00123', description: 'Review flagged transaction TXN-SUS-00123', status: 'Pending', regulatoryBody: 'FinCEN', submittedAt: new Date(Date.now() - 5 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit', second: '2-digit'}) },
     ],
     activityLog: [
       { timestamp: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Connected to transaction firehose.', type: 'Info' },
@@ -376,7 +376,7 @@ export default function OperationsCenterPage() {
                   onClick={() => handleStopAgent(agent.id, agent.name)}
                   disabled={agent.status === 'Disabled'}
                 >
-                  <StopCircle className="mr-1.5 h-4 w-4" /> Stop Agent
+                  <StopCircle className="mr-1.5 h-4 w-4" /> Stop
                 </Button>
               </div>
             </Card>
