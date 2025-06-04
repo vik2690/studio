@@ -144,7 +144,24 @@ export default function ReviewApprovalsPage() {
         </h1>
       </div>
 
-      <div className="mb-6">
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-xl flex items-center">
+            {selectedUser && selectedUser !== 'all' ? <UserCheck className="mr-2 h-6 w-6 text-primary" /> : <Eye className="mr-2 h-6 w-6 text-primary" />}
+            {selectedUser && selectedUser !== 'all' ? `${selectedUserName}'s Open Tasks` : "Overview of All Open Tasks"}
+          </CardTitle>
+          <CardDescription>
+            A summary of open approval and review tasks {selectedUser && selectedUser !== 'all' ? `for ${selectedUserName}` : 'across the system'}.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          {currentMyTasksMetrics.map((metric) => (
+            <MetricCard key={metric.title} {...metric} />
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="my-6"> {/* Moved user filter here */}
         <Label htmlFor="user-filter-select" className="text-base font-semibold mb-2 block">Filter by User</Label>
         <Select value={selectedUser} onValueChange={setSelectedUser}>
           <SelectTrigger id="user-filter-select" className="w-full md:w-[300px]">
@@ -169,44 +186,19 @@ export default function ReviewApprovalsPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-xl flex items-center">
-            {selectedUser && selectedUser !== 'all' ? <UserCheck className="mr-2 h-6 w-6 text-primary" /> : <Eye className="mr-2 h-6 w-6 text-primary" />}
-            {selectedUser && selectedUser !== 'all' ? `${selectedUserName}'s Open Tasks` : "Overview of All Open Tasks"}
-          </CardTitle>
-          <CardDescription>
-            A summary of open approval and review tasks {selectedUser && selectedUser !== 'all' ? `for ${selectedUserName}` : 'across the system'}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          {currentMyTasksMetrics.map((metric) => (
-            <MetricCard key={metric.title} {...metric} />
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-lg">
-        <CardHeader>
           <CardTitle className="text-xl">My Dashboard</CardTitle>
-          <CardDescription>Overview of current approval statuses{selectedUser && selectedUser !== 'all' ? ` for ${selectedUserName}` : ''}.</CardDescription>
+          <CardDescription>Overview of current approval and review statuses{selectedUser && selectedUser !== 'all' ? ` for ${selectedUserName}` : ''}.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {currentApprovalMetrics.map((metric) => (
             <MetricCard key={metric.title} {...metric} />
           ))}
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl">Reviews Dashboard</CardTitle>
-          <CardDescription>Overview of current review task statuses{selectedUser && selectedUser !== 'all' ? ` for ${selectedUserName}` : ''}.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {currentReviewMetrics.map((metric) => (
             <MetricCard key={metric.title} {...metric} />
           ))}
         </CardContent>
       </Card>
+
     </div>
   );
 }
