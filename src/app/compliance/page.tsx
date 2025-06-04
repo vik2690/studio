@@ -36,6 +36,8 @@ const initialExistingControls: ExistingControl[] = [
     lastTestDate: '2024-05-20',
     testResult: 'Pass',
     issuesIdentified: ['Minor delay in revoking one terminated employee access.'],
+    associatedRiskId: 'RISK-001',
+    associatedRiskDetails: 'Potential data breach due to outdated encryption protocols on customer database.'
   },
   {
     id: 'CTRL-002',
@@ -55,6 +57,8 @@ const initialExistingControls: ExistingControl[] = [
     residualRisk: 'Low',
     lastTestDate: '2024-06-10',
     testResult: 'Pass',
+    associatedRiskId: 'RISK-007',
+    associatedRiskDetails: 'Risk of unauthorized financial transactions due to lack of SoD.'
   },
   {
     id: 'CTRL-003',
@@ -74,6 +78,8 @@ const initialExistingControls: ExistingControl[] = [
     lastTestDate: '2024-07-05',
     testResult: 'Pass with Exceptions',
     issuesIdentified: ['Process not fully automated for all systems.', 'Average deletion time slightly above target.'],
+    associatedRiskId: 'RISK-009',
+    associatedRiskDetails: 'Failure to comply with GDPR data subject rights leading to potential fines.'
   },
   {
     id: 'CTRL-004',
@@ -93,6 +99,8 @@ const initialExistingControls: ExistingControl[] = [
     residualRisk: 'Low',
     lastTestDate: 'Daily',
     testResult: 'Pass',
+    associatedRiskId: 'RISK-012',
+    associatedRiskDetails: 'System outages leading to data loss if backups are not reliable.'
   },
 ];
 
@@ -213,13 +221,15 @@ export default function ComplianceHubPage() {
                 <TableHead>Owner</TableHead>
                 <TableHead>Reviewer</TableHead>
                 <TableHead>Last Reviewed</TableHead>
+                <TableHead>Risk ID</TableHead>
+                <TableHead>Risk Details</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {existingControlsList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="h-24 text-center">
+                  <TableCell colSpan={14} className="h-24 text-center">
                     No existing controls found.
                   </TableCell>
                 </TableRow>
@@ -253,6 +263,8 @@ export default function ComplianceHubPage() {
                     <TableCell className="text-xs whitespace-nowrap">{control.owner}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{control.reviewer}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{control.lastReviewedDate || 'N/A'}</TableCell>
+                    <TableCell className="text-xs">{control.associatedRiskId || 'N/A'}</TableCell>
+                    <TableCell className="text-xs max-w-[200px] truncate" title={control.associatedRiskDetails || 'N/A'}>{control.associatedRiskDetails || 'N/A'}</TableCell>
                     <TableCell>
                       <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
                         <Eye className="mr-1 h-3.5 w-3.5" /> View
@@ -446,4 +458,3 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
-

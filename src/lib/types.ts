@@ -135,4 +135,6 @@ export interface ExistingControl {
   lastTestDate?: string;
   testResult?: 'Pass' | 'Fail' | 'Pass with Exceptions' | 'Not Tested';
   issuesIdentified?: string[];
+  associatedRiskId?: string;
+  associatedRiskDetails?: string;
 }
