@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from 'react'; // Added this line
+import * as React from 'react'; 
 import { useState } from 'react';
 import { suggestControlsAction } from '@/lib/actions';
 import type { SuggestControlsInput, SuggestControlsOutput } from '@/ai/flows/suggest-controls';
@@ -11,11 +11,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle } from 'lucide-react'; // Added new icons
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const initialExistingControls: ExistingControl[] = [
   {
@@ -200,10 +200,10 @@ export default function ComplianceHubPage() {
   const getAICheckBadgeVariant = (status?: ExistingControl['latestAICheck']['status']): 'default' | 'secondary' | 'destructive' | 'outline' => {
     if (!status) return 'outline';
     switch (status) {
-      case 'Covered': return 'secondary'; // Green
-      case 'Needs Review': return 'default'; // Yellow/Primary
-      case 'Gap Identified': return 'destructive'; // Red
-      case 'Not Assessed': return 'outline'; // Grey
+      case 'Covered': return 'secondary'; 
+      case 'Needs Review': return 'default'; 
+      case 'Gap Identified': return 'destructive'; 
+      case 'Not Assessed': return 'outline'; 
       default: return 'outline';
     }
   };
@@ -321,11 +321,9 @@ export default function ComplianceHubPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
-                          <Eye className="mr-1 h-3.5 w-3.5" /> View
-                        </Button>
-                      </DialogTrigger>
+                      <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
+                        <Eye className="mr-1 h-3.5 w-3.5" /> View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -530,4 +528,3 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
-
