@@ -146,13 +146,30 @@ export interface ExistingControl {
 
 export type AIAgentStatusValue = 'Active' | 'Idle' | 'Processing' | 'Error' | 'Disabled';
 
+export interface WorkloadItem {
+  id: string;
+  description: string;
+  status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
+  submittedAt: string;
+}
+
+export interface ActivityLogEntry {
+  timestamp: string;
+  message: string;
+  type: 'Info' | 'Warning' | 'Error' | 'Success' | 'Debug';
+}
+
 export interface AIAgent {
   id: string;
   emoji: string;
   name: string;
   role: string;
   status: AIAgentStatusValue;
-  lastActive: string; // Could be a timestamp string or a relative time string like "2 mins ago"
-  nextRun?: string;   // Could be a timestamp string or a relative time string like "In 5 mins"
-  details?: string;   // e.g., current task for 'Processing', or error message for 'Error'
+  lastActive: string;
+  nextRun?: string;
+  details?: string;
+  llmModel?: string;
+  workloadQueue?: WorkloadItem[];
+  activityLog?: ActivityLogEntry[];
 }
+

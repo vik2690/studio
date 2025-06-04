@@ -2,13 +2,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import type { AIAgent, AIAgentStatusValue } from '@/lib/types';
+import type { AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight } from 'lucide-react';
+import { Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const initialAgents: AIAgent[] = [
   {
@@ -17,9 +20,20 @@ const initialAgents: AIAgent[] = [
     name: 'Risk Sentinel Agent',
     role: 'Detects new/emerging risks from various internal and external data sources.',
     status: 'Active',
-    lastActive: new Date(Date.now() - 2 * 60 * 1000).toLocaleTimeString(), // 2 minutes ago
+    lastActive: new Date(Date.now() - 2 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
     nextRun: 'Continuous',
-    details: 'Monitoring news feeds and internal anomaly detectors.'
+    details: 'Monitoring news feeds (Reuters, Bloomberg) and internal anomaly detectors (transactions > $1M).',
+    llmModel: 'Gemini 1.5 Pro (Vertex AI)',
+    workloadQueue: [
+      { id: 'news_feed_reuters', description: 'Scan Reuters World News', status: 'Processing', submittedAt: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) },
+      { id: 'anomaly_tx_high_value', description: 'Check for new transactions > $1M', status: 'Pending', submittedAt: new Date(Date.now() - 0.5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) },
+    ],
+    activityLog: [
+      { timestamp: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Agent started. Initializing data sources.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 3 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Successfully connected to Reuters API.', type: 'Success' },
+      { timestamp: new Date(Date.now() - 2 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Processing batch of 50 news articles.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Identified 1 potential geopolitical risk event.', type: 'Warning' },
+    ]
   },
   {
     id: 'control-validator',
@@ -27,9 +41,20 @@ const initialAgents: AIAgent[] = [
     name: 'Control Validator Agent',
     role: 'Periodically tests key controls and gathers compliance evidence.',
     status: 'Processing',
-    lastActive: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString(), // 10 minutes ago
-    nextRun: new Date(Date.now() + 30 * 60 * 1000).toLocaleTimeString(), // In 30 minutes
-    details: 'Validating SOX control C-045: Access Reviews (Batch 3/5).'
+    lastActive: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
+    nextRun: new Date(Date.now() + 30 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
+    details: 'Validating SOX control C-045: Access Reviews (Batch 3/5 - Users 200-300).',
+    llmModel: 'Claude 3 Sonnet (Bedrock)',
+    workloadQueue: [
+      { id: 'sox_c045_b3', description: 'SOX C-045 Batch 3 (Users 200-300)', status: 'Processing', submittedAt: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) },
+      { id: 'sox_c045_b4', description: 'SOX C-045 Batch 4 (Users 300-400)', status: 'Pending', submittedAt: new Date(Date.now() - 1 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) },
+      { id: 'gdpr_art30_test', description: 'Test GDPR Art.30 RoPA accuracy', status: 'Pending', submittedAt: new Date(Date.now() - 0.5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) },
+    ],
+    activityLog: [
+      { timestamp: new Date(Date.now() - 12 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Scheduled run started for Control Validator.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 11 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Fetching access logs for batch 3.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 10 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Cross-referencing 100 user accounts with HR database.', type: 'Processing' },
+    ]
   },
   {
     id: 'compliance-watchdog',
@@ -37,9 +62,15 @@ const initialAgents: AIAgent[] = [
     name: 'Compliance Watchdog Agent',
     role: 'Tracks regulatory changes from multiple jurisdictions and maps potential gaps.',
     status: 'Idle',
-    lastActive: new Date(Date.now() - 60 * 60 * 1000).toLocaleTimeString(), // 1 hour ago
-    nextRun: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString(), // In 2 hours
-    details: 'Awaiting next scheduled scan of regulatory portals.'
+    lastActive: new Date(Date.now() - 60 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
+    nextRun: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
+    details: 'Awaiting next scheduled scan of ESMA, SEC, FinCEN portals.',
+    llmModel: 'Gemini 1.5 Flash (Vertex AI)',
+    activityLog: [
+      { timestamp: new Date(Date.now() - 65 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Completed scan of 5 regulatory portals.', type: 'Success' },
+      { timestamp: new Date(Date.now() - 62 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'No new major updates found. Identified 3 minor clarifications.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 60 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Agent entering idle state until next scheduled run.', type: 'Info' },
+    ]
   },
   {
     id: 'remediation-planner',
@@ -47,8 +78,16 @@ const initialAgents: AIAgent[] = [
     name: 'Remediation Planner Agent',
     role: 'Suggests or initiates automated fixes for identified failed controls or gaps.',
     status: 'Error',
-    lastActive: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString(), // 5 minutes ago
-    details: 'Failed to connect to ticketing system API (Error 503). Retrying...'
+    lastActive: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
+    details: 'Failed to connect to Jira ticketing system API (Error 503 Service Unavailable). Retrying in 5 mins.',
+    llmModel: 'Custom Fine-tuned Model (Internal)',
+    workloadQueue: [
+       { id: 'failed_ctrl_01', description: 'Create ticket for C-012 failure', status: 'Failed', submittedAt: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}) }
+    ],
+    activityLog: [
+      { timestamp: new Date(Date.now() - 6 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Attempting to create Jira ticket for control C-012.', type: 'Info' },
+      { timestamp: new Date(Date.now() - 5 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}), message: 'Jira API connection failed: 503 Service Unavailable.', type: 'Error' },
+    ]
   },
   {
     id: 'crics-copilot',
@@ -56,9 +95,10 @@ const initialAgents: AIAgent[] = [
     name: 'CRICS Copilot Agent',
     role: 'Answers natural language questions and provides explanations on compliance insights.',
     status: 'Active',
-    lastActive: new Date(Date.now() - 30 * 1000).toLocaleTimeString(), // 30 seconds ago
+    lastActive: new Date(Date.now() - 30 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
     nextRun: 'On-demand',
-    details: 'Currently assisting User_JohnD with risk assessment query.'
+    details: 'Currently assisting User_JaneS with query: "Summarize MiFID II impact on SME advisory services."',
+    llmModel: 'Gemini 1.5 Pro (Vertex AI) with RAG',
   },
   {
     id: 'data-ingestion-monitor',
@@ -66,9 +106,9 @@ const initialAgents: AIAgent[] = [
     name: 'Data Ingestion Monitor',
     role: 'Oversees data feeds and flags anomalies in incoming regulatory or internal data.',
     status: 'Disabled',
-    lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleTimeString(), // 1 day ago
+    lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'}),
     nextRun: 'N/A',
-    details: 'Temporarily disabled for system maintenance.'
+    details: 'Temporarily disabled for system maintenance on data pipeline (ETL-03).',
   }
 ];
 
@@ -83,39 +123,71 @@ const statusConfig: Record<AIAgentStatusValue, { color: string; icon: LucideIcon
 
 export default function OperationsCenterPage() {
   const [agents, setAgents] = useState<AIAgent[]>(initialAgents);
+  const [selectedAgentDetails, setSelectedAgentDetails] = useState<AIAgent | null>(null);
+  const [isAgentDetailDialogOpen, setIsAgentDetailDialogOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setAgents(prevAgents =>
         prevAgents.map(agent => {
           let newLastActive = agent.lastActive;
-          // Simulate 'Active' and 'Processing' agents updating their last active time more frequently
           if ((agent.status === 'Active' || agent.status === 'Processing') && Math.random() < 0.3) {
-            newLastActive = new Date().toLocaleTimeString();
+            newLastActive = new Date().toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'});
           }
-          // Simulate some status changes for dynamism
           let newStatus = agent.status;
           if (agent.status === 'Processing' && Math.random() < 0.1) {
-            newStatus = 'Idle'; // Finished processing
+            newStatus = Math.random() < 0.5 ? 'Idle' : 'Active'; // Finished processing, could go idle or active
           } else if (agent.status === 'Idle' && Math.random() < 0.05) {
-            newStatus = 'Processing'; // Started new task
+            newStatus = 'Processing';
           } else if (agent.status === 'Error' && Math.random() < 0.2) {
-            newStatus = 'Active'; // Error resolved
+            newStatus = 'Active';
           }
 
-
-          return {
-            ...agent,
-            lastActive: newLastActive,
-            status: newStatus,
-            // Potentially update nextRun or details here too
-          };
+          return { ...agent, lastActive: newLastActive, status: newStatus };
         })
       );
-    }, 5000); // Update every 5 seconds
+    }, 5000); 
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleViewAgentDetails = (agent: AIAgent) => {
+    setSelectedAgentDetails(agent);
+    setIsAgentDetailDialogOpen(true);
+  };
+
+  const getWorkloadStatusBadge = (status: WorkloadItem['status']) => {
+    switch (status) {
+      case 'Failed':
+        return <Badge variant="destructive" className="text-xs">Failed</Badge>;
+      case 'Completed':
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300 border-green-300 dark:border-green-500 text-xs">Completed</Badge>;
+      case 'Processing':
+        return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300 border-blue-300 dark:border-blue-500 text-xs">Processing</Badge>;
+      case 'Pending':
+        return <Badge variant="outline" className="text-xs">Pending</Badge>;
+      default:
+        return <Badge variant="outline" className="text-xs">{status}</Badge>;
+    }
+  };
+
+  const getActivityLogBadge = (type: ActivityLogEntry['type']) => {
+    switch (type) {
+      case 'Error':
+        return <Badge variant="destructive" className="text-xs mr-2">{type}</Badge>;
+      case 'Warning':
+        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-700/30 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500 text-xs mr-2">{type}</Badge>;
+      case 'Success':
+        return <Badge className="bg-green-100 text-green-700 dark:bg-green-700/30 dark:text-green-300 border-green-300 dark:border-green-500 text-xs mr-2">{type}</Badge>;
+      case 'Info':
+        return <Badge className="bg-sky-100 text-sky-700 dark:bg-sky-700/30 dark:text-sky-300 border-sky-300 dark:border-sky-500 text-xs mr-2">{type}</Badge>;
+      case 'Debug':
+        return <Badge variant="outline" className="text-gray-500 dark:text-gray-400 text-xs mr-2">{type}</Badge>;
+      default:
+        return <Badge variant="outline" className="text-xs mr-2">{type}</Badge>;
+    }
+  };
+
 
   return (
     <div className="space-y-8">
@@ -124,7 +196,7 @@ export default function OperationsCenterPage() {
           <ActivityIcon className="mr-3 h-8 w-8 text-primary" />
           AI Operations Center
         </h1>
-         <Button variant="outline" size="sm">
+         <Button variant="outline" size="sm" onClick={() => window.location.reload()}> {/* Simple refresh */}
             Refresh All
         </Button>
       </div>
@@ -173,7 +245,7 @@ export default function OperationsCenterPage() {
                 )}
               </CardContent>
               <div className="p-4 pt-2 border-t border-border/50 mt-auto">
-                <Button variant="ghost" size="sm" className="w-full justify-start text-primary hover:text-primary/90">
+                <Button variant="ghost" size="sm" className="w-full justify-start text-primary hover:text-primary/90" onClick={() => handleViewAgentDetails(agent)}>
                     View Logs & Details <ChevronRight className="ml-auto h-4 w-4" />
                 </Button>
               </div>
@@ -183,6 +255,100 @@ export default function OperationsCenterPage() {
       </div>
        {agents.length === 0 && (
         <p className="text-center text-muted-foreground py-8">No AI agents configured or reporting.</p>
+      )}
+
+      {selectedAgentDetails && (
+        <Dialog open={isAgentDetailDialogOpen} onOpenChange={setIsAgentDetailDialogOpen}>
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                {selectedAgentDetails.emoji} <span className="ml-2">{selectedAgentDetails.name} - Details</span>
+              </DialogTitle>
+              <DialogDescription>
+                Operational details, workload, and activity log for the agent.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto pr-3">
+              {selectedAgentDetails.llmModel && (
+                <Card>
+                  <CardHeader className="pb-2 flex-row items-center space-x-2">
+                     <Brain className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">LLM Configuration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p><strong>Model Used:</strong> {selectedAgentDetails.llmModel}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card>
+                <CardHeader className="pb-2 flex-row items-center space-x-2">
+                  <Database className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Workload Queue ({selectedAgentDetails.workloadQueue?.length || 0})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedAgentDetails.workloadQueue && selectedAgentDetails.workloadQueue.length > 0 ? (
+                    <ScrollArea className="h-[150px] border rounded-md">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">ID</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Submitted</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {selectedAgentDetails.workloadQueue.map(item => (
+                            <TableRow key={item.id}>
+                              <TableCell className="font-mono text-xs py-1.5">{item.id.slice(0,12)}</TableCell>
+                              <TableCell className="text-xs py-1.5">{item.description}</TableCell>
+                              <TableCell className="py-1.5">{getWorkloadStatusBadge(item.status)}</TableCell>
+                              <TableCell className="text-xs text-right py-1.5">{item.submittedAt}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Workload queue is empty.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2 flex-row items-center space-x-2">
+                  <ListChecksIcon className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Activity Log</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedAgentDetails.activityLog && selectedAgentDetails.activityLog.length > 0 ? (
+                    <ScrollArea className="h-[200px] p-3 border rounded-md bg-muted/20">
+                      <div className="space-y-2.5">
+                        {selectedAgentDetails.activityLog.slice().reverse().map((log, index) => (
+                          <div key={index} className="text-xs flex items-start">
+                            <span className="font-semibold text-muted-foreground mr-2 whitespace-nowrap tabular-nums">{log.timestamp}</span>
+                            <div className="flex items-center flex-wrap">
+                                {getActivityLogBadge(log.type)}
+                                <span className="leading-tight">{log.message}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Activity log is empty.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
