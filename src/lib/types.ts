@@ -20,8 +20,8 @@ export interface Metric {
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
-  breakdownDetailsUrl?: string; // Renamed from detailsUrl
-  navUrl?: string; // New: URL for card navigation
+  breakdownDetailsUrl?: string; 
+  navUrl?: string; 
   breakdownAction?: {
     label: string;
     onClick: () => void;
@@ -176,7 +176,7 @@ export interface AIAgent {
 }
 
 export interface ReportChange {
-  field: string; // e.g., 'status', 'associatedRisks', 'typeOfReport'
+  field: string; 
   oldValue: string | string[] | undefined;
   newValue: string | string[] | undefined;
   changedBy: string;
@@ -184,8 +184,8 @@ export interface ReportChange {
 }
 
 export interface ReportVersionMetadata {
-  version: number; // e.g., 1, 2, 3
-  timestamp: string; // Date of this version
+  version: number; 
+  timestamp: string; 
   changes: ReportChange[];
 }
 
@@ -209,22 +209,38 @@ export type AlertStatus = 'Active' | 'Acknowledged' | 'Resolved' | 'Muted';
 export interface AlertNotificationItem {
   id: string;
   assignmentGroup: string;
-  lastSentTime: string; // ISO string or formatted date string
-  natureOfAlert: string; // e.g., 'Compliance Deadline', 'Risk Threshold Exceeded'
-  mappedRisk: string; // e.g., 'RISK-CYBER-001'
-  objective: string; // Purpose of the alert
-  status: AlertStatus; // Current status
-  severity: AlertSeverity; // Severity level
-  description?: string; // More detailed description of the alert itself
-  triggerCondition?: string; // What condition triggers this alert
-  recipients?: string[]; // Who receives this alert
-  escalationPath?: string; // What's the escalation procedure
-  // Additional details specific to the alert to be shown in the dialog
+  lastSentTime: string; 
+  natureOfAlert: string; 
+  mappedRisk: string; 
+  objective: string; 
+  status: AlertStatus; 
+  severity: AlertSeverity; 
+  description?: string; 
+  triggerCondition?: string; 
+  recipients?: string[]; 
+  escalationPath?: string; 
   dialogDetails?: {
     fullDescription?: string;
     recommendedActions?: string[];
-    historicalDataLink?: string; // Link to historical occurrences
+    historicalDataLink?: string; 
     notes?: string;
   };
 }
 
+export type FeedItemStatus = 'New' | 'Pending AI Analysis' | 'AI Processing' | 'AI Analyzed - No Risk' | 'AI Analyzed - Risk Flagged' | 'Action Required';
+export type FeedItemCategory = 'Regulatory Update' | 'Geopolitical Event' | 'Market News' | 'Cybersecurity Alert' | 'Compliance Advisory' | 'Financial Crime' | 'Internal Finding';
+
+export interface FeedItem {
+  id: string;
+  timestamp: string; 
+  source: string;
+  title: string;
+  snippet: string;
+  category: FeedItemCategory;
+  status: FeedItemStatus;
+  link?: string; 
+  relevanceScore?: number; 
+  flaggedKeywords?: string[];
+  priority?: 'Low' | 'Medium' | 'High' | 'Critical';
+  assignedTo?: string; 
+}
