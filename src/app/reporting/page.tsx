@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download } from 'lucide-react';
+import Link from 'next/link';
 
 const initialReportItems: ReportItem[] = [
   {
@@ -63,7 +64,7 @@ const initialReportItems: ReportItem[] = [
     frequency: 'Ad-hoc',
     dateOfGeneration: '2023-12-10',
     lastModifiedDate: '2024-01-05',
-    impactedCitations: ['GDPR Article 33, GDPR Article 34'],
+    impactedCitations: ['GDPR Article 32', 'GDPR Article 34'],
   }
 ];
 
@@ -182,7 +183,15 @@ export default function ReportingHubPage() {
                     <TableCell className="text-xs whitespace-nowrap">{item.dateOfGeneration}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{item.lastModifiedDate}</TableCell>
                     <TableCell className="text-xs max-w-[180px]">
-                        {item.impactedCitations?.map(cite => <Badge key={cite} variant="secondary" className="mr-1 mb-1 text-xs">{cite}</Badge>) ?? 'N/A'}
+                        {item.impactedCitations?.map(cite => (
+                          <Link key={cite} href={`/citations/${encodeURIComponent(cite)}`} passHref legacyBehavior>
+                            <a className="inline-block mr-1 mb-1">
+                              <Badge variant="secondary" className="text-xs hover:bg-primary/10 hover:text-primary-foreground cursor-pointer">
+                                {cite}
+                              </Badge>
+                            </a>
+                          </Link>
+                        )) ?? <span className="text-muted-foreground">N/A</span>}
                     </TableCell>
                     <TableCell className="space-x-1">
                       <Button variant="outline" size="sm" onClick={() => handlePreviewComparison(item)} title="Check old report versions">
