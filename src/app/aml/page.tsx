@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon } from 'lucide-react';
+import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon, ArrowUpCircle } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import type { ChartConfig } from '@/components/ui/chart';
@@ -99,9 +99,9 @@ export default function AMLDashboardPage() {
     // Update SARs filed count if transactions list changes (e.g. after table actions)
     setSarsFiled(transactions.filter(t => t.status === 'sar_filed').length);
     // Mock updates for other metrics based on table changes for demonstration
-    setAmlHits(transactions.filter(t => t.status === 'flagged' || t.status === 'sar_filed').length);
+    setAmlHits(transactions.filter(t => t.status === 'flagged' || t.status === 'sar_filed' || t.status === 'escalated').length);
     // This is a very rough estimation for demo. Real logic would be more complex.
-    setPendingReview(transactions.filter(t => t.status === 'flagged').length);
+    setPendingReview(transactions.filter(t => t.status === 'flagged' || t.status === 'escalated').length);
 
   }, [transactions]);
 
@@ -277,7 +277,14 @@ export default function AMLDashboardPage() {
                   <TableCell>{txn.date}</TableCell>
                   <TableCell>{txn.amount.toLocaleString()} {txn.currency}</TableCell>
                   <TableCell>
-                    <Badge variant={txn.status === 'flagged' ? 'destructive' : txn.status === 'sar_filed' ? 'default' : 'secondary'}>
+                    <Badge variant={
+                        txn.status === 'flagged' ? 'destructive' : 
+                        txn.status === 'sar_filed' ? 'default' : 
+                        txn.status === 'escalated' ? 'default' : // Using default (primary color) for escalated
+                        'secondary'
+                      }
+                      className={txn.status === 'escalated' ? 'border-primary text-primary-foreground' : ''} // Custom styling if needed, or rely on variant
+                    >
                       {txn.status.replace('_', ' ').toUpperCase()}
                     </Badge>
                   </TableCell>
@@ -322,14 +329,24 @@ export default function AMLDashboardPage() {
                             )}
                             {!isLoading && !aiSuggestions && <p className="text-muted-foreground">No AI suggestions available or failed to load.</p>}
                           </div>
-                          <DialogFooter>
+                          <DialogFooter className="gap-2 sm:gap-0">
                             <Button variant="outline" onClick={() => {
                                 setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'reviewed', riskScore: t.riskScore ? Math.max(10, t.riskScore - 20) : 30} : t));
                                 toast({title: "Status Updated", description: `${selectedTransaction.id} marked as reviewed.`});
                             }}>Mark as Reviewed</Button>
+                            <Button variant="outline" onClick={() => {
+                                if(selectedTransaction) {
+                                    setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'escalated', riskScore: t.riskScore ? Math.min(100, t.riskScore + 15) : 90 } : t));
+                                    toast({title: "Transaction Escalated", description: `${selectedTransaction.id} has been escalated.`});
+                                }
+                            }}>
+                              <ArrowUpCircle className="mr-2 h-4 w-4" /> Escalate
+                            </Button>
                              <Button variant="destructive" onClick={() => {
-                                setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'sar_filed', riskScore: t.riskScore ? Math.min(100, t.riskScore + 20) : 95} : t));
-                                toast({title: "Status Updated", description: `${selectedTransaction.id} marked for SAR filing.`});
+                                if(selectedTransaction) {
+                                    setTransactions(prev => prev.map(t => t.id === selectedTransaction.id ? {...t, status: 'sar_filed', riskScore: t.riskScore ? Math.min(100, t.riskScore + 20) : 95} : t));
+                                    toast({title: "Status Updated", description: `${selectedTransaction.id} marked for SAR filing.`});
+                                }
                             }}>File SAR</Button>
                             <DialogClose asChild><Button type="button">Close</Button></DialogClose>
                           </DialogFooter>
@@ -349,3 +366,4 @@ export default function AMLDashboardPage() {
     </div>
   );
 }
+

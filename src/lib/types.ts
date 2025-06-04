@@ -14,7 +14,7 @@ export interface Metric {
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
-  detailsUrl?: string; // New field for linking to more details
+  detailsUrl?: string; 
 }
 
 export interface ChartDataPoint {
@@ -30,7 +30,7 @@ export interface FlaggedTransaction {
   currency: string;
   sender: string;
   receiver: string;
-  status: 'flagged' | 'reviewed' | 'sar_filed';
+  status: 'flagged' | 'reviewed' | 'sar_filed' | 'escalated';
   riskScore?: number; // Optional
   details?: string; // Full transaction details for AI
   userProfile?: string; // User profile for AI
@@ -104,3 +104,4 @@ export interface RiskIssueItem {
   regulatoryImplications?: string;
   suggestedControls?: string[];
 }
+
