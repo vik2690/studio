@@ -10,10 +10,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye } from 'lucide-react';
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 const initialExistingControls: ExistingControl[] = [
   {
@@ -29,6 +30,12 @@ const initialExistingControls: ExistingControl[] = [
     owner: 'IT Security Department',
     reviewer: 'Internal Audit',
     lastReviewedDate: '2024-06-15',
+    controlMaturityLevel: 'Managed',
+    effectivenessRating: 'Effective',
+    residualRisk: 'Low',
+    lastTestDate: '2024-05-20',
+    testResult: 'Pass',
+    issuesIdentified: ['Minor delay in revoking one terminated employee access.'],
   },
   {
     id: 'CTRL-002',
@@ -43,6 +50,11 @@ const initialExistingControls: ExistingControl[] = [
     owner: 'Finance Department',
     reviewer: 'Compliance Officer',
     lastReviewedDate: '2024-07-01',
+    controlMaturityLevel: 'Optimized',
+    effectivenessRating: 'Highly Effective',
+    residualRisk: 'Low',
+    lastTestDate: '2024-06-10',
+    testResult: 'Pass',
   },
   {
     id: 'CTRL-003',
@@ -56,6 +68,12 @@ const initialExistingControls: ExistingControl[] = [
     frequency: 'Event-driven',
     owner: 'Data Protection Officer',
     reviewer: 'Legal Department',
+    controlMaturityLevel: 'Developing',
+    effectivenessRating: 'Partially Effective',
+    residualRisk: 'Medium',
+    lastTestDate: '2024-07-05',
+    testResult: 'Pass with Exceptions',
+    issuesIdentified: ['Process not fully automated for all systems.', 'Average deletion time slightly above target.'],
   },
   {
     id: 'CTRL-004',
@@ -70,6 +88,11 @@ const initialExistingControls: ExistingControl[] = [
     owner: 'IT Operations',
     reviewer: 'IT Manager',
     lastReviewedDate: 'N/A - Daily Check',
+    controlMaturityLevel: 'Managed',
+    effectivenessRating: 'Effective',
+    residualRisk: 'Low',
+    lastTestDate: 'Daily',
+    testResult: 'Pass',
   },
 ];
 
@@ -82,6 +105,8 @@ export default function ComplianceHubPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [existingControlsList] = useState<ExistingControl[]>(initialExistingControls);
+  const [selectedControlDetail, setSelectedControlDetail] = useState<ExistingControl | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -130,6 +155,20 @@ export default function ComplianceHubPage() {
     toast({ title: "Control Updated", description: `Control ${id} status set to ${newStatus}.` });
   };
 
+  const handleViewControlDetails = (control: ExistingControl) => {
+    setSelectedControlDetail(control);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleManualUpdate = (controlId: string | undefined) => {
+    if (!controlId) return;
+    toast({
+      title: 'Manual Update',
+      description: `Manual update process initiated for control ${controlId}. (This is a placeholder action)`,
+    });
+    // Here you would typically open another form/modal or navigate to an edit page
+  };
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">Compliance & Controls Hub</h1>
@@ -154,7 +193,6 @@ export default function ComplianceHubPage() {
                 <TableHead>Risk Mitigated</TableHead>
                 <TableHead>Policy/Regulation</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Objective</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Frequency</TableHead>
                 <TableHead>Owner</TableHead>
@@ -166,7 +204,7 @@ export default function ComplianceHubPage() {
             <TableBody>
               {existingControlsList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="h-24 text-center">
+                  <TableCell colSpan={12} className="h-24 text-center">
                     No existing controls found.
                   </TableCell>
                 </TableRow>
@@ -180,7 +218,7 @@ export default function ComplianceHubPage() {
                         control.status === 'Active' ? 'secondary' :
                         control.status === 'Inactive' ? 'outline' :
                         control.status === 'Draft' ? 'outline' :
-                        control.status === 'Under Review' ? 'default' : // default uses primary color
+                        control.status === 'Under Review' ? 'default' : 
                         'secondary'
                       }
                       className={
@@ -195,14 +233,13 @@ export default function ComplianceHubPage() {
                     <TableCell className="text-xs min-w-[200px]">{control.riskMitigated}</TableCell>
                     <TableCell className="text-xs min-w-[150px]">{control.mappedPolicyRegulation}</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{control.controlType}</Badge></TableCell>
-                    <TableCell className="text-xs min-w-[200px]">{control.objective}</TableCell>
                     <TableCell><Badge variant="secondary" className="text-xs whitespace-nowrap">{control.controlCategory}</Badge></TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{control.frequency}</Badge></TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{control.owner}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{control.reviewer}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">{control.lastReviewedDate || 'N/A'}</TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => toast({title: "View Details", description: `Viewing details for ${control.controlName}`})}>
+                      <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
                         <Eye className="mr-1 h-3.5 w-3.5" /> View
                       </Button>
                     </TableCell>
@@ -319,6 +356,72 @@ export default function ComplianceHubPage() {
         </Card>
       )}
 
+      {selectedControlDetail && (
+        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>{selectedControlDetail.controlName} (ID: {selectedControlDetail.id})</DialogTitle>
+              <DialogDescription>
+                Detailed information for the selected control.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3 py-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
+              <div className="grid grid-cols-[1fr_2fr] items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Maturity Level:</span>
+                <span>{selectedControlDetail.controlMaturityLevel || 'N/A'}</span>
+              </div>
+              <div className="grid grid-cols-[1fr_2fr] items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Effectiveness:</span>
+                <span>{selectedControlDetail.effectivenessRating || 'N/A'}</span>
+              </div>
+              <div className="grid grid-cols-[1fr_2fr] items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Residual Risk:</span>
+                <span>{selectedControlDetail.residualRisk || 'N/A'}</span>
+              </div>
+               <div className="grid grid-cols-[1fr_2fr] items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Last Test Date:</span>
+                <span>{selectedControlDetail.lastTestDate || 'N/A'}</span>
+              </div>
+              <div className="grid grid-cols-[1fr_2fr] items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Test Result:</span>
+                <Badge variant={
+                    selectedControlDetail.testResult === 'Pass' ? 'secondary' :
+                    selectedControlDetail.testResult === 'Fail' ? 'destructive' :
+                    selectedControlDetail.testResult === 'Pass with Exceptions' ? 'default' :
+                    'outline'
+                } 
+                className={
+                    selectedControlDetail.testResult === 'Pass' ? 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600 w-fit' :
+                    selectedControlDetail.testResult === 'Pass with Exceptions' ? 'border-primary/50 text-primary-foreground w-fit' : 
+                    selectedControlDetail.testResult === 'Fail' ? 'w-fit' : 'w-fit'
+                }>
+                    {selectedControlDetail.testResult || 'N/A'}
+                </Badge>
+              </div>
+              <div>
+                <span className="font-semibold text-muted-foreground">Issues Identified:</span>
+                {selectedControlDetail.issuesIdentified && selectedControlDetail.issuesIdentified.length > 0 ? (
+                  <ul className="list-disc list-inside pl-4 mt-1">
+                    {selectedControlDetail.issuesIdentified.map((issue, index) => (
+                      <li key={index}>{issue}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span> N/A</span>
+                )}
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => handleManualUpdate(selectedControlDetail?.id)}>
+                <Edit3 className="mr-2 h-4 w-4" /> Manual Update
+              </Button>
+              <DialogClose asChild>
+                <Button type="button">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

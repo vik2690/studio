@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 export interface MetricBreakdownItem {
   category: string;
   value: string | number;
-  action?: { // New field for an action on individual breakdown items
+  action?: { 
     label: string;
     onClick: () => void;
     icon?: LucideIcon;
@@ -15,13 +15,13 @@ export interface MetricBreakdownItem {
 export interface Metric {
   title: string;
   value: string;
-  change?: string; // e.g., "+5%"
+  change?: string; 
   changeType?: 'positive' | 'negative';
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
   detailsUrl?: string;
-  breakdownAction?: { // Global action for the card's breakdown panel
+  breakdownAction?: { 
     label: string;
     onClick: () => void; 
     icon?: LucideIcon;
@@ -29,9 +29,9 @@ export interface Metric {
 }
 
 export interface ChartDataPoint {
-  name: string; // For x-axis label
-  value: number; // For y-axis value
-  fill?: string; // Optional color for bar/segment
+  name: string; 
+  value: number; 
+  fill?: string; 
 }
 
 export interface FlaggedTransaction {
@@ -42,9 +42,9 @@ export interface FlaggedTransaction {
   sender: string;
   receiver: string;
   status: 'flagged' | 'reviewed' | 'sar_filed' | 'escalated';
-  riskScore?: number; // Optional
-  details?: string; // Full transaction details for AI
-  userProfile?: string; // User profile for AI
+  riskScore?: number; 
+  details?: string; 
+  userProfile?: string; 
 }
 
 export interface RegulationDocument {
@@ -52,8 +52,8 @@ export interface RegulationDocument {
   title: string;
   source?: string;
   uploadDate: string;
-  content: string; // Full text
-  summary?: string; // AI generated
+  content: string; 
+  summary?: string; 
 }
 
 export interface ListedRegulationDocument {
@@ -126,7 +126,13 @@ export interface ExistingControl {
   objective: string;
   controlCategory: 'Financial Reporting' | 'Operational' | 'IT General Controls' | 'Compliance' | 'Data Privacy' | 'Physical Security';
   frequency: 'Continuous' | 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'Annually' | 'Ad-hoc' | 'Event-driven';
-  owner: string; // Department or Individual
-  reviewer: string; // Department or Individual
-  lastReviewedDate?: string; // Optional
+  owner: string; 
+  reviewer: string; 
+  lastReviewedDate?: string; 
+  controlMaturityLevel?: 'Initial' | 'Developing' | 'Defined' | 'Managed' | 'Optimized' | string;
+  effectivenessRating?: 'Highly Effective' | 'Effective' | 'Partially Effective' | 'Ineffective' | 'Not Assessed' | string;
+  residualRisk?: 'Low' | 'Medium' | 'High' | 'Critical' | string;
+  lastTestDate?: string;
+  testResult?: 'Pass' | 'Fail' | 'Pass with Exceptions' | 'Not Tested';
+  issuesIdentified?: string[];
 }
