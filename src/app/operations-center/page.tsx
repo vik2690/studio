@@ -365,14 +365,14 @@ export default function OperationsCenterPage() {
                   </div>
                 )}
               </CardContent>
-              <div className="p-4 pt-2 border-t border-border/50 mt-auto flex flex-col sm:flex-row sm:justify-between gap-2">
-                <Button variant="ghost" size="sm" className="justify-start text-primary hover:text-primary/90 flex-1" onClick={() => handleViewAgentDetails(agent)}>
+              <div className="p-4 pt-2 border-t border-border/50 mt-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <Button variant="ghost" size="sm" className="justify-start text-primary hover:text-primary/90 w-full sm:flex-1" onClick={() => handleViewAgentDetails(agent)}>
                   View Logs & Details <ChevronRight className="ml-auto h-4 w-4" />
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="flex-1 sm:flex-none"
+                  className="w-full sm:w-auto justify-start sm:justify-center"
                   onClick={() => handleStopAgent(agent.id, agent.name)}
                   disabled={agent.status === 'Disabled'}
                 >
