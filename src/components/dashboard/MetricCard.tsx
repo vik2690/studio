@@ -13,7 +13,7 @@ interface MetricCardProps extends Metric {}
 export function MetricCard({ title, value, change, changeType, icon: Icon, description, breakdown, detailsUrl }: MetricCardProps) {
   const [showBreakdown, setShowBreakdown] = useState(false);
 
-  const cardMinHeight = detailsUrl ? "200px" : "170px";
+  const cardMinHeight = "170px"; // Min height remains same
 
   return (
     <Card
@@ -53,7 +53,6 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
               <p className="text-xs text-muted-foreground mt-1">{description}</p>
             )}
           </div>
-          {/* "View Details" link removed from here */}
         </CardContent>
       </div>
 
@@ -73,7 +72,24 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
               {title} Breakdown
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow !p-0 !pt-2 overflow-y-auto flex flex-col">
+
+          {/* "View Details" link, shown only if detailsUrl exists and this panel is active */}
+          {detailsUrl && showBreakdown && (
+            <div className="py-1.5"> {/* Vertical padding for the link container */}
+              <Link href={detailsUrl} passHref legacyBehavior>
+                <a className="text-xs text-primary hover:underline flex items-center">
+                  View Details <ExternalLink className="ml-1 h-3 w-3" />
+                </a>
+              </Link>
+            </div>
+          )}
+
+          <CardContent className={cn(
+            "flex-grow !p-0 overflow-y-auto flex flex-col",
+            // If the link is NOT being rendered above, add pt-2 to CardContent.
+            // CardHeader has pb-2. If no link, CardContent needs pt-2 for consistent spacing.
+            { "!pt-2": !(detailsUrl && showBreakdown) } 
+          )}>
             <ul className="space-y-1 text-sm flex-grow">
               {breakdown.map((item) => (
                 <li key={item.category} className="flex justify-between items-start py-0.5">
@@ -82,15 +98,6 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
                 </li>
               ))}
             </ul>
-            {detailsUrl && ( // Show link if detailsUrl is provided when breakdown IS shown
-              <div className="mt-2 pt-2 border-t border-border">
-                <Link href={detailsUrl} passHref legacyBehavior>
-                  <a className="text-xs text-primary hover:underline flex items-center">
-                    View Details <ExternalLink className="ml-1 h-3 w-3" />
-                  </a>
-                </Link>
-              </div>
-            )}
           </CardContent>
         </div>
       )}
