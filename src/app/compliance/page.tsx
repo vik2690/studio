@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3 } from 'lucide-react';
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -164,9 +164,24 @@ export default function ComplianceHubPage() {
     if (!controlId) return;
     toast({
       title: 'Manual Update',
-      description: `Manual update process initiated for control ${controlId}. (This is a placeholder action)`,
+      description: `Manual update process initiated for control ${controlId}. (Placeholder)`,
     });
-    // Here you would typically open another form/modal or navigate to an edit page
+  };
+
+  const handleReassessRisk = (controlId: string | undefined) => {
+    if (!controlId) return;
+    toast({
+      title: 'Reassess Risk',
+      description: `Risk reassessment initiated for control ${controlId}. (Placeholder)`,
+    });
+  };
+
+  const handleInitiateDiscussion = (controlId: string | undefined) => {
+    if (!controlId) return;
+    toast({
+      title: 'Initiate Discussion',
+      description: `Discussion thread created for control ${controlId}. (Placeholder)`,
+    });
   };
 
   return (
@@ -415,6 +430,12 @@ export default function ComplianceHubPage() {
               <Button variant="outline" onClick={() => handleManualUpdate(selectedControlDetail?.id)}>
                 <Edit3 className="mr-2 h-4 w-4" /> Manual Update
               </Button>
+              <Button variant="outline" onClick={() => handleReassessRisk(selectedControlDetail?.id)}>
+                <Scale className="mr-2 h-4 w-4" /> Reassess Risk
+              </Button>
+              <Button variant="outline" onClick={() => handleInitiateDiscussion(selectedControlDetail?.id)}>
+                <MessageSquare className="mr-2 h-4 w-4" /> Initiate Discussion
+              </Button>
               <DialogClose asChild>
                 <Button type="button">Close</Button>
               </DialogClose>
@@ -425,3 +446,4 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
+
