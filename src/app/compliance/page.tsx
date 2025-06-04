@@ -137,6 +137,86 @@ export default function ComplianceHubPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
+            <Library className="mr-2 h-6 w-6 text-primary" />
+            Existing Controls Library
+          </CardTitle>
+          <CardDescription>
+            A comprehensive list of currently implemented compliance controls within the organization.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Risk Mitigated</TableHead>
+                <TableHead>Policy/Regulation</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Objective</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Frequency</TableHead>
+                <TableHead>Owner</TableHead>
+                <TableHead>Reviewer</TableHead>
+                <TableHead>Last Reviewed</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {existingControlsList.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={13} className="h-24 text-center">
+                    No existing controls found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                existingControlsList.map((control) => (
+                  <TableRow key={control.id}>
+                    <TableCell className="font-medium text-xs">{control.id}</TableCell>
+                    <TableCell className="font-medium text-xs min-w-[150px]">{control.controlName}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        control.status === 'Active' ? 'secondary' :
+                        control.status === 'Inactive' ? 'outline' :
+                        control.status === 'Draft' ? 'outline' :
+                        control.status === 'Under Review' ? 'default' : // default uses primary color
+                        'secondary'
+                      }
+                      className={
+                        control.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600' :
+                        control.status === 'Inactive' ? 'text-muted-foreground' :
+                        control.status === 'Under Review' ? 'border-primary/50 text-primary-foreground' : ''
+                      }
+                      >
+                        {control.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs min-w-[200px]">{control.riskMitigated}</TableCell>
+                    <TableCell className="text-xs min-w-[150px]">{control.mappedPolicyRegulation}</TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs">{control.controlType}</Badge></TableCell>
+                    <TableCell className="text-xs min-w-[200px]">{control.objective}</TableCell>
+                    <TableCell><Badge variant="secondary" className="text-xs whitespace-nowrap">{control.controlCategory}</Badge></TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs">{control.frequency}</Badge></TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">{control.owner}</TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">{control.reviewer}</TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">{control.lastReviewedDate || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => toast({title: "View Details", description: `Viewing details for ${control.controlName}`})}>
+                        <Eye className="mr-1 h-3.5 w-3.5" /> View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
             <ShieldCheck className="mr-2 h-6 w-6 text-primary" />
             Analyze Compliance Gaps & Suggest Controls
           </CardTitle>
@@ -238,86 +318,6 @@ export default function ComplianceHubPage() {
           </CardContent>
         </Card>
       )}
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Library className="mr-2 h-6 w-6 text-primary" />
-            Existing Controls Library
-          </CardTitle>
-          <CardDescription>
-            A comprehensive list of currently implemented compliance controls within the organization.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Risk Mitigated</TableHead>
-                <TableHead>Policy/Regulation</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Objective</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Frequency</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Reviewer</TableHead>
-                <TableHead>Last Reviewed</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {existingControlsList.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={13} className="h-24 text-center">
-                    No existing controls found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                existingControlsList.map((control) => (
-                  <TableRow key={control.id}>
-                    <TableCell className="font-medium text-xs">{control.id}</TableCell>
-                    <TableCell className="font-medium text-xs min-w-[150px]">{control.controlName}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        control.status === 'Active' ? 'secondary' :
-                        control.status === 'Inactive' ? 'outline' :
-                        control.status === 'Draft' ? 'outline' :
-                        control.status === 'Under Review' ? 'default' : // default uses primary color
-                        'secondary'
-                      }
-                      className={
-                        control.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600' :
-                        control.status === 'Inactive' ? 'text-muted-foreground' :
-                        control.status === 'Under Review' ? 'border-primary/50 text-primary-foreground' : ''
-                      }
-                      >
-                        {control.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs min-w-[200px]">{control.riskMitigated}</TableCell>
-                    <TableCell className="text-xs min-w-[150px]">{control.mappedPolicyRegulation}</TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{control.controlType}</Badge></TableCell>
-                    <TableCell className="text-xs min-w-[200px]">{control.objective}</TableCell>
-                    <TableCell><Badge variant="secondary" className="text-xs whitespace-nowrap">{control.controlCategory}</Badge></TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{control.frequency}</Badge></TableCell>
-                    <TableCell className="text-xs whitespace-nowrap">{control.owner}</TableCell>
-                    <TableCell className="text-xs whitespace-nowrap">{control.reviewer}</TableCell>
-                    <TableCell className="text-xs whitespace-nowrap">{control.lastReviewedDate || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => toast({title: "View Details", description: `Viewing details for ${control.controlName}`})}>
-                        <Eye className="mr-1 h-3.5 w-3.5" /> View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
     </div>
   );
