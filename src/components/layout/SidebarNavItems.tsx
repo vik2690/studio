@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell, FileSpreadsheet, Globe, GitCompareArrows } from 'lucide-react';
+import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell, FileSpreadsheet, Globe, Bot } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const navItems = [
@@ -20,6 +20,7 @@ const navItems = [
   { href: "/audit-hub", label: "Audit Hub", icon: ClipboardCheck },
   { href: "/live-tracker", label: "Live Tracker", icon: Globe },
   { href: "/admin", label: "Admin Hub", icon: Settings2 },
+  { href: "/crics-chatbot", label: "CRICS Chatbot", icon: Bot },
 ];
 
 export function SidebarNavItems() {
