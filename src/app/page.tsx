@@ -5,12 +5,42 @@ import { MetricCard } from '@/components/dashboard/MetricCard';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard';
 import { AlertTriangle, ShieldCheck, BarChartHorizontalBig, FileWarning } from 'lucide-react';
-import type { Metric, ChartDataPoint } from '@/lib/types';
+import type { Metric, ChartDataPoint, MetricBreakdownItem } from '@/lib/types';
 import type { ChartConfig } from '@/components/ui/chart';
 
+const riskBreakdown: MetricBreakdownItem[] = [
+  { category: "Regulatory", value: 30 },
+  { category: "Internal Policy", value: 25 },
+  { category: "Operational", value: 40 },
+  { category: "Cybersecurity", value: 30 },
+];
+
+const controlsBreakdown: MetricBreakdownItem[] = [
+  { category: "Regulatory", value: 250 },
+  { category: "Internal Policy", value: 300 },
+  { category: "Operational", value: 150 },
+  { category: "Cybersecurity", value: 150 },
+];
+
 const overviewMetrics: Metric[] = [
-  { title: "Identified Risks", value: "125", change: "+12 last month", changeType: "negative", icon: AlertTriangle, description: "Total open risks across the organization." },
-  { title: "Applied Controls", value: "850", change: "+50 last month", changeType: "positive", icon: ShieldCheck, description: "Total active compliance controls." },
+  { 
+    title: "Identified Risks", 
+    value: "125", 
+    change: "+12 last month", 
+    changeType: "negative", 
+    icon: AlertTriangle, 
+    description: "Total open risks across the organization.",
+    breakdown: riskBreakdown,
+  },
+  { 
+    title: "Applied Controls", 
+    value: "850", 
+    change: "+50 last month", 
+    changeType: "positive", 
+    icon: ShieldCheck, 
+    description: "Total active compliance controls.",
+    breakdown: controlsBreakdown,
+  },
   { title: "Organization Risk Score", value: "68%", change: "-3% last month", changeType: "positive", icon: BarChartHorizontalBig, description: "Overall calculated risk exposure." },
   { title: "AML Hits", value: "15", change: "+2 this week", changeType: "negative", icon: FileWarning, description: "Suspicious transactions flagged." },
 ];

@@ -1,6 +1,11 @@
 
 import type { LucideIcon } from 'lucide-react';
 
+export interface MetricBreakdownItem {
+  category: string;
+  value: string | number;
+}
+
 export interface Metric {
   title: string;
   value: string;
@@ -8,6 +13,7 @@ export interface Metric {
   changeType?: 'positive' | 'negative';
   icon?: LucideIcon;
   description?: string;
+  breakdown?: MetricBreakdownItem[]; // New field for hover breakdown
 }
 
 export interface ChartDataPoint {
@@ -93,8 +99,8 @@ export interface RiskIssueItem {
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   riskType: 'Operational' | 'Reputational' | 'Financial' | 'Compliance' | 'Strategic' | 'Cybersecurity' | 'Third-Party' | 'Other';
   status: 'Open' | 'In Progress' | 'Mitigated' | 'Closed' | 'Requires Attention';
-  violatedRegulation?: string; // New field
-  regulatoryImplications?: string; // Placeholder for future feature
-  suggestedControls?: string[]; // Placeholder for future feature
+  violatedRegulation?: string; 
+  regulatoryImplications?: string; 
+  suggestedControls?: string[]; 
 }
     
