@@ -4,13 +4,15 @@
 import { useState, useEffect } from 'react';
 import type { ReportItem, ReportVersionMetadata, ReportChange } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download } from 'lucide-react';
+import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch } from 'lucide-react';
 import Link from 'next/link';
 
 const initialReportItems: ReportItem[] = [
@@ -90,6 +92,7 @@ export default function ReportingHubPage() {
   const [reportItems, setReportItems] = useState<ReportItem[]>(initialReportItems);
   const [selectedReportForComparison, setSelectedReportForComparison] = useState<ReportItem | null>(null);
   const [isComparisonDialogOpen, setIsComparisonDialogOpen] = useState(false);
+  const [manualRegulationInput, setManualRegulationInput] = useState('');
   const { toast } = useToast();
 
   const handlePreviewComparison = (report: ReportItem) => {
@@ -118,6 +121,30 @@ export default function ReportingHubPage() {
       return value.join(', ');
     }
     return value || 'N/A';
+  };
+
+  const handleManualExport = () => {
+    if (!manualRegulationInput.trim()) {
+      toast({ title: "Input Required", description: "Please enter a regulation name or ID.", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Export Initiated",
+      description: `Report export started for regulation: "${manualRegulationInput}". (Placeholder)`,
+    });
+    // Actual export logic would go here
+  };
+
+  const handleManualSummary = () => {
+    if (!manualRegulationInput.trim()) {
+      toast({ title: "Input Required", description: "Please enter a regulation name or ID.", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Summary Extraction Initiated",
+      description: `Summary extraction started for regulation: "${manualRegulationInput}". (Placeholder)`,
+    });
+    // Actual summary logic would go here
   };
 
   return (
@@ -209,6 +236,41 @@ export default function ReportingHubPage() {
             </TableBody>
           </Table>
         </CardContent>
+      </Card>
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Settings className="mr-2 h-6 w-6 text-primary" />
+            Manual Report Tools
+          </CardTitle>
+          <CardDescription>
+            Manually export a report or extract a summary for a specific regulation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="manualRegulationInput" className="font-semibold">Regulation Name or ID</Label>
+            <Input
+              id="manualRegulationInput"
+              type="text"
+              value={manualRegulationInput}
+              onChange={(e) => setManualRegulationInput(e.target.value)}
+              placeholder="e.g., MiFID II Article 27, GDPR Article 30"
+              className="mt-1"
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="gap-2">
+          <Button onClick={handleManualExport}>
+            <FileOutput className="mr-2 h-4 w-4" />
+            Export Report for Regulation
+          </Button>
+          <Button onClick={handleManualSummary} variant="outline">
+            <FileSearch className="mr-2 h-4 w-4" />
+            Extract Summary for Regulation
+          </Button>
+        </CardFooter>
       </Card>
 
       {selectedReportForComparison && isComparisonDialogOpen && (
