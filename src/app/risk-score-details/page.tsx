@@ -21,6 +21,13 @@ const processedRiskScoreData = riskScoreTableData.map(item => ({
 
 const totalCalculatedScore = processedRiskScoreData.reduce((acc, item) => acc + item.score, 0);
 
+const riskInterpretationData = [
+  { range: "0–30%", level: "Low" },
+  { range: "31–60%", level: "Moderate" },
+  { range: "61–80%", level: "High" },
+  { range: "81–100%", level: "Critical/Severe" },
+];
+
 export default function RiskScoreDetailsPage() {
   return (
     <div className="space-y-6">
@@ -71,6 +78,33 @@ export default function RiskScoreDetailsPage() {
               </ul>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle>Interpreting the Score</CardTitle>
+          <CardDescription>
+            The Organization Risk Score percentage translates to the following risk levels:
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50%]">Risk %</TableHead>
+                <TableHead className="w-[50%]">Risk Level</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {riskInterpretationData.map((item) => (
+                <TableRow key={item.level}>
+                  <TableCell className="font-medium">{item.range}</TableCell>
+                  <TableCell>{item.level}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
