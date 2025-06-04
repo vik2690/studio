@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch } from 'lucide-react';
 import Link from 'next/link';
@@ -87,6 +88,20 @@ const frequencyVariantMap: Record<ReportItem['frequency'], 'default' | 'secondar
   'Ad-hoc': 'outline',
 };
 
+const regulatoryBodies = [
+  { value: 'ESMA', label: 'ESMA (European Securities and Markets Authority)' },
+  { value: 'FinCEN', label: 'FinCEN (Financial Crimes Enforcement Network)' },
+  { value: 'EC', label: 'European Commission' },
+  { value: 'SEC', label: 'SEC (U.S. Securities and Exchange Commission)' },
+  { value: 'PRA', label: 'PRA (Prudential Regulation Authority)' },
+  { value: 'FCA', label: 'FCA (Financial Conduct Authority)' },
+  { value: 'MAS', label: 'MAS (Monetary Authority of Singapore)' },
+  { value: 'Internal Audit', label: 'Internal Audit' },
+  { value: 'SOX Compliance Office', label: 'SOX Compliance Office' },
+  { value: 'DPO Office', label: 'DPO Office' },
+  { value: 'Other', label: 'Other/Not Specified' },
+];
+
 
 export default function ReportingHubPage() {
   const [reportItems, setReportItems] = useState<ReportItem[]>(initialReportItems);
@@ -125,24 +140,24 @@ export default function ReportingHubPage() {
 
   const handleManualExport = () => {
     if (!manualRegulationInput.trim()) {
-      toast({ title: "Input Required", description: "Please enter a regulation name or ID.", variant: "destructive" });
+      toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
       return;
     }
     toast({
       title: "Export Initiated",
-      description: `Report export started for regulation: "${manualRegulationInput}". (Placeholder)`,
+      description: `Report export started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
     });
     // Actual export logic would go here
   };
 
   const handleManualSummary = () => {
     if (!manualRegulationInput.trim()) {
-      toast({ title: "Input Required", description: "Please enter a regulation name or ID.", variant: "destructive" });
+      toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
       return;
     }
     toast({
       title: "Summary Extraction Initiated",
-      description: `Summary extraction started for regulation: "${manualRegulationInput}". (Placeholder)`,
+      description: `Summary extraction started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
     });
     // Actual summary logic would go here
   };
@@ -245,30 +260,32 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Manually export a report or extract a summary for a specific regulation.
+            Manually export a report or extract a summary for a selected regulatory body.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="manualRegulationInput" className="font-semibold">Regulation Name or ID</Label>
-            <Input
-              id="manualRegulationInput"
-              type="text"
-              value={manualRegulationInput}
-              onChange={(e) => setManualRegulationInput(e.target.value)}
-              placeholder="e.g., MiFID II Article 27, GDPR Article 30"
-              className="mt-1"
-            />
+            <Label htmlFor="manualRegulationInput" className="font-semibold">Regulatory Body</Label>
+            <Select value={manualRegulationInput} onValueChange={setManualRegulationInput}>
+              <SelectTrigger id="manualRegulationInput" className="mt-1">
+                <SelectValue placeholder="Select a regulatory body" />
+              </SelectTrigger>
+              <SelectContent>
+                {regulatoryBodies.map(body => (
+                  <SelectItem key={body.value} value={body.value}>{body.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
         <CardFooter className="gap-2">
           <Button onClick={handleManualExport}>
             <FileOutput className="mr-2 h-4 w-4" />
-            Export Report for Regulation
+            Export Report for Body
           </Button>
           <Button onClick={handleManualSummary} variant="outline">
             <FileSearch className="mr-2 h-4 w-4" />
-            Extract Summary for Regulation
+            Extract Summary for Body
           </Button>
         </CardFooter>
       </Card>
