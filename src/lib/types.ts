@@ -115,3 +115,18 @@ export interface RiskIssueItem {
   regulatoryImplications?: string;
   suggestedControls?: string[];
 }
+
+export interface ExistingControl {
+  id: string;
+  controlName: string;
+  status: 'Active' | 'Inactive' | 'Draft' | 'Under Review';
+  riskMitigated: string;
+  mappedPolicyRegulation: string;
+  controlType: 'Preventive' | 'Detective' | 'Corrective' | 'Directive';
+  objective: string;
+  controlCategory: 'Financial Reporting' | 'Operational' | 'IT General Controls' | 'Compliance' | 'Data Privacy' | 'Physical Security';
+  frequency: 'Continuous' | 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'Annually' | 'Ad-hoc' | 'Event-driven';
+  owner: string; // Department or Individual
+  reviewer: string; // Department or Individual
+  lastReviewedDate?: string; // Optional
+}
