@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare } from 'lucide-react';
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle } from 'lucide-react'; // Added new icons
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -37,7 +37,8 @@ const initialExistingControls: ExistingControl[] = [
     testResult: 'Pass',
     issuesIdentified: ['Minor delay in revoking one terminated employee access.'],
     associatedRiskId: 'RISK-001',
-    associatedRiskDetails: 'Potential data breach due to outdated encryption protocols on customer database.'
+    associatedRiskDetails: 'Potential data breach due to outdated encryption protocols on customer database.',
+    latestAICheck: { status: 'Covered', date: '2024-07-28', summary: 'Control aligns with latest data privacy mandates.'}
   },
   {
     id: 'CTRL-002',
@@ -58,7 +59,8 @@ const initialExistingControls: ExistingControl[] = [
     lastTestDate: '2024-06-10',
     testResult: 'Pass',
     associatedRiskId: 'RISK-007',
-    associatedRiskDetails: 'Risk of unauthorized financial transactions due to lack of SoD.'
+    associatedRiskDetails: 'Risk of unauthorized financial transactions due to lack of SoD.',
+    latestAICheck: { status: 'Needs Review', date: '2024-07-25', summary: 'New VASP regulations might impact payment SoD.'}
   },
   {
     id: 'CTRL-003',
@@ -79,7 +81,8 @@ const initialExistingControls: ExistingControl[] = [
     testResult: 'Pass with Exceptions',
     issuesIdentified: ['Process not fully automated for all systems.', 'Average deletion time slightly above target.'],
     associatedRiskId: 'RISK-009',
-    associatedRiskDetails: 'Failure to comply with GDPR data subject rights leading to potential fines.'
+    associatedRiskDetails: 'Failure to comply with GDPR data subject rights leading to potential fines.',
+    latestAICheck: { status: 'Gap Identified', date: '2024-07-20', summary: 'Automated deletion not covering new marketing database.'}
   },
   {
     id: 'CTRL-004',
@@ -100,7 +103,8 @@ const initialExistingControls: ExistingControl[] = [
     lastTestDate: 'Daily',
     testResult: 'Pass',
     associatedRiskId: 'RISK-012',
-    associatedRiskDetails: 'System outages leading to data loss if backups are not reliable.'
+    associatedRiskDetails: 'System outages leading to data loss if backups are not reliable.',
+    latestAICheck: { status: 'Not Assessed', date: 'N/A'}
   },
 ];
 
@@ -192,6 +196,40 @@ export default function ComplianceHubPage() {
     });
   };
 
+  const getAICheckBadgeVariant = (status?: ExistingControl['latestAICheck']['status']): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    if (!status) return 'outline';
+    switch (status) {
+      case 'Covered': return 'secondary'; // Green
+      case 'Needs Review': return 'default'; // Yellow/Primary
+      case 'Gap Identified': return 'destructive'; // Red
+      case 'Not Assessed': return 'outline'; // Grey
+      default: return 'outline';
+    }
+  };
+
+  const getAICheckBadgeClassName = (status?: ExistingControl['latestAICheck']['status']): string => {
+    if (!status) return 'text-muted-foreground';
+    switch (status) {
+      case 'Covered': return 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600';
+      case 'Needs Review': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-700/80 dark:text-yellow-100 border-yellow-300 dark:border-yellow-600';
+      case 'Gap Identified': return 'bg-red-100 text-red-700 dark:bg-red-700/80 dark:text-red-100 border-red-300 dark:border-red-600';
+      case 'Not Assessed': return 'text-muted-foreground';
+      default: return 'text-muted-foreground';
+    }
+  };
+  
+  const getAICheckIcon = (status?: ExistingControl['latestAICheck']['status']): React.ElementType => {
+    if (!status) return HelpCircle;
+    switch (status) {
+      case 'Covered': return CheckCircle;
+      case 'Needs Review': return AlertCircleIcon;
+      case 'Gap Identified': return AlertTriangleIcon;
+      case 'Not Assessed': return HelpCircle;
+      default: return HelpCircle;
+    }
+  }
+
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">Compliance & Controls Hub</h1>
@@ -223,13 +261,14 @@ export default function ComplianceHubPage() {
                 <TableHead>Last Reviewed</TableHead>
                 <TableHead>Risk ID</TableHead>
                 <TableHead>Risk Details</TableHead>
+                <TableHead>Latest AI Check</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {existingControlsList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={14} className="h-24 text-center">
+                  <TableCell colSpan={15} className="h-24 text-center">
                     No existing controls found.
                   </TableCell>
                 </TableRow>
@@ -265,6 +304,22 @@ export default function ComplianceHubPage() {
                     <TableCell className="text-xs whitespace-nowrap">{control.lastReviewedDate || 'N/A'}</TableCell>
                     <TableCell className="text-xs">{control.associatedRiskId || 'N/A'}</TableCell>
                     <TableCell className="text-xs max-w-[200px] truncate" title={control.associatedRiskDetails || 'N/A'}>{control.associatedRiskDetails || 'N/A'}</TableCell>
+                    <TableCell>
+                      {control.latestAICheck ? (
+                        <div className="flex flex-col items-start text-xs whitespace-nowrap">
+                           <Badge 
+                            variant={getAICheckBadgeVariant(control.latestAICheck.status)}
+                            className={`${getAICheckBadgeClassName(control.latestAICheck.status)} flex items-center gap-1`}
+                          >
+                            {React.createElement(getAICheckIcon(control.latestAICheck.status), { className: "h-3 w-3" })}
+                            {control.latestAICheck.status}
+                          </Badge>
+                          <span className="text-muted-foreground mt-1">{control.latestAICheck.date}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">N/A</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Button variant="outline" size="sm" onClick={() => handleViewControlDetails(control)}>
                         <Eye className="mr-1 h-3.5 w-3.5" /> View
@@ -437,6 +492,24 @@ export default function ComplianceHubPage() {
                   <span> N/A</span>
                 )}
               </div>
+              {selectedControlDetail.latestAICheck && (
+                 <div className="mt-2">
+                  <span className="font-semibold text-muted-foreground">Latest AI Check:</span>
+                  <div className="flex flex-col items-start mt-1">
+                    <Badge 
+                        variant={getAICheckBadgeVariant(selectedControlDetail.latestAICheck.status)}
+                        className={`${getAICheckBadgeClassName(selectedControlDetail.latestAICheck.status)} flex items-center gap-1 text-xs`}
+                    >
+                        {React.createElement(getAICheckIcon(selectedControlDetail.latestAICheck.status), { className: "h-3 w-3" })}
+                        {selectedControlDetail.latestAICheck.status}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs mt-1">{selectedControlDetail.latestAICheck.date}</span>
+                    {selectedControlDetail.latestAICheck.summary && (
+                        <p className="text-xs mt-1 italic">{selectedControlDetail.latestAICheck.summary}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => handleManualUpdate(selectedControlDetail?.id)}>
@@ -458,3 +531,4 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
+

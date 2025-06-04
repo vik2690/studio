@@ -137,4 +137,10 @@ export interface ExistingControl {
   issuesIdentified?: string[];
   associatedRiskId?: string;
   associatedRiskDetails?: string;
+  latestAICheck?: {
+    status: 'Covered' | 'Needs Review' | 'Gap Identified' | 'Not Assessed';
+    date: string;
+    summary?: string; 
+  };
 }
+
