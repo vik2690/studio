@@ -13,7 +13,7 @@ interface MetricCardProps extends Metric {}
 export function MetricCard({ title, value, change, changeType, icon: Icon, description, breakdown, detailsUrl }: MetricCardProps) {
   const [showBreakdown, setShowBreakdown] = useState(false);
 
-  const cardMinHeight = detailsUrl ? "200px" : "170px"; // Adjusted for potential details link
+  const cardMinHeight = detailsUrl ? "200px" : "170px";
 
   return (
     <Card
@@ -53,7 +53,7 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
               <p className="text-xs text-muted-foreground mt-1">{description}</p>
             )}
           </div>
-          {detailsUrl && !showBreakdown && (
+          {detailsUrl && ( // Show link if detailsUrl is provided and breakdown is NOT shown (or no breakdown exists)
             <div className="mt-2">
               <Link href={detailsUrl} passHref legacyBehavior>
                 <a className="text-xs text-primary hover:underline flex items-center">
@@ -81,8 +81,8 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
               {title} Breakdown
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow !p-0 !pt-2 overflow-y-auto">
-            <ul className="space-y-1 text-sm">
+          <CardContent className="flex-grow !p-0 !pt-2 overflow-y-auto flex flex-col">
+            <ul className="space-y-1 text-sm flex-grow">
               {breakdown.map((item) => (
                 <li key={item.category} className="flex justify-between items-start py-0.5">
                   <span className="text-muted-foreground whitespace-nowrap mr-2">{item.category}:</span>
@@ -90,6 +90,15 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
                 </li>
               ))}
             </ul>
+            {detailsUrl && ( // Show link if detailsUrl is provided when breakdown IS shown
+              <div className="mt-2 pt-2 border-t border-border">
+                <Link href={detailsUrl} passHref legacyBehavior>
+                  <a className="text-xs text-primary hover:underline flex items-center">
+                    View Details <ExternalLink className="ml-1 h-3 w-3" />
+                  </a>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </div>
       )}
