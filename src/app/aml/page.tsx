@@ -14,11 +14,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon, ArrowUpCircle, Send } from 'lucide-react';
+import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon, ArrowUpCircle, Send, ListChecks } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import type { ChartConfig } from '@/components/ui/chart';
 import type { MetricBreakdownItem } from '@/lib/types';
+import Link from 'next/link';
 
 
 const initialTransactions: FlaggedTransaction[] = [
@@ -216,7 +217,6 @@ export default function AMLDashboardPage() {
       icon: Clock3, 
       description: "Flagged cases awaiting analyst review.",
       breakdown: pendingReviewBreakdown,
-      // Removed global breakdownAction as individual actions are now in breakdown items
     },
     { title: "SARs Filed", value: sarsFiled.toString(), icon: FileText, description: "Suspicious Activity Reports submitted." },
     { title: "Closed (Resolved)", value: closedCases.toString(), icon: ShieldCheckIcon, description: "Cases reviewed and closed without SAR." },
@@ -296,7 +296,7 @@ export default function AMLDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Flagged Transactions Queue</CardTitle>
-          <CardDescription>Review and take action on suspicious transactions.</CardDescription>
+          <CardDescription>Review and take action on suspicious transactions. Displaying a subset here.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -311,7 +311,7 @@ export default function AMLDashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((txn) => (
+              {transactions.slice(0, 5).map((txn) => ( // Displaying only first 5 for brevity on main page
                 <TableRow key={txn.id}>
                   <TableCell className="font-medium">{txn.id}</TableCell>
                   <TableCell>{txn.date}</TableCell>
@@ -402,7 +402,17 @@ export default function AMLDashboardPage() {
             <p className="text-center text-muted-foreground py-4">No flagged transactions at the moment.</p>
           )}
         </CardContent>
+        <CardFooter className="justify-center">
+            <Link href="/aml/full-queue" passHref>
+              <Button variant="outline">
+                <ListChecks className="mr-2 h-4 w-4" />
+                View Full Transaction Queue
+              </Button>
+            </Link>
+        </CardFooter>
       </Card>
     </div>
   );
 }
+
+    
