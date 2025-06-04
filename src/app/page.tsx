@@ -22,6 +22,13 @@ const controlsBreakdown: MetricBreakdownItem[] = [
   { category: "Cybersecurity", value: 150 },
 ];
 
+const riskScoreCalculationBreakdown: MetricBreakdownItem[] = [
+  { category: "Formula", value: "Risk Score = Σ(Likelihood_i × Impact_i × Weight_i)" },
+  { category: "Likelihood (Lᵢ)", value: "Probability of risk event occurring (e.g., 1-5 scale)." },
+  { category: "Impact (Iᵢ)", value: "Severity of risk if it occurs (e.g., 1-5 scale)." },
+  { category: "Weight (Wᵢ)", value: "Relative importance of risk domain or item." },
+];
+
 const overviewMetrics: Metric[] = [
   { 
     title: "Identified Risks", 
@@ -41,7 +48,15 @@ const overviewMetrics: Metric[] = [
     description: "Total active compliance controls.",
     breakdown: controlsBreakdown,
   },
-  { title: "Organization Risk Score", value: "68%", change: "-3% last month", changeType: "positive", icon: BarChartHorizontalBig, description: "Overall calculated risk exposure." },
+  { 
+    title: "Organization Risk Score", 
+    value: "68%", 
+    change: "-3% last month", 
+    changeType: "positive", 
+    icon: BarChartHorizontalBig, 
+    description: "Overall calculated risk exposure.",
+    breakdown: riskScoreCalculationBreakdown,
+  },
   { title: "AML Hits", value: "15", change: "+2 this week", changeType: "negative", icon: FileWarning, description: "Suspicious transactions flagged." },
 ];
 
@@ -153,3 +168,4 @@ export default function OverviewPage() {
     </div>
   );
 }
+
