@@ -14,7 +14,12 @@ export interface Metric {
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
-  detailsUrl?: string; 
+  detailsUrl?: string;
+  breakdownAction?: { // New field for an action button in the breakdown panel
+    label: string;
+    onClick: () => void; // Ensure this can be passed from a client component
+    icon?: LucideIcon;
+  };
 }
 
 export interface ChartDataPoint {

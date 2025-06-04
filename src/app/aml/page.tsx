@@ -14,10 +14,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon, ArrowUpCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Eye, Loader2, FileText, DatabaseZap, AlertTriangle, BadgeCheck, BadgeX, Clock3, ShieldCheck as ShieldCheckIcon, LineChart as LineChartIcon, ArrowUpCircle, Send } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import type { ChartConfig } from '@/components/ui/chart';
+import type { MetricBreakdownItem } from '@/lib/types';
+
 
 const initialTransactions: FlaggedTransaction[] = [
   { id: 'txn_001', date: '2024-05-01', amount: 15000, currency: 'USD', sender: 'Acc00123', receiver: 'Acc99876', status: 'flagged', riskScore: 85, details: 'Large cash deposit followed by international transfer.', userProfile: 'New customer, high-risk jurisdiction.' },
@@ -73,21 +75,18 @@ export default function AMLDashboardPage() {
   const [aiSuggestions, setAiSuggestions] = useState<FlagAMLTransactionsOutput | null>(null);
   const { toast } = useToast();
 
-  // Form state for manual flagging
   const [manualTxnDetails, setManualTxnDetails] = useState('');
   const [manualUserProfile, setManualUserProfile] = useState('');
   const [isManualFlagging, setIsManualFlagging] = useState(false);
 
-  // State for new dashboard metrics
   const [totalProcessed, setTotalProcessed] = useState(125670);
-  const [amlHits, setAmlHits] = useState(235);
+  const [amlHits, setAmlHits] = useState(initialTransactions.filter(t => t.status === 'flagged' || t.status === 'sar_filed' || t.status === 'escalated').length);
   const [truePositives, setTruePositives] = useState(45);
   const [falsePositives, setFalsePositives] = useState(190);
-  const [pendingReview, setPendingReview] = useState(30);
+  const [pendingReview, setPendingReview] = useState(initialTransactions.filter(t => t.status === 'flagged' || t.status === 'escalated').length);
   const [sarsFiled, setSarsFiled] = useState(initialTransactions.filter(t => t.status === 'sar_filed').length);
   const [closedCases, setClosedCases] = useState(150);
 
-  // State for chart
   const [chartTimeView, setChartTimeView] = useState<ChartTimeView>('monthly');
   const [trendData, setTrendData] = useState(generateMockTrendData('monthly'));
 
@@ -96,15 +95,10 @@ export default function AMLDashboardPage() {
   }, [chartTimeView]);
 
   useEffect(() => {
-    // Update SARs filed count if transactions list changes (e.g. after table actions)
     setSarsFiled(transactions.filter(t => t.status === 'sar_filed').length);
-    // Mock updates for other metrics based on table changes for demonstration
-    setAmlHits(transactions.filter(t => t.status === 'flagged' || t.status === 'sar_filed' || t.status === 'escalated').length);
-    // This is a very rough estimation for demo. Real logic would be more complex.
-    setPendingReview(transactions.filter(t => t.status === 'flagged' || t.status === 'escalated').length);
-
+    setAmlHits(transactions.filter(t => ['flagged', 'sar_filed', 'escalated'].includes(t.status)).length);
+    setPendingReview(transactions.filter(t => ['flagged', 'escalated'].includes(t.status)).length);
   }, [transactions]);
-
 
   const handleReviewTransaction = async (transaction: FlaggedTransaction) => {
     setSelectedTransaction(transaction);
@@ -173,15 +167,40 @@ export default function AMLDashboardPage() {
     }
   };
   
+  const handleSendReminders = () => {
+    toast({
+      title: "Reminders Sent",
+      description: "Notifications have been sent to analysts with pending reviews. (Placeholder)",
+    });
+  };
+
+  const pendingReviewBreakdown: MetricBreakdownItem[] = [
+    { category: "Analyst Sarah P.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('1')).length + " cases" },
+    { category: "Analyst John D.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('2')).length + " cases" },
+    { category: "Analyst Emily K.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && !t.id.endsWith('1') && !t.id.endsWith('2')).length + " cases" },
+  ];
+
   const amlMetrics = useMemo(() => [
     { title: "Total Transactions Processed", value: totalProcessed.toLocaleString(), icon: DatabaseZap, description: "All transactions analyzed." },
     { title: "AML Hits", value: amlHits.toString(), icon: AlertTriangle, description: "Transactions flagged as potentially suspicious." },
     { title: "True Positives", value: truePositives.toString(), icon: BadgeCheck, description: "Confirmed suspicious activities." },
     { title: "False Positives", value: falsePositives.toString(), icon: BadgeX, description: "Incorrectly flagged transactions." },
-    { title: "Pending Review", value: pendingReview.toString(), icon: Clock3, description: "Flagged cases awaiting analyst review." },
+    { 
+      title: "Pending Review", 
+      value: pendingReview.toString(), 
+      icon: Clock3, 
+      description: "Flagged cases awaiting analyst review.",
+      breakdown: pendingReviewBreakdown,
+      breakdownAction: {
+        label: "Send Reminders",
+        onClick: handleSendReminders,
+        icon: Send,
+      }
+    },
     { title: "SARs Filed", value: sarsFiled.toString(), icon: FileText, description: "Suspicious Activity Reports submitted." },
     { title: "Closed (Resolved)", value: closedCases.toString(), icon: ShieldCheckIcon, description: "Cases reviewed and closed without SAR." },
-  ], [totalProcessed, amlHits, truePositives, falsePositives, pendingReview, sarsFiled, closedCases]);
+  ], [totalProcessed, amlHits, truePositives, falsePositives, pendingReview, sarsFiled, closedCases, pendingReviewBreakdown]);
+
 
   return (
     <div className="space-y-8">
@@ -219,8 +238,8 @@ export default function AMLDashboardPage() {
             </div>
             <OverviewChart
               data={trendData}
-              title="" // Title is handled above
-              description="" // Description is handled above
+              title="" 
+              description="" 
               xAxisKey="name"
               chartConfig={amlTrendChartConfig}
               chartType="line"
@@ -280,10 +299,10 @@ export default function AMLDashboardPage() {
                     <Badge variant={
                         txn.status === 'flagged' ? 'destructive' : 
                         txn.status === 'sar_filed' ? 'default' : 
-                        txn.status === 'escalated' ? 'default' : // Using default (primary color) for escalated
+                        txn.status === 'escalated' ? 'default' : 
                         'secondary'
                       }
-                      className={txn.status === 'escalated' ? 'border-primary text-primary-foreground' : ''} // Custom styling if needed, or rely on variant
+                      className={txn.status === 'escalated' ? 'border-primary text-primary-foreground' : ''} 
                     >
                       {txn.status.replace('_', ' ').toUpperCase()}
                     </Badge>
