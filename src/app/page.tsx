@@ -29,6 +29,12 @@ const riskScoreCalculationBreakdown: MetricBreakdownItem[] = [
   { category: "Weight (Wᵢ)", value: "Relative importance of risk domain or item." },
 ];
 
+const amlHitsBreakdown: MetricBreakdownItem[] = [
+  { category: "Country X (Sanctioned)", value: 5 },
+  { category: "Country Y (Sanctioned)", value: 7 },
+  { category: "Country Z (Watchlist)", value: 3 },
+];
+
 const overviewMetrics: Metric[] = [
   {
     title: "Identified Risks",
@@ -56,9 +62,17 @@ const overviewMetrics: Metric[] = [
     icon: BarChartHorizontalBig,
     description: "Overall calculated risk exposure.",
     breakdown: riskScoreCalculationBreakdown,
-    detailsUrl: "/risk-score-details", // Added details URL
+    detailsUrl: "/risk-score-details", 
   },
-  { title: "AML Hits", value: "15", change: "+2 this week", changeType: "negative", icon: FileWarning, description: "Suspicious transactions flagged." },
+  { 
+    title: "AML Hits", 
+    value: "15", 
+    change: "+2 this week", 
+    changeType: "negative", 
+    icon: FileWarning, 
+    description: "Suspicious transactions flagged.",
+    breakdown: amlHitsBreakdown,
+  },
 ];
 
 const riskTrendData: ChartDataPoint[] = [
