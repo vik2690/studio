@@ -4,6 +4,12 @@ import type { LucideIcon } from 'lucide-react';
 export interface MetricBreakdownItem {
   category: string;
   value: string | number;
+  action?: { // New field for an action on individual breakdown items
+    label: string;
+    onClick: () => void;
+    icon?: LucideIcon;
+    disabled?: boolean;
+  };
 }
 
 export interface Metric {
@@ -15,9 +21,9 @@ export interface Metric {
   description?: string;
   breakdown?: MetricBreakdownItem[];
   detailsUrl?: string;
-  breakdownAction?: { // New field for an action button in the breakdown panel
+  breakdownAction?: { // Global action for the card's breakdown panel
     label: string;
-    onClick: () => void; // Ensure this can be passed from a client component
+    onClick: () => void; 
     icon?: LucideIcon;
   };
 }
@@ -109,4 +115,3 @@ export interface RiskIssueItem {
   regulatoryImplications?: string;
   suggestedControls?: string[];
 }
-

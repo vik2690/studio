@@ -167,18 +167,43 @@ export default function AMLDashboardPage() {
     }
   };
   
-  const handleSendReminders = () => {
+  const handleSendIndividualReminder = (analystName: string) => {
     toast({
-      title: "Reminders Sent",
-      description: "Notifications have been sent to analysts with pending reviews. (Placeholder)",
+      title: "Reminder Sent",
+      description: `Reminder sent to ${analystName} for pending reviews. (Placeholder)`,
     });
   };
 
-  const pendingReviewBreakdown: MetricBreakdownItem[] = [
-    { category: "Analyst Sarah P.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('1')).length + " cases" },
-    { category: "Analyst John D.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('2')).length + " cases" },
-    { category: "Analyst Emily K.", value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && !t.id.endsWith('1') && !t.id.endsWith('2')).length + " cases" },
-  ];
+  const pendingReviewBreakdown: MetricBreakdownItem[] = useMemo(() => [
+    { 
+      category: "Sarah P.", 
+      value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('1')).length + " cases",
+      action: {
+        label: "Send Reminder",
+        onClick: () => handleSendIndividualReminder("Sarah P."),
+        icon: Send,
+      }
+    },
+    { 
+      category: "John D.", 
+      value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && t.id.endsWith('2')).length + " cases",
+      action: {
+        label: "Send Reminder",
+        onClick: () => handleSendIndividualReminder("John D."),
+        icon: Send,
+      }
+    },
+    { 
+      category: "Emily K.", 
+      value: transactions.filter(t => (t.status === 'flagged' || t.status === 'escalated') && !t.id.endsWith('1') && !t.id.endsWith('2')).length + " cases",
+      action: {
+        label: "Send Reminder",
+        onClick: () => handleSendIndividualReminder("Emily K."),
+        icon: Send,
+      }
+    },
+  ], [transactions]);
+
 
   const amlMetrics = useMemo(() => [
     { title: "Total Transactions Processed", value: totalProcessed.toLocaleString(), icon: DatabaseZap, description: "All transactions analyzed." },
@@ -191,11 +216,7 @@ export default function AMLDashboardPage() {
       icon: Clock3, 
       description: "Flagged cases awaiting analyst review.",
       breakdown: pendingReviewBreakdown,
-      breakdownAction: {
-        label: "Send Reminders",
-        onClick: handleSendReminders,
-        icon: Send,
-      }
+      // Removed global breakdownAction as individual actions are now in breakdown items
     },
     { title: "SARs Filed", value: sarsFiled.toString(), icon: FileText, description: "Suspicious Activity Reports submitted." },
     { title: "Closed (Resolved)", value: closedCases.toString(), icon: ShieldCheckIcon, description: "Cases reviewed and closed without SAR." },
@@ -385,4 +406,3 @@ export default function AMLDashboardPage() {
     </div>
   );
 }
-

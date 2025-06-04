@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import type { Metric } from '@/lib/types';
+import type { Metric, MetricBreakdownItem } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,9 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
   const [showBreakdown, setShowBreakdown] = useState(false);
 
   const cardMinHeight = "170px"; 
+
+  // Determine if any breakdown item has an action. If so, we won't show the global breakdownAction button.
+  const hasIndividualItemActions = breakdown?.some(item => !!item.action);
 
   return (
     <Card
@@ -90,16 +93,30 @@ export function MetricCard({ title, value, change, changeType, icon: Icon, descr
           )}>
             {breakdown && breakdown.length > 0 && (
               <ul className="space-y-1 text-sm flex-grow">
-                {breakdown.map((item) => (
-                  <li key={item.category} className="flex justify-between items-start py-0.5">
-                    <span className="text-muted-foreground whitespace-nowrap mr-2">{item.category}:</span>
-                    <span className="font-semibold text-card-foreground text-right">{item.value}</span>
+                {breakdown.map((item: MetricBreakdownItem) => (
+                  <li key={item.category} className="flex justify-between items-center py-0.5">
+                    <div className="flex-grow">
+                      <span className="text-muted-foreground whitespace-nowrap mr-2">{item.category}:</span>
+                      <span className="font-semibold text-card-foreground text-right">{item.value}</span>
+                    </div>
+                    {item.action && item.action.icon && (
+                       <Button 
+                         onClick={item.action.onClick} 
+                         size="sm" 
+                         variant="ghost" 
+                         className="ml-2 px-1.5 py-1 h-auto" // Adjusted padding for icon-only
+                         title={item.action.label} // Tooltip for icon button
+                         disabled={item.action.disabled}
+                       >
+                         <item.action.icon className="h-4 w-4" />
+                       </Button>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
-            {showBreakdown && breakdownAction && (
-              <div className={cn("mt-auto", breakdown && breakdown.length > 0 ? "pt-2" : "pt-0 flex-grow flex items-end")}> {/* Adjust spacing if no list */}
+            {showBreakdown && breakdownAction && !hasIndividualItemActions && (
+              <div className={cn("mt-auto", breakdown && breakdown.length > 0 ? "pt-2" : "pt-0 flex-grow flex items-end")}>
                 <Button onClick={breakdownAction.onClick} size="sm" className="w-full">
                   {breakdownAction.icon && <breakdownAction.icon className="mr-2 h-4 w-4" />}
                   {breakdownAction.label}
