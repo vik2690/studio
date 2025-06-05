@@ -15,12 +15,22 @@ const detailedRiskDataInput = [
   { riskId: 'R5', description: 'IT system failure', likelihood: 5, impact: 4, controlEffectiveness: 0.5 },
 ];
 
+const calculateResidualRiskScore = (item: typeof detailedRiskDataInput[0]) => {
+  return item.likelihood * item.impact * (1 - item.controlEffectiveness);
+};
+
+const totalResidualRiskScore = detailedRiskDataInput.reduce((sum, item) => {
+  return sum + calculateResidualRiskScore(item);
+}, 0);
+
 const processedDetailedRiskData = detailedRiskDataInput.map(item => {
-  const scoreValue = item.likelihood * item.impact * (1 - item.controlEffectiveness);
+  const scoreValue = calculateResidualRiskScore(item);
+  const percentage = totalResidualRiskScore > 0 ? (scoreValue / totalResidualRiskScore) * 100 : 0;
   return {
     ...item,
     residualRiskScoreFormula: `${item.likelihood} × ${item.impact} × (1 – ${item.controlEffectiveness.toFixed(1)})`,
     residualRiskScoreValue: scoreValue.toFixed(1),
+    residualRiskScorePercentage: percentage.toFixed(1) + '%',
   };
 });
 
@@ -59,6 +69,7 @@ export default function RiskScoreDetailsPage() {
                 <TableHead className="text-right">Impact (1–5)</TableHead>
                 <TableHead className="text-right">Control Effectiveness (0–1)</TableHead>
                 <TableHead className="text-right">Residual Risk Score</TableHead>
+                <TableHead className="text-right">Residual Risk Score (%)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -73,6 +84,7 @@ export default function RiskScoreDetailsPage() {
                     <span className="font-mono text-xs text-muted-foreground block">{item.residualRiskScoreFormula} =</span>
                     {item.residualRiskScoreValue}
                   </TableCell>
+                  <TableCell className="text-right">{item.residualRiskScorePercentage}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -84,6 +96,7 @@ export default function RiskScoreDetailsPage() {
               <li><strong>Impact:</strong> Potential severity if the risk materializes (1=Negligible, 5=Catastrophic).</li>
               <li><strong>Control Effectiveness:</strong> Assessed effectiveness of existing controls in mitigating the risk (0=No effective controls, 1=Fully effective controls).</li>
               <li>The "Organization Risk Score" (e.g., 68%) seen on the overview dashboard is a high-level aggregation. This page provides a detailed look at how individual residual risks might be calculated and contribute to the overall profile.</li>
+              <li><strong>Residual Risk Score (%):</strong> Each risk's score as a percentage of the total residual risk from this table.</li>
             </ul>
           </div>
         </CardContent>
