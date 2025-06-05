@@ -23,10 +23,8 @@ const controlsBreakdown: MetricBreakdownItem[] = [
 ];
 
 const riskScoreCalculationBreakdown: MetricBreakdownItem[] = [
-  { category: "Formula", value: "Risk Score = Σ(Likelihoodᵢ × Impactᵢ × Weightᵢ)" },
-  { category: "Likelihood (Lᵢ)", value: "Probability of risk event occurring (e.g., 1-5 scale)." },
-  { category: "Impact (Iᵢ)", value: "Severity of risk if it occurs (e.g., 1-5 scale)." },
-  { category: "Weight (Wᵢ)", value: "Relative importance of risk domain or item." },
+  { category: "Formula Hint", value: "Overall score aggregates various risk factors." },
+  { category: "Detailed Calculation:", value: "See 'View Details' for specific examples of residual risk." },
 ];
 
 const amlHitsBreakdown: MetricBreakdownItem[] = [
@@ -63,7 +61,7 @@ const overviewMetrics: Metric[] = [
     icon: BarChartHorizontalBig,
     description: "Overall calculated risk exposure.",
     breakdown: riskScoreCalculationBreakdown,
-    detailsUrl: "/risk-score-details", 
+    breakdownDetailsUrl: "/risk-score-details",
   },
   { 
     title: "AML Hits", 
