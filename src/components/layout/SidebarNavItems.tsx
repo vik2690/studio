@@ -12,7 +12,7 @@ const navItems = [
   { href: "/regulations", label: "Regulations Hub", icon: BookOpenText },
   { href: "/risk-issues", label: "Risk & Issues Hub", icon: AlertTriangle },
   { href: "/aml", label: "AML Hub", icon: ShieldAlert },
-  { href: "/compliance", label: "Compliance Hub", icon: FileText },
+  { href: "/compliance", label: "Control Hub", icon: FileText },
   { href: "/operations-center", label: "Operations Center", icon: Activity },
   { href: "/reporting", label: "Analytics and Reporting Hub", icon: FileSpreadsheet },
   { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
