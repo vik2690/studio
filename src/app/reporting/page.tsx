@@ -105,7 +105,6 @@ const regulatoryBodies = [
   { value: 'Other', label: 'Other/Not Specified' },
 ];
 
-// Chart data and configurations moved from Overview page
 const riskTrendData: ChartDataPoint[] = [
   { name: "Jan", value: 120 },
   { name: "Feb", value: 135 },
@@ -188,7 +187,13 @@ export default function ReportingHubPage() {
       title: "Download Initiated",
       description: `Preparing report "${reportType}" (ID: ${reportId}) for download. (Placeholder)`,
     });
-    // Actual download logic would go here
+  };
+
+  const handleDownloadChartReport = (reportName: string) => {
+    toast({
+      title: "Download Initiated",
+      description: `Preparing to download report for "${reportName}". (Placeholder)`,
+    });
   };
 
   const renderChangeValue = (value: string | string[] | undefined) => {
@@ -207,7 +212,6 @@ export default function ReportingHubPage() {
       title: "Export Initiated",
       description: `Report export started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
     });
-    // Actual export logic would go here
   };
 
   const handleManualSummary = () => {
@@ -219,7 +223,6 @@ export default function ReportingHubPage() {
       title: "Summary Extraction Initiated",
       description: `Summary extraction started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
     });
-    // Actual summary logic would go here
   };
 
   return (
@@ -236,36 +239,95 @@ export default function ReportingHubPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
-            <OverviewChart
-              data={riskTrendData}
-              title="Risk Trend Analysis"
-              description="Monthly trend of identified risks."
-              xAxisKey="name"
-              chartConfig={riskTrendChartConfig}
-            />
-            <PieChartCard
-              data={riskDistributionData}
-              title="Risk Distribution by Severity"
-              description="Breakdown of risks by their severity level."
-              dataKey="value"
-              nameKey="name"
-              chartConfig={riskDistributionChartConfig}
-            />
-            <OverviewChart
-              data={controlEffectivenessData}
-              title="Control Effectiveness"
-              description="Quarterly control effectiveness score."
-              xAxisKey="name"
-              chartConfig={controlEffectivenessChartConfig}
-            />
-            <PieChartCard
-              data={controlStatusData}
-              title="Control Implementation Status"
-              description="Current status of applied controls."
-              dataKey="value"
-              nameKey="name"
-              chartConfig={controlStatusChartConfig}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>Risk Trend Analysis</CardTitle>
+                <CardDescription>Monthly trend of identified risks.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <OverviewChart
+                  data={riskTrendData}
+                  title=""
+                  description=""
+                  xAxisKey="name"
+                  chartConfig={riskTrendChartConfig}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => handleDownloadChartReport('Risk Trend Analysis')}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Risk Distribution by Severity</CardTitle>
+                <CardDescription>Breakdown of risks by their severity level.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PieChartCard
+                  data={riskDistributionData}
+                  title=""
+                  description=""
+                  dataKey="value"
+                  nameKey="name"
+                  chartConfig={riskDistributionChartConfig}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => handleDownloadChartReport('Risk Distribution by Severity')}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Control Effectiveness</CardTitle>
+                <CardDescription>Quarterly control effectiveness score.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <OverviewChart
+                  data={controlEffectivenessData}
+                  title=""
+                  description=""
+                  xAxisKey="name"
+                  chartConfig={controlEffectivenessChartConfig}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => handleDownloadChartReport('Control Effectiveness')}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Control Implementation Status</CardTitle>
+                <CardDescription>Current status of applied controls.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PieChartCard
+                  data={controlStatusData}
+                  title=""
+                  description=""
+                  dataKey="value"
+                  nameKey="name"
+                  chartConfig={controlStatusChartConfig}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => handleDownloadChartReport('Control Implementation Status')}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </CardContent>
       </Card>
@@ -464,3 +526,5 @@ export default function ReportingHubPage() {
   );
 }
 
+
+    
