@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react'; 
@@ -278,149 +277,6 @@ export default function ComplianceHubPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <ShieldCheck className="mr-2 h-6 w-6 text-primary" />
-            Analyze Compliance Gaps & Suggest Controls
-          </CardTitle>
-          <CardDescription>
-            Provide your risk gap analysis report (which outlines identified risks/gaps and impact areas) and current policies to receive AI-powered control suggestions.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="riskGapReport" className="text-base font-semibold">Risk Gap Analysis Report</Label>
-              <Textarea
-                id="riskGapReport"
-                value={riskGapReport}
-                onChange={(e) => setRiskGapReport(e.target.value)}
-                placeholder="Paste the detailed report on compliance shortfalls and weaknesses..."
-                className="min-h-[150px] mt-1 text-sm"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label htmlFor="currentPolicies" className="text-base font-semibold">Current Policies</Label>
-              <Textarea
-                id="currentPolicies"
-                value={currentPolicies}
-                onChange={(e) => setCurrentPolicies(e.target.value)}
-                placeholder="Paste the text of your current relevant policies..."
-                className="min-h-[150px] mt-1 text-sm"
-                disabled={isLoading}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Lightbulb className="mr-2 h-4 w-4" />
-                  Get Control Suggestions
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-
-      {aiResult && suggestedControls.length > 0 && (
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileSearch className="mr-2 h-6 w-6 text-primary" />
-              AI-Generated Control Suggestions & Analysis
-            </CardTitle>
-            <Alert>
-              <AlertTitle className="font-semibold">Overall Justification from AI:</AlertTitle>
-              <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                {aiResult.justification}
-              </AlertDescription>
-            </Alert>
-            <CardDescription className="pt-2">
-              The table below lists AI-suggested controls based on your input. Each suggestion includes an analysis against your existing controls library.
-              Identified risks and impact areas are derived from the "Risk Gap Analysis Report" you provided.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="max-h-[600px] w-full overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[250px]">AI Suggested Control</TableHead>
-                    <TableHead className="min-w-[300px]">Analysis of Existing Controls</TableHead>
-                    <TableHead>Validation Status</TableHead>
-                    <TableHead className="min-w-[250px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {suggestedControls.map(control => (
-                    <TableRow key={control.id}>
-                      <TableCell className="text-sm align-top">{control.suggestion}</TableCell>
-                      <TableCell className="align-top">
-                        {control.similarExistingControls && control.similarExistingControls.length > 0 ? (
-                          <div className="space-y-2">
-                            {control.similarExistingControls.map(ec => (
-                              <div key={ec.id} className="text-xs p-2 rounded-md border bg-background/70 shadow-sm">
-                                <p><strong>ID:</strong> {ec.id} - <strong>Name:</strong> {ec.controlName}</p>
-                                <p><strong>Area:</strong> {ec.owner} ({ec.controlCategory})</p>
-                                <p><strong>Status:</strong> <Badge variant="outline" className="text-xs h-auto py-0.5 px-1.5">{ec.status}</Badge></p>
-                                <p className="mt-0.5"><em>Mitigates: {ec.riskMitigated}</em></p>
-                                <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-1 text-primary hover:text-primary/80" onClick={() => handleViewControlDetails(ec)}>
-                                  View Full Details <Eye className="ml-1 h-3 w-3" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <Badge variant="outline" className="text-xs bg-blue-50 border-blue-400 text-blue-700 dark:bg-blue-700/20 dark:border-blue-600 dark:text-blue-300 whitespace-normal">
-                            <Info className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
-                            No highly similar existing controls found by preliminary check. Review manually.
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        <Badge variant={
-                          control.status === 'approved' ? 'default' :
-                          control.status === 'rejected' ? 'destructive' :
-                          control.status === 'implemented' ? 'secondary' :
-                          'outline'
-                        }
-                        className={
-                          control.status === 'approved' ? 'bg-green-500/20 text-green-700 dark:bg-green-700/30 dark:text-green-300 border-green-500/50' :
-                          control.status === 'implemented' ? 'bg-blue-500/20 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300 border-blue-500/50' : ''
-                        }
-                        >
-                          {control.status.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="align-top space-x-2 space-y-2">
-                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
-                          <ThumbsUp className="mr-1 h-4 w-4" /> Approve
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
-                          <ThumbsDown className="mr-1 h-4 w-4" /> Reject
-                        </Button>
-                         <Button size="sm" variant="default" onClick={() => handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
-                          Mark Implemented
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
             <Library className="mr-2 h-6 w-6 text-primary" />
             Existing Controls Library
           </CardTitle>
@@ -519,6 +375,149 @@ export default function ComplianceHubPage() {
         </CardContent>
       </Card>
 
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <ShieldCheck className="mr-2 h-6 w-6 text-primary" />
+            Analyze Compliance Gaps &amp; Suggest Controls
+          </CardTitle>
+          <CardDescription>
+            Provide your risk gap analysis report (which outlines identified risks/gaps and impact areas) and current policies to receive AI-powered control suggestions.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="riskGapReport" className="text-base font-semibold">Risk Gap Analysis Report</Label>
+              <Textarea
+                id="riskGapReport"
+                value={riskGapReport}
+                onChange={(e) => setRiskGapReport(e.target.value)}
+                placeholder="Paste the detailed report on compliance shortfalls and weaknesses..."
+                className="min-h-[150px] mt-1 text-sm"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="currentPolicies" className="text-base font-semibold">Current Policies</Label>
+              <Textarea
+                id="currentPolicies"
+                value={currentPolicies}
+                onChange={(e) => setCurrentPolicies(e.target.value)}
+                placeholder="Paste the text of your current relevant policies..."
+                className="min-h-[150px] mt-1 text-sm"
+                disabled={isLoading}
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Lightbulb className="mr-2 h-4 w-4" />
+                  Get Control Suggestions
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+
+      {aiResult && suggestedControls.length > 0 && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileSearch className="mr-2 h-6 w-6 text-primary" />
+              AI-Generated Control Suggestions &amp; Analysis
+            </CardTitle>
+            <Alert>
+              <AlertTitle className="font-semibold">Overall Justification from AI:</AlertTitle>
+              <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                {aiResult.justification}
+              </AlertDescription>
+            </Alert>
+            <CardDescription className="pt-2">
+              The table below lists AI-suggested controls based on your input. Each suggestion includes an analysis against your existing controls library.
+              Identified risks and impact areas are derived from the "Risk Gap Analysis Report" you provided.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="max-h-[600px] w-full overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[250px]">AI Suggested Control</TableHead>
+                    <TableHead className="min-w-[300px]">Analysis of Existing Controls</TableHead>
+                    <TableHead>Validation Status</TableHead>
+                    <TableHead className="min-w-[250px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {suggestedControls.map(control => (
+                    <TableRow key={control.id}>
+                      <TableCell className="text-sm align-top">{control.suggestion}</TableCell>
+                      <TableCell className="align-top">
+                        {control.similarExistingControls && control.similarExistingControls.length > 0 ? (
+                          <div className="space-y-2">
+                            {control.similarExistingControls.map(ec => (
+                              <div key={ec.id} className="text-xs p-2 rounded-md border bg-background/70 shadow-sm">
+                                <p><strong>ID:</strong> {ec.id} - <strong>Name:</strong> {ec.controlName}</p>
+                                <p><strong>Area:</strong> {ec.owner} ({ec.controlCategory})</p>
+                                <p><strong>Status:</strong> <Badge variant="outline" className="text-xs h-auto py-0.5 px-1.5">{ec.status}</Badge></p>
+                                <p className="mt-0.5"><em>Mitigates: {ec.riskMitigated}</em></p>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-1 text-primary hover:text-primary/80" onClick={() => handleViewControlDetails(ec)}>
+                                  View Full Details <Eye className="ml-1 h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-blue-50 border-blue-400 text-blue-700 dark:bg-blue-700/20 dark:border-blue-600 dark:text-blue-300 whitespace-normal">
+                            <Info className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
+                            No highly similar existing controls found by preliminary check. Review manually.
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="align-top">
+                        <Badge variant={
+                          control.status === 'approved' ? 'default' :
+                          control.status === 'rejected' ? 'destructive' :
+                          control.status === 'implemented' ? 'secondary' :
+                          'outline'
+                        }
+                        className={
+                          control.status === 'approved' ? 'bg-green-500/20 text-green-700 dark:bg-green-700/30 dark:text-green-300 border-green-500/50' :
+                          control.status === 'implemented' ? 'bg-blue-500/20 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300 border-blue-500/50' : ''
+                        }
+                        >
+                          {control.status.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="align-top space-x-2 space-y-2">
+                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
+                          <ThumbsUp className="mr-1 h-4 w-4" /> Approve
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
+                          <ThumbsDown className="mr-1 h-4 w-4" /> Reject
+                        </Button>
+                         <Button size="sm" variant="default" onClick={() => handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
+                          Mark Implemented
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+
       {selectedControlDetail && (
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
           <DialogContent className="sm:max-w-xl">
@@ -611,4 +610,3 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
-
