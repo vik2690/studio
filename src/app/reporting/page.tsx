@@ -105,6 +105,41 @@ const regulatoryBodies = [
   { value: 'Other', label: 'Other/Not Specified' },
 ];
 
+const reportOptionsByBody: Record<string, { value: string; label: string }[]> = {
+  ESMA: [
+    { value: 'mifid_ii_q_transparency', label: 'MiFID II Quarterly Transparency Report' },
+    { value: 'emr_annual_clearing', label: 'EMIR Annual Clearing Obligation Report' },
+    { value: 'sfdr_entity_level', label: 'SFDR Entity-Level Disclosure Report' },
+  ],
+  FinCEN: [
+    { value: 'sar_monthly_summary', label: 'Monthly SAR Activity Summary' },
+    { value: 'ctr_batch_filing', label: 'CTR Batch Filing Report' },
+    { value: 'fbar_annual_overview', label: 'FBAR Annual Filing Overview' },
+  ],
+  EC: [
+    { value: 'gdpr_dpa_annual', label: 'GDPR Data Protection Authority Annual Report' },
+    { value: 'aml_directive_transposition', label: 'AML Directive Transposition Status Report' },
+  ],
+  SEC: [
+    { value: 'form_10k_annual', label: 'Form 10-K Annual Report Summary' },
+    { value: 'form_8k_current', label: 'Form 8-K Current Event Report Tracker' },
+    { value: 'adv_annual_update', label: 'Form ADV Annual Update Summary' },
+  ],
+  'Internal Audit': [
+    { value: 'q_audit_findings', label: 'Quarterly Internal Audit Findings' },
+    { value: 'annual_risk_assessment_summary', label: 'Annual Risk Assessment Summary' },
+  ],
+  'SOX Compliance Office': [
+    { value: 'itgc_effectiveness_report', label: 'ITGC Effectiveness Report' },
+    { value: 'management_assertion_report', label: 'Management Assertion Report (SOX 302/404)'},
+  ],
+  'DPO Office': [
+    { value: 'dpia_register_summary', label: 'DPIA Register Summary Report' },
+    { value: 'data_subject_request_log', label: 'Data Subject Request Log & Metrics'},
+  ],
+};
+
+
 const riskTrendData: ChartDataPoint[] = [
   { name: "Jan", value: 120 },
   { name: "Feb", value: 135 },
@@ -166,8 +201,19 @@ export default function ReportingHubPage() {
   const [reportItems, setReportItems] = useState<ReportItem[]>(initialReportItems);
   const [selectedReportForComparison, setSelectedReportForComparison] = useState<ReportItem | null>(null);
   const [isComparisonDialogOpen, setIsComparisonDialogOpen] = useState(false);
-  const [manualRegulationInput, setManualRegulationInput] = useState('');
+  const [manualRegulationInput, setManualRegulationInput] = useState<string | undefined>(undefined);
+  const [selectedManualReport, setSelectedManualReport] = useState<string | undefined>(undefined);
+  const [availableReports, setAvailableReports] = useState<{ value: string; label: string }[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (manualRegulationInput && reportOptionsByBody[manualRegulationInput]) {
+      setAvailableReports(reportOptionsByBody[manualRegulationInput]);
+    } else {
+      setAvailableReports([]);
+    }
+    setSelectedManualReport(undefined); // Reset selected report when body changes
+  }, [manualRegulationInput]);
 
   const handlePreviewComparison = (report: ReportItem) => {
     if (!report.versionHistory || report.versionHistory.length === 0) {
@@ -204,24 +250,37 @@ export default function ReportingHubPage() {
   };
 
   const handleManualExport = () => {
-    if (!manualRegulationInput.trim()) {
+    if (!manualRegulationInput) {
       toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
       return;
     }
+    if (!selectedManualReport) {
+      toast({ title: "Input Required", description: "Please select a specific report to export.", variant: "destructive" });
+      return;
+    }
+    const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
+    const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
     toast({
       title: "Export Initiated",
-      description: `Report export started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
+      description: `Report export started for "${reportLabel}" under ${regBodyLabel}. (Placeholder)`,
     });
   };
 
   const handleManualSummary = () => {
-    if (!manualRegulationInput.trim()) {
+    if (!manualRegulationInput) {
       toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
       return;
     }
+    const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
+    let summaryFor = regBodyLabel;
+    if (selectedManualReport) {
+      const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
+      summaryFor = `"${reportLabel}" under ${regBodyLabel}`;
+    }
+    
     toast({
       title: "Summary Extraction Initiated",
-      description: `Summary extraction started for regulatory body: "${manualRegulationInput}". (Placeholder)`,
+      description: `Summary extraction started for ${summaryFor}. (Placeholder)`,
     });
   };
 
@@ -229,7 +288,7 @@ export default function ReportingHubPage() {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight flex items-center">
         <FileSpreadsheet className="mr-3 h-8 w-8 text-primary" />
-        Reporting Hub
+        Analytics and Reporting Hub
       </h1>
       
       <Card className="shadow-lg">
@@ -424,11 +483,11 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Manually export a report or extract a summary for a selected regulatory body.
+            Select a regulatory body and then a specific report to export or extract a summary.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
             <Label htmlFor="manualRegulationInput" className="font-semibold">Regulatory Body</Label>
             <Select value={manualRegulationInput} onValueChange={setManualRegulationInput}>
               <SelectTrigger id="manualRegulationInput" className="mt-1">
@@ -441,15 +500,37 @@ export default function ReportingHubPage() {
               </SelectContent>
             </Select>
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="manualReportSelect" className="font-semibold">Report Selection</Label>
+            <Select 
+              value={selectedManualReport} 
+              onValueChange={setSelectedManualReport} 
+              disabled={!manualRegulationInput || availableReports.length === 0}
+            >
+              <SelectTrigger id="manualReportSelect" className="mt-1">
+                <SelectValue placeholder={!manualRegulationInput ? "First select a regulatory body" : "Select a specific report"} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableReports.length > 0 ? (
+                  availableReports.map(report => (
+                    <SelectItem key={report.value} value={report.value}>{report.label}</SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no_reports" disabled>No reports available for selected body</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
-        <CardFooter className="gap-2">
-          <Button onClick={handleManualExport}>
+        <CardFooter className="gap-2 flex-wrap">
+          <Button onClick={handleManualExport} disabled={!selectedManualReport}>
             <FileOutput className="mr-2 h-4 w-4" />
-            Export Report for Body
+            Export Selected Report
           </Button>
-          <Button onClick={handleManualSummary} variant="outline">
+          <Button onClick={handleManualSummary} variant="outline" disabled={!manualRegulationInput}>
             <FileSearch className="mr-2 h-4 w-4" />
-            Extract Summary for Body
+            Extract Summary
           </Button>
         </CardFooter>
       </Card>
@@ -525,6 +606,3 @@ export default function ReportingHubPage() {
     </div>
   );
 }
-
-
-    
