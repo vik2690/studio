@@ -12,6 +12,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch } from 'lucide-react';
 import Link from 'next/link';
@@ -167,7 +169,6 @@ const reportCitationsByReportValue: Record<string, { value: string; label: strin
     { value: 'fincen_form_112', label: 'FinCEN Form 112 (CTR Form Instructions)' },
     { value: 'ctr_aggregation_rules', label: 'CTR Aggregation Rules' },
   ],
-  // Placeholder for other reports - expand as needed
   form_10k_annual: [
     {value: 'sec_item_1a', label: 'SEC Form 10-K Item 1A (Risk Factors)'},
     {value: 'sec_item_7', label: 'SEC Form 10-K Item 7 (MD&A)'},
@@ -249,27 +250,45 @@ export default function ReportingHubPage() {
   const [selectedManualCitation, setSelectedManualCitation] = useState<string | undefined>(undefined);
   const [availableCitations, setAvailableCitations] = useState<{ value: string; label: string }[]>([]);
 
+  const [isManualCitationEntry, setIsManualCitationEntry] = useState(false);
+  const [manualCitationDetailsText, setManualCitationDetailsText] = useState('');
+  const MAX_MANUAL_CITATION_LENGTH = 300;
+
+
   const { toast } = useToast();
 
   useEffect(() => {
-    if (manualRegulationInput && reportOptionsByBody[manualRegulationInput]) {
+    if (!isManualCitationEntry && manualRegulationInput && reportOptionsByBody[manualRegulationInput]) {
       setAvailableReports(reportOptionsByBody[manualRegulationInput]);
-    } else {
+    } else if (isManualCitationEntry) {
       setAvailableReports([]);
     }
     setSelectedManualReport(undefined);
-    setAvailableCitations([]);
-    setSelectedManualCitation(undefined);
-  }, [manualRegulationInput]);
+  }, [manualRegulationInput, isManualCitationEntry]);
 
   useEffect(() => {
-    if (selectedManualReport && reportCitationsByReportValue[selectedManualReport]) {
+    if (!isManualCitationEntry && selectedManualReport && reportCitationsByReportValue[selectedManualReport]) {
       setAvailableCitations(reportCitationsByReportValue[selectedManualReport]);
-    } else {
+    } else if (isManualCitationEntry) {
       setAvailableCitations([]);
     }
     setSelectedManualCitation(undefined);
-  }, [selectedManualReport]);
+  }, [selectedManualReport, isManualCitationEntry]);
+
+  const handleManualCitationCheckboxChange = (checked: boolean) => {
+    setIsManualCitationEntry(checked);
+    if (checked) {
+      // Clear dropdown selections when switching to manual entry
+      setManualRegulationInput(undefined);
+      setSelectedManualReport(undefined);
+      setSelectedManualCitation(undefined);
+      setAvailableReports([]);
+      setAvailableCitations([]);
+    } else {
+      // Clear manual text when switching away from manual entry
+      setManualCitationDetailsText('');
+    }
+  };
 
   const handlePreviewComparison = (report: ReportItem) => {
     if (!report.versionHistory || report.versionHistory.length === 0) {
@@ -306,48 +325,63 @@ export default function ReportingHubPage() {
   };
 
   const handleManualExport = () => {
-    if (!manualRegulationInput) {
-      toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
-      return;
+    let exportContext = "";
+    if (isManualCitationEntry) {
+      if (!manualCitationDetailsText.trim()) {
+        toast({ title: "Input Required", description: "Please enter manual citation details.", variant: "destructive"});
+        return;
+      }
+      exportContext = `with manual citation details: "${manualCitationDetailsText.substring(0,50)}..."`;
+    } else {
+      if (!manualRegulationInput) {
+        toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
+        return;
+      }
+      if (!selectedManualReport) {
+        toast({ title: "Input Required", description: "Please select a specific report to export.", variant: "destructive" });
+        return;
+      }
+      const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
+      const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
+      exportContext = `for "${reportLabel}" under ${regBodyLabel}`;
+      if (selectedManualCitation) {
+          const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
+          exportContext += ` (Citation: ${citationLabel})`;
+      }
     }
-    if (!selectedManualReport) {
-      toast({ title: "Input Required", description: "Please select a specific report to export.", variant: "destructive" });
-      return;
-    }
-    const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
-    const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
-    let citationContext = "";
-    if (selectedManualCitation) {
-        const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
-        citationContext = ` (Citation: ${citationLabel})`;
-    }
-
     toast({
       title: "Export Initiated",
-      description: `Report export started for "${reportLabel}" under ${regBodyLabel}${citationContext}. (Placeholder)`,
+      description: `Report export started ${exportContext}. (Placeholder)`,
     });
   };
 
   const handleManualSummary = () => {
-    if (!manualRegulationInput) {
-      toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
-      return;
+    let summaryContext = "";
+     if (isManualCitationEntry) {
+      if (!manualCitationDetailsText.trim()) {
+        toast({ title: "Input Required", description: "Please enter manual citation details for summary.", variant: "destructive"});
+        return;
+      }
+      summaryContext = `based on manual citation details: "${manualCitationDetailsText.substring(0,50)}..."`;
+    } else {
+      if (!manualRegulationInput) {
+        toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
+        return;
+      }
+      const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
+      summaryContext = `for ${regBodyLabel}`;
+      if (selectedManualReport) {
+        const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
+        summaryContext = `for "${reportLabel}" under ${regBodyLabel}`;
+      }
+      if (selectedManualCitation) {
+          const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
+          summaryContext += ` (focusing on citation: ${citationLabel})`;
+      }
     }
-    const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
-    let summaryFor = regBodyLabel;
-    if (selectedManualReport) {
-      const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
-      summaryFor = `"${reportLabel}" under ${regBodyLabel}`;
-    }
-     let citationContext = "";
-    if (selectedManualCitation) {
-        const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
-        citationContext = ` (focusing on citation: ${citationLabel})`;
-    }
-    
     toast({
       title: "Summary Extraction Initiated",
-      description: `Summary extraction started for ${summaryFor}${citationContext}. (Placeholder)`,
+      description: `Summary extraction started ${summaryContext}. (Placeholder)`,
     });
   };
 
@@ -550,13 +584,17 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Select a regulatory body, report, and citation to export or extract a summary.
+            Configure and generate reports or summaries based on specific criteria.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="manualRegulationInput" className="font-semibold">Regulatory Body</Label>
-            <Select value={manualRegulationInput} onValueChange={setManualRegulationInput}>
+            <Select 
+              value={manualRegulationInput} 
+              onValueChange={setManualRegulationInput}
+              disabled={isManualCitationEntry}
+            >
               <SelectTrigger id="manualRegulationInput" className="mt-1">
                 <SelectValue placeholder="Select a regulatory body" />
               </SelectTrigger>
@@ -573,19 +611,19 @@ export default function ReportingHubPage() {
             <Select 
               value={selectedManualReport} 
               onValueChange={setSelectedManualReport} 
-              disabled={!manualRegulationInput || availableReports.length === 0}
+              disabled={isManualCitationEntry || !manualRegulationInput || availableReports.length === 0}
             >
               <SelectTrigger id="manualReportSelect" className="mt-1">
-                <SelectValue placeholder={!manualRegulationInput ? "First select a regulatory body" : (availableReports.length === 0 ? "No reports for selected body" : "Select a specific report")} />
+                <SelectValue placeholder={isManualCitationEntry ? "Disabled for manual citation entry" : !manualRegulationInput ? "First select a regulatory body" : (availableReports.length === 0 ? "No reports for selected body" : "Select a specific report")} />
               </SelectTrigger>
               <SelectContent>
-                {availableReports.length > 0 ? (
+                {availableReports.length > 0 && !isManualCitationEntry ? (
                   availableReports.map(report => (
                     <SelectItem key={report.value} value={report.value}>{report.label}</SelectItem>
                   ))
                 ) : (
                   <SelectItem value="no_reports" disabled>
-                    {!manualRegulationInput ? "Select a regulatory body first" : "No reports available for selected body"}
+                    {isManualCitationEntry ? "Disabled for manual citation entry" : !manualRegulationInput ? "Select a regulatory body first" : "No reports available"}
                   </SelectItem>
                 )}
               </SelectContent>
@@ -597,32 +635,64 @@ export default function ReportingHubPage() {
             <Select 
               value={selectedManualCitation} 
               onValueChange={setSelectedManualCitation} 
-              disabled={!selectedManualReport || availableCitations.length === 0}
+              disabled={isManualCitationEntry || !selectedManualReport || availableCitations.length === 0}
             >
               <SelectTrigger id="manualCitationSelect" className="mt-1">
-                <SelectValue placeholder={!selectedManualReport ? "First select a report" : (availableCitations.length === 0 ? "No citations for selected report" : "Select a specific citation")} />
+                <SelectValue placeholder={isManualCitationEntry ? "Disabled for manual citation entry" : !selectedManualReport ? "First select a report" : (availableCitations.length === 0 ? "No citations for selected report" : "Select a specific citation")} />
               </SelectTrigger>
               <SelectContent>
-                {availableCitations.length > 0 ? (
+                {availableCitations.length > 0 && !isManualCitationEntry ? (
                   availableCitations.map(citation => (
                     <SelectItem key={citation.value} value={citation.value}>{citation.label}</SelectItem>
                   ))
                 ) : (
                   <SelectItem value="no_citations" disabled>
-                    {!selectedManualReport ? "Select a report first" : "No citations available for selected report"}
+                     {isManualCitationEntry ? "Disabled for manual citation entry" : !selectedManualReport ? "Select a report first" : "No citations available"}
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
           </div>
 
+          <div className="flex items-center space-x-2 pt-2">
+            <Checkbox
+              id="manual-citation-checkbox"
+              checked={isManualCitationEntry}
+              onCheckedChange={handleManualCitationCheckboxChange}
+            />
+            <Label htmlFor="manual-citation-checkbox" className="font-normal text-sm">
+              Enter Citation Details Manually
+            </Label>
+          </div>
+
+          {isManualCitationEntry && (
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="manualCitationDetailsText" className="font-semibold">Manual Citation Details</Label>
+              <Textarea
+                id="manualCitationDetailsText"
+                value={manualCitationDetailsText}
+                onChange={(e) => {
+                  if (e.target.value.length <= MAX_MANUAL_CITATION_LENGTH) {
+                    setManualCitationDetailsText(e.target.value);
+                  }
+                }}
+                placeholder="Enter citation information (approx. 50 words)..."
+                className="min-h-[100px]"
+                maxLength={MAX_MANUAL_CITATION_LENGTH}
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {manualCitationDetailsText.length}/{MAX_MANUAL_CITATION_LENGTH} characters
+              </p>
+            </div>
+          )}
+
         </CardContent>
         <CardFooter className="gap-2 flex-wrap">
-          <Button onClick={handleManualExport} disabled={!selectedManualReport}>
+          <Button onClick={handleManualExport} disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !selectedManualReport}>
             <FileOutput className="mr-2 h-4 w-4" />
             Export Selected Report
           </Button>
-          <Button onClick={handleManualSummary} variant="outline" disabled={!manualRegulationInput}>
+          <Button onClick={handleManualSummary} variant="outline" disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput}>
             <FileSearch className="mr-2 h-4 w-4" />
             Extract Summary
           </Button>
