@@ -191,7 +191,7 @@ export default function ComplianceHubPage() {
           };
         });
         setSuggestedControls(processedSuggestions);
-        toast({ title: "Analysis Complete", description: "Control suggestions generated and analyzed against existing library." });
+        toast({ title: "Analysis Complete", description: "Control suggestions generated and analyzed against existing library. Results are displayed at the top of the page." });
       }
     } catch (e) {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
@@ -474,7 +474,7 @@ export default function ComplianceHubPage() {
             Analyze Compliance Gaps &amp; Suggest Controls
           </CardTitle>
           <CardDescription>
-            Provide your risk gap analysis report (which outlines identified risks/gaps and impact areas) and current policies to receive AI-powered control suggestions. Results will appear at the top of the page.
+            Provide your risk gap analysis report (which outlines identified risks/gaps and impact areas) and current policies to receive AI-powered control suggestions. Results will appear in a table at the top of this page.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -613,4 +613,3 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
-
