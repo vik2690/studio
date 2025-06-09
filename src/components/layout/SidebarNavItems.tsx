@@ -13,7 +13,7 @@ const navItems = [
   { href: "/risk-issues", label: "Risk & Issues Hub", icon: AlertTriangle },
   { href: "/aml", label: "AML Hub", icon: ShieldAlert },
   { href: "/compliance", label: "Control Hub", icon: FileText },
-  { href: "/operations-center", label: "Operations Center", icon: Activity },
+  { href: "/operations-center", label: "Cost Center", icon: Activity },
   { href: "/reporting", label: "Analytics and Reporting Hub", icon: FileSpreadsheet },
   { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
   { href: "/alerts-notifications", label: "Alerts & Notifications", icon: Bell },
@@ -48,4 +48,3 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
-
