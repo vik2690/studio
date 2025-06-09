@@ -5,6 +5,7 @@ import { summarizeRegulations as _summarizeRegulations, type SummarizeRegulation
 import { flagAMLTransactions as _flagAMLTransactions, type FlagAMLTransactionsInput, type FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
 import { suggestControls as _suggestControls, type SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
 import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
+import { generateCostSummary as _generateCostSummary, GenerateCostSummaryInputSchema, type GenerateCostSummaryOutput } from '@/ai/flows/generate-cost-summary-flow';
 import { z } from 'zod';
 
 // Define Zod schemas for input validation if not already strictly typed by AI flows
@@ -22,7 +23,6 @@ const SuggestControlsActionInputSchema = z.object({
   currentPolicies: z.string().min(1, "Current policies cannot be empty."),
 });
 
-// Redefine the schema here as it cannot be exported from the 'use server' flow file
 const CompareDocumentsActionInputSchema = z.object({
   document1Text: z.string().min(1, "Document 1 text cannot be empty.").describe("The text of the first regulatory document."),
   document2Text: z.string().min(1, "Document 2 text cannot be empty.").describe("The text of the second regulatory document."),
@@ -82,3 +82,16 @@ export async function compareDocumentsAction(input: CompareDocumentsInput): Prom
   }
 }
 
+export async function generateCostSummaryAction(input: GenerateCostSummaryInput): Promise<GenerateCostSummaryOutput | { error: string }> {
+  const validationResult = GenerateCostSummaryInputSchema.safeParse(input);
+  if (!validationResult.success) {
+    return { error: validationResult.error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join('; ') };
+  }
+  try {
+    const result = await _generateCostSummary(validationResult.data);
+    return result;
+  } catch (e: any) {
+    console.error("Error in generateCostSummaryAction:", e);
+    return { error: e.message || "Failed to generate cost summary. Please try again." };
+  }
+}

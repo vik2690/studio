@@ -16,7 +16,7 @@ export interface Metric {
   title: string;
   value: string;
   change?: string;
-  changeType?: 'positive' | 'negative';
+  changeType?: 'positive' | 'negative' | 'default';
   icon?: LucideIcon;
   description?: string;
   breakdown?: MetricBreakdownItem[];
@@ -33,7 +33,10 @@ export interface ChartDataPoint {
   name: string;
   value: number;
   fill?: string;
+  // Allow other keys for multi-line/bar charts
+  [key: string]: string | number | undefined;
 }
+
 
 export interface FlaggedTransaction {
   id: string;
@@ -79,11 +82,11 @@ export interface PolicyDocument {
 
 export interface ControlSuggestion {
   id: string;
-  suggestion: string;
-  justification: string;
+  suggestion: string; 
   status: 'pending' | 'approved' | 'rejected' | 'implemented';
-  relatedRisk?: string;
+  similarExistingControls?: ExistingControl[];
 }
+
 
 export interface RiskData {
     id: string;
@@ -244,3 +247,13 @@ export interface FeedItem {
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';
   assignedTo?: string; 
 }
+
+
+// Define ChartConfig more broadly if it's used by different chart types
+export type ChartConfig = {
+  [key: string]: {
+    label: string;
+    color: string;
+    icon?: React.ComponentType;
+  };
+};
