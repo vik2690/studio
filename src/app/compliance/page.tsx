@@ -5,17 +5,26 @@ import * as React from 'react';
 import { useState } from 'react';
 import { suggestControlsAction } from '@/lib/actions';
 import type { SuggestControlsInput, SuggestControlsOutput } from '@/ai/flows/suggest-controls';
-import type { ControlSuggestion, ExistingControl } from '@/lib/types';
+import type { ExistingControl } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle } from 'lucide-react'; 
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle, ListChecks, Info } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
+// Local type for AI suggested controls, augmented with similarity analysis
+interface ControlSuggestion {
+  id: string;
+  suggestion: string; // AI suggested control text
+  status: 'pending' | 'approved' | 'rejected' | 'implemented';
+  similarExistingControls?: ExistingControl[];
+}
+
 
 const initialExistingControls: ExistingControl[] = [
   {
@@ -109,6 +118,33 @@ const initialExistingControls: ExistingControl[] = [
   },
 ];
 
+// Helper function for a basic similarity check (placeholder for more advanced logic)
+function findSimilarExistingControls(suggestionText: string, existingControls: ExistingControl[]): ExistingControl[] {
+  const suggestionKeywords = suggestionText.toLowerCase().split(/\s+/).filter(kw => kw.length > 3 && !['the', 'and', 'for', 'with', 'should'].includes(kw));
+  if (suggestionKeywords.length === 0) return [];
+
+  const matchedControls: ExistingControl[] = [];
+  existingControls.forEach(ec => {
+    const controlText = `${ec.controlName} ${ec.objective} ${ec.riskMitigated} ${ec.controlCategory}`.toLowerCase();
+    let matchScore = 0;
+    suggestionKeywords.forEach(kw => {
+      if (controlText.includes(kw)) {
+        matchScore++;
+      }
+    });
+    // Consider it a match if at least a few keywords overlap, or a significant keyword
+    if (matchScore > 1 || (suggestionKeywords.length <= 2 && matchScore > 0) ) {
+      // Check for more specific keyword matches for better relevance
+      const specificKeywords = ["access review", "data deletion", "backup", "segregation of duties", "payment", "encryption"];
+      const hasSpecificKeyword = specificKeywords.some(skw => suggestionText.toLowerCase().includes(skw) && controlText.includes(skw));
+      if (hasSpecificKeyword || matchScore > 2) {
+         matchedControls.push(ec);
+      }
+    }
+  });
+  return matchedControls.slice(0, 3); // Limit to a few top matches for display
+}
+
 
 export default function ComplianceHubPage() {
   const [riskGapReport, setRiskGapReport] = useState('');
@@ -143,14 +179,23 @@ export default function ComplianceHubPage() {
         toast({ title: "AI Error", description: result.error, variant: "destructive" });
       } else {
         setAiResult(result);
-        const controlsArray = result.suggestedControls.split('\n').filter(line => line.trim() !== '');
-        setSuggestedControls(controlsArray.map((controlText, index) => ({
-          id: `control-${Date.now()}-${index}`,
-          suggestion: controlText,
-          justification: result.justification,
-          status: 'pending',
-        })));
-        toast({ title: "Analysis Complete", description: "Control suggestions generated." });
+        // Process AI suggested controls string into an array of objects
+        const controlsArray = result.suggestedControls
+            .split('\n')
+            .map(line => line.replace(/^-|^\*|^\d+\.\s*/, '').trim()) // Remove list markers
+            .filter(line => line.length > 0);
+        
+        const processedSuggestions = controlsArray.map((controlText, index) => {
+          const similar = findSimilarExistingControls(controlText, existingControlsList);
+          return {
+            id: `ai-control-${Date.now()}-${index}`,
+            suggestion: controlText,
+            status: 'pending' as ControlSuggestion['status'],
+            similarExistingControls: similar,
+          };
+        });
+        setSuggestedControls(processedSuggestions);
+        toast({ title: "Analysis Complete", description: "Control suggestions generated and analyzed against existing library." });
       }
     } catch (e) {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
@@ -393,20 +438,19 @@ export default function ComplianceHubPage() {
               <Lightbulb className="mr-2 h-6 w-6 text-primary" />
               AI-Generated Control Suggestions
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertTitle className="font-semibold">Overall Justification:</AlertTitle>
+             <Alert>
+              <AlertTitle className="font-semibold">Overall Justification from AI:</AlertTitle>
               <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
                 {aiResult.justification}
               </AlertDescription>
             </Alert>
-            
-            <h3 className="text-xl font-semibold mt-6 mb-3">Suggested Controls for Review:</h3>
+            <CardDescription className="pt-2">Review each AI-suggested control. The system provides a preliminary analysis of potentially similar existing controls. Approve, reject, or mark as implemented.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {suggestedControls.map(control => (
-              <Card key={control.id} className="bg-muted/50 p-4">
-                <div className="flex justify-between items-start">
-                  <p className="text-sm font-medium">{control.suggestion}</p>
+              <Card key={control.id} className="bg-card p-4 border shadow-sm">
+                <div className="flex justify-between items-start mb-3">
+                  <p className="text-sm font-medium flex-1">{control.suggestion}</p>
                   <Badge variant={
                     control.status === 'approved' ? 'default' :
                     control.status === 'rejected' ? 'destructive' :
@@ -421,7 +465,34 @@ export default function ComplianceHubPage() {
                     {control.status.toUpperCase()}
                   </Badge>
                 </div>
-                <div className="mt-3 flex space-x-2">
+                
+                <div className="mb-3 pt-3 border-t border-border/50">
+                  <h4 className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center">
+                    <ListChecks className="mr-1.5 h-4 w-4" />
+                    Analysis of Existing Controls:
+                  </h4>
+                  {control.similarExistingControls && control.similarExistingControls.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {control.similarExistingControls.map(ec => (
+                        <div key={ec.id} className="text-xs p-2.5 rounded-md border bg-background/80 shadow-sm">
+                          <p><strong>ID:</strong> {ec.id} - <strong>Name:</strong> {ec.controlName}</p>
+                          <p><strong>Area/Owner:</strong> {ec.owner} ({ec.controlCategory})</p>
+                          <p><strong>Status:</strong> <Badge variant="outline" className="text-xs h-auto py-0.5 px-1.5">{ec.status}</Badge> - <strong>Mitigates:</strong> <span className="italic">{ec.riskMitigated}</span></p>
+                          <Button variant="link" size="sm" className="h-auto p-0 text-xs mt-0.5 text-primary hover:text-primary/80" onClick={() => handleViewControlDetails(ec)}>
+                            View Full Details <Eye className="ml-1 h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <Badge variant="outline" className="text-xs bg-blue-50 border-blue-400 text-blue-700 dark:bg-blue-700/20 dark:border-blue-600 dark:text-blue-300">
+                      <Info className="mr-1.5 h-3.5 w-3.5" />
+                      No highly similar existing controls found by preliminary check. Review manually.
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="mt-4 flex space-x-2 flex-wrap gap-y-2">
                   <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
                     <ThumbsUp className="mr-1 h-4 w-4" /> Approve
                   </Button>
@@ -528,3 +599,4 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
+
