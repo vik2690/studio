@@ -388,7 +388,7 @@ export default function OverviewPage() {
       <div className="space-y-4 pt-6">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center">
             <ActivityIcon className="mr-3 h-7 w-7 text-primary" />
-            AI Agent Operations
+            AI Agents at Work
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"> 
             {agents.map((agent) => {
