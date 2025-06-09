@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { Metric, MetricBreakdownItem, AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import type { LucideIcon } from 'lucide-react';
-// ChartConfig and ChartDataPoint removed if no longer used
+// ChartConfig and ChartDataPoint removed as no longer used
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -387,6 +387,8 @@ export default function OverviewPage() {
           <MetricCard key={metric.title} {...metric} />
         ))}
       </div>
+
+      {/* Removed Chart Cards Section */}
 
       <div className="space-y-4 pt-6">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center">
