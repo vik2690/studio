@@ -550,7 +550,7 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Select a regulatory body, report, and optionally a citation to export or extract a summary.
+            Select a regulatory body, report, and citation to export or extract a summary.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -593,7 +593,7 @@ export default function ReportingHubPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="manualCitationSelect" className="font-semibold">Citations (Optional)</Label>
+            <Label htmlFor="manualCitationSelect" className="font-semibold">Citations</Label>
             <Select 
               value={selectedManualCitation} 
               onValueChange={setSelectedManualCitation} 
