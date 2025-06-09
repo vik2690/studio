@@ -5,7 +5,9 @@ import { summarizeRegulations as _summarizeRegulations, type SummarizeRegulation
 import { flagAMLTransactions as _flagAMLTransactions, type FlagAMLTransactionsInput, type FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
 import { suggestControls as _suggestControls, type SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
 import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
-import { generateCostSummary as _generateCostSummary, GenerateCostSummaryInputSchema, type GenerateCostSummaryOutput } from '@/ai/flows/generate-cost-summary-flow';
+import { generateCostSummary as _generateCostSummary } from '@/ai/flows/generate-cost-summary-flow';
+import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
+import { GenerateCostSummaryInputSchema } from '@/ai/schemas/cost-summary-schemas';
 import { z } from 'zod';
 
 // Define Zod schemas for input validation if not already strictly typed by AI flows
