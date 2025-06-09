@@ -324,38 +324,7 @@ export default function ReportingHubPage() {
     return value || 'N/A';
   };
 
-  const handleManualExport = () => {
-    let exportContext = "";
-    if (isManualCitationEntry) {
-      if (!manualCitationDetailsText.trim()) {
-        toast({ title: "Input Required", description: "Please enter manual citation details.", variant: "destructive"});
-        return;
-      }
-      exportContext = `with manual citation details: "${manualCitationDetailsText.substring(0,50)}..."`;
-    } else {
-      if (!manualRegulationInput) {
-        toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
-        return;
-      }
-      if (!selectedManualReport) {
-        toast({ title: "Input Required", description: "Please select a specific report to export.", variant: "destructive" });
-        return;
-      }
-      const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
-      const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
-      exportContext = `for "${reportLabel}" under ${regBodyLabel}`;
-      if (selectedManualCitation) {
-          const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
-          exportContext += ` (Citation: ${citationLabel})`;
-      }
-    }
-    toast({
-      title: "Export Initiated",
-      description: `Report export started ${exportContext}. (Placeholder)`,
-    });
-  };
-
-  const handleManualSummary = () => {
+  const handleAiSummary = () => {
     let summaryContext = "";
      if (isManualCitationEntry) {
       if (!manualCitationDetailsText.trim()) {
@@ -380,8 +349,8 @@ export default function ReportingHubPage() {
       }
     }
     toast({
-      title: "Summary Extraction Initiated",
-      description: `Summary extraction started ${summaryContext}. (Placeholder)`,
+      title: "AI Summary Extraction Initiated",
+      description: `AI Summary extraction started ${summaryContext}. (Placeholder)`,
     });
   };
 
@@ -658,7 +627,7 @@ export default function ReportingHubPage() {
             <Checkbox
               id="manual-citation-checkbox"
               checked={isManualCitationEntry}
-              onCheckedChange={handleManualCitationCheckboxChange}
+              onCheckedChange={(checked) => handleManualCitationCheckboxChange(checked as boolean)}
             />
             <Label htmlFor="manual-citation-checkbox" className="font-normal text-sm">
               Enter Citation Details Manually
@@ -688,13 +657,9 @@ export default function ReportingHubPage() {
 
         </CardContent>
         <CardFooter className="gap-2 flex-wrap">
-          <Button onClick={handleManualExport} disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !selectedManualReport}>
-            <FileOutput className="mr-2 h-4 w-4" />
-            Export Selected Report
-          </Button>
-          <Button onClick={handleManualSummary} variant="outline" disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput}>
+          <Button onClick={handleAiSummary} variant="outline" disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput}>
             <FileSearch className="mr-2 h-4 w-4" />
-            Extract Summary
+            AI Summary
           </Button>
         </CardFooter>
       </Card>
