@@ -267,7 +267,7 @@ export default function ReportingHubPage() {
     } else if (isManualCitationEntry || !manualRegulationInput) {
       setAvailableReports([]);
     }
-    setSelectedManualReport(undefined); // Reset report when body changes or mode changes
+    setSelectedManualReport(undefined); 
   }, [manualRegulationInput, isManualCitationEntry]);
 
   useEffect(() => {
@@ -276,7 +276,7 @@ export default function ReportingHubPage() {
     } else if (isManualCitationEntry || !selectedManualReport) {
       setAvailableCitations([]);
     }
-    setSelectedManualCitation(undefined); // Reset citation when report changes or mode changes
+    setSelectedManualCitation(undefined); 
   }, [selectedManualReport, isManualCitationEntry]);
 
   const handleManualCitationCheckboxChange = (checked: boolean) => {
@@ -287,7 +287,6 @@ export default function ReportingHubPage() {
       setSelectedManualCitation(undefined);
       setAvailableReports([]);
       setAvailableCitations([]);
-      // Do not clear aiSummaryOutputText here, let reset button do it
     } else {
       setManualCitationDetailsText('');
     }
@@ -367,7 +366,6 @@ export default function ReportingHubPage() {
       description: `AI summary extraction started ${summaryContext}. (Placeholder)`,
     });
 
-    // Simulate AI processing
     setTimeout(() => {
       const placeholderSummary = `This is a placeholder AI-generated summary. Based on your selection (${summaryContext}), the key aspects include: A) The primary obligations outlined. B) Potential impacts on current operations. C) Recommended areas for closer review. For a detailed analysis, full document review is advised. The AI model considered factors related to ${baseQuery.substring(baseQuery.indexOf(' ') + 1)}.`;
       setAiSummaryOutputText(placeholderSummary);
@@ -388,7 +386,7 @@ export default function ReportingHubPage() {
     setIsManualCitationEntry(false);
     setManualCitationDetailsText('');
     setAiSummaryOutputText(null);
-    setIsGeneratingAiSummary(false); // Ensure loading state is also reset
+    setIsGeneratingAiSummary(false);
     toast({
         title: "Manual Tools Reset",
         description: "All selections and generated summaries have been cleared."
@@ -816,3 +814,5 @@ export default function ReportingHubPage() {
   );
 }
 
+
+    
