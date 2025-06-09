@@ -14,7 +14,7 @@ const navItems = [
   { href: "/aml", label: "AML Hub", icon: ShieldAlert },
   { href: "/compliance", label: "Compliance Hub", icon: FileText },
   { href: "/operations-center", label: "Operations Center", icon: Activity },
-  { href: "/reporting", label: "Reporting Hub", icon: FileSpreadsheet },
+  { href: "/reporting", label: "Analytics and Reporting Hub", icon: FileSpreadsheet },
   { href: "/review-approvals", label: "Review & Approvals", icon: CheckSquare },
   { href: "/alerts-notifications", label: "Alerts & Notifications", icon: Bell },
   { href: "/audit-hub", label: "Audit Hub", icon: ClipboardCheck },
