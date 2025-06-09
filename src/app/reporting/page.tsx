@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch } from 'lucide-react';
+import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch, Wand2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard';
@@ -139,6 +139,7 @@ const reportOptionsByBody: Record<string, { value: string; label: string }[]> = 
     { value: 'dpia_register_summary', label: 'DPIA Register Summary Report' },
     { value: 'data_subject_request_log', label: 'Data Subject Request Log & Metrics'},
   ],
+  Other: [],
 };
 
 const reportCitationsByReportValue: Record<string, { value: string; label: string }[]> = {
@@ -254,13 +255,16 @@ export default function ReportingHubPage() {
   const [manualCitationDetailsText, setManualCitationDetailsText] = useState('');
   const MAX_MANUAL_CITATION_LENGTH = 300;
 
+  const [aiSummaryOutputText, setAiSummaryOutputText] = useState<string | null>(null);
+  const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
+
 
   const { toast } = useToast();
 
   useEffect(() => {
     if (!isManualCitationEntry && manualRegulationInput && reportOptionsByBody[manualRegulationInput]) {
       setAvailableReports(reportOptionsByBody[manualRegulationInput]);
-    } else if (isManualCitationEntry) {
+    } else if (isManualCitationEntry || !manualRegulationInput) {
       setAvailableReports([]);
     }
     setSelectedManualReport(undefined);
@@ -269,7 +273,7 @@ export default function ReportingHubPage() {
   useEffect(() => {
     if (!isManualCitationEntry && selectedManualReport && reportCitationsByReportValue[selectedManualReport]) {
       setAvailableCitations(reportCitationsByReportValue[selectedManualReport]);
-    } else if (isManualCitationEntry) {
+    } else if (isManualCitationEntry || !selectedManualReport) {
       setAvailableCitations([]);
     }
     setSelectedManualCitation(undefined);
@@ -278,14 +282,12 @@ export default function ReportingHubPage() {
   const handleManualCitationCheckboxChange = (checked: boolean) => {
     setIsManualCitationEntry(checked);
     if (checked) {
-      // Clear dropdown selections when switching to manual entry
       setManualRegulationInput(undefined);
       setSelectedManualReport(undefined);
       setSelectedManualCitation(undefined);
       setAvailableReports([]);
       setAvailableCitations([]);
     } else {
-      // Clear manual text when switching away from manual entry
       setManualCitationDetailsText('');
     }
   };
@@ -325,33 +327,55 @@ export default function ReportingHubPage() {
   };
 
   const handleAiSummary = () => {
+    setIsGeneratingAiSummary(true);
+    setAiSummaryOutputText(null);
     let summaryContext = "";
+    let baseQuery = "Provide a summary focusing on ";
+
      if (isManualCitationEntry) {
       if (!manualCitationDetailsText.trim()) {
         toast({ title: "Input Required", description: "Please enter manual citation details for summary.", variant: "destructive"});
+        setIsGeneratingAiSummary(false);
         return;
       }
-      summaryContext = `based on manual citation details: "${manualCitationDetailsText.substring(0,50)}..."`;
+      summaryContext = `manual citation details: "${manualCitationDetailsText.substring(0,100)}..."`;
+      baseQuery += `the following manually entered citation: ${manualCitationDetailsText}`;
     } else {
       if (!manualRegulationInput) {
         toast({ title: "Input Required", description: "Please select a regulatory body.", variant: "destructive" });
+        setIsGeneratingAiSummary(false);
         return;
       }
       const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
       summaryContext = `for ${regBodyLabel}`;
+      baseQuery += `regulations from ${regBodyLabel}`;
       if (selectedManualReport) {
         const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
         summaryContext = `for "${reportLabel}" under ${regBodyLabel}`;
+        baseQuery += `, specifically concerning the report '${reportLabel}'`;
       }
       if (selectedManualCitation) {
           const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
           summaryContext += ` (focusing on citation: ${citationLabel})`;
+          baseQuery += `, with emphasis on citation '${citationLabel}'`;
       }
     }
+    
     toast({
       title: "AI Summary Extraction Initiated",
-      description: `AI Summary extraction started ${summaryContext}. (Placeholder)`,
+      description: `AI summary extraction started ${summaryContext}. (Placeholder)`,
     });
+
+    // Simulate AI processing
+    setTimeout(() => {
+      const placeholderSummary = `This is a placeholder AI-generated summary. Based on your selection (${summaryContext}), the key aspects include: A) The primary obligations outlined. B) Potential impacts on current operations. C) Recommended areas for closer review. For a detailed analysis, full document review is advised. The AI model considered factors related to ${baseQuery.substring(baseQuery.indexOf(' ') + 1)}.`;
+      setAiSummaryOutputText(placeholderSummary);
+      setIsGeneratingAiSummary(false);
+      toast({
+        title: "AI Summary Generated",
+        description: "Summary successfully extracted and displayed below."
+      });
+    }, 2500);
   };
 
   return (
@@ -562,7 +586,7 @@ export default function ReportingHubPage() {
             <Select 
               value={manualRegulationInput} 
               onValueChange={setManualRegulationInput}
-              disabled={isManualCitationEntry}
+              disabled={isManualCitationEntry || isGeneratingAiSummary}
             >
               <SelectTrigger id="manualRegulationInput" className="mt-1">
                 <SelectValue placeholder="Select a regulatory body" />
@@ -580,7 +604,7 @@ export default function ReportingHubPage() {
             <Select 
               value={selectedManualReport} 
               onValueChange={setSelectedManualReport} 
-              disabled={isManualCitationEntry || !manualRegulationInput || availableReports.length === 0}
+              disabled={isManualCitationEntry || !manualRegulationInput || availableReports.length === 0 || isGeneratingAiSummary}
             >
               <SelectTrigger id="manualReportSelect" className="mt-1">
                 <SelectValue placeholder={isManualCitationEntry ? "Disabled for manual citation entry" : !manualRegulationInput ? "First select a regulatory body" : (availableReports.length === 0 ? "No reports for selected body" : "Select a specific report")} />
@@ -604,7 +628,7 @@ export default function ReportingHubPage() {
             <Select 
               value={selectedManualCitation} 
               onValueChange={setSelectedManualCitation} 
-              disabled={isManualCitationEntry || !selectedManualReport || availableCitations.length === 0}
+              disabled={isManualCitationEntry || !selectedManualReport || availableCitations.length === 0 || isGeneratingAiSummary}
             >
               <SelectTrigger id="manualCitationSelect" className="mt-1">
                 <SelectValue placeholder={isManualCitationEntry ? "Disabled for manual citation entry" : !selectedManualReport ? "First select a report" : (availableCitations.length === 0 ? "No citations for selected report" : "Select a specific citation")} />
@@ -628,6 +652,7 @@ export default function ReportingHubPage() {
               id="manual-citation-checkbox"
               checked={isManualCitationEntry}
               onCheckedChange={(checked) => handleManualCitationCheckboxChange(checked as boolean)}
+              disabled={isGeneratingAiSummary}
             />
             <Label htmlFor="manual-citation-checkbox" className="font-normal text-sm">
               Enter Citation Details Manually
@@ -648,6 +673,7 @@ export default function ReportingHubPage() {
                 placeholder="Enter citation information (approx. 50 words)..."
                 className="min-h-[100px]"
                 maxLength={MAX_MANUAL_CITATION_LENGTH}
+                disabled={isGeneratingAiSummary}
               />
               <p className="text-xs text-muted-foreground text-right">
                 {manualCitationDetailsText.length}/{MAX_MANUAL_CITATION_LENGTH} characters
@@ -657,12 +683,41 @@ export default function ReportingHubPage() {
 
         </CardContent>
         <CardFooter className="gap-2 flex-wrap">
-          <Button onClick={handleAiSummary} variant="outline" disabled={isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput}>
-            <FileSearch className="mr-2 h-4 w-4" />
+          <Button 
+            onClick={handleAiSummary} 
+            variant="outline" 
+            disabled={(isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput) || isGeneratingAiSummary}
+          >
+            {isGeneratingAiSummary ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="mr-2 h-4 w-4" />
+            )}
             AI Summary
           </Button>
         </CardFooter>
       </Card>
+
+      {aiSummaryOutputText && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Wand2 className="mr-2 h-6 w-6 text-primary" />
+              AI Generated Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Label htmlFor="aiSummaryOutput" className="font-semibold">Summary Details</Label>
+            <Textarea
+              id="aiSummaryOutput"
+              value={aiSummaryOutputText}
+              readOnly
+              className="min-h-[150px] mt-1 text-sm bg-muted/50"
+            />
+          </CardContent>
+        </Card>
+      )}
+
 
       {selectedReportForComparison && isComparisonDialogOpen && (
         <Dialog open={isComparisonDialogOpen} onOpenChange={setIsComparisonDialogOpen}>
