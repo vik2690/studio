@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import type { ReportItem, ReportVersionMetadata, ReportChange } from '@/lib/types';
+import type { ReportItem, ReportVersionMetadata, ReportChange, ChartDataPoint } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch } from 'lucide-react';
 import Link from 'next/link';
+import { OverviewChart } from '@/components/dashboard/OverviewChart';
+import { PieChartCard } from '@/components/dashboard/PieChartCard';
+import type { ChartConfig } from '@/components/ui/chart';
 
 const initialReportItems: ReportItem[] = [
   {
@@ -102,6 +105,63 @@ const regulatoryBodies = [
   { value: 'Other', label: 'Other/Not Specified' },
 ];
 
+// Chart data and configurations moved from Overview page
+const riskTrendData: ChartDataPoint[] = [
+  { name: "Jan", value: 120 },
+  { name: "Feb", value: 135 },
+  { name: "Mar", value: 110 },
+  { name: "Apr", value: 140 },
+  { name: "May", value: 125 },
+  { name: "Jun", value: 150 },
+];
+
+const riskTrendChartConfig = {
+  value: {
+    label: "Identified Risks",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
+const controlEffectivenessData: ChartDataPoint[] = [
+  { name: "Q1", value: 75 },
+  { name: "Q2", value: 82 },
+  { name: "Q3", value: 78 },
+  { name: "Q4", value: 85 },
+];
+
+const controlEffectivenessChartConfig = {
+  value: {
+    label: "Effectiveness (%)",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig;
+
+const riskDistributionData: ChartDataPoint[] = [
+  { name: "Critical", value: 25 },
+  { name: "High", value: 40 },
+  { name: "Medium", value: 60 },
+  { name: "Low", value: 80 },
+];
+
+const riskDistributionChartConfig = {
+  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" },
+  "High": { label: "High", color: "hsl(var(--chart-1))" },
+  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" },
+  "Low": { label: "Low", color: "hsl(var(--chart-3))" },
+} satisfies ChartConfig;
+
+const controlStatusData: ChartDataPoint[] = [
+  { name: "Implemented", value: 650 },
+  { name: "Pending", value: 150 },
+  { name: "Overdue", value: 50 },
+];
+
+const controlStatusChartConfig = {
+  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" },
+  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" },
+  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },
+} satisfies ChartConfig;
+
 
 export default function ReportingHubPage() {
   const [reportItems, setReportItems] = useState<ReportItem[]>(initialReportItems);
@@ -168,6 +228,48 @@ export default function ReportingHubPage() {
         <FileSpreadsheet className="mr-3 h-8 w-8 text-primary" />
         Reporting Hub
       </h1>
+      
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle>Reporting Dashboards</CardTitle>
+          <CardDescription>Visual overview of key risk and control metrics.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            <OverviewChart
+              data={riskTrendData}
+              title="Risk Trend Analysis"
+              description="Monthly trend of identified risks."
+              xAxisKey="name"
+              chartConfig={riskTrendChartConfig}
+            />
+            <PieChartCard
+              data={riskDistributionData}
+              title="Risk Distribution by Severity"
+              description="Breakdown of risks by their severity level."
+              dataKey="value"
+              nameKey="name"
+              chartConfig={riskDistributionChartConfig}
+            />
+            <OverviewChart
+              data={controlEffectivenessData}
+              title="Control Effectiveness"
+              description="Quarterly control effectiveness score."
+              xAxisKey="name"
+              chartConfig={controlEffectivenessChartConfig}
+            />
+            <PieChartCard
+              data={controlStatusData}
+              title="Control Implementation Status"
+              description="Current status of applied controls."
+              dataKey="value"
+              nameKey="name"
+              chartConfig={controlStatusChartConfig}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
 
       <Card className="shadow-lg">
         <CardHeader>

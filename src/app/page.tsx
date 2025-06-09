@@ -3,15 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
-import { OverviewChart } from '@/components/dashboard/OverviewChart';
-import { PieChartCard } from '@/components/dashboard/PieChartCard';
+// OverviewChart and PieChartCard removed as they are no longer used here after moving charts
 import { 
   AlertTriangle, ShieldCheck, BarChartHorizontalBig, FileWarning, 
   Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, StopCircle, Download, WalletCards, LineChart as LineChartIcon, BellRing
 } from 'lucide-react';
-import type { Metric, ChartDataPoint, MetricBreakdownItem, AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
+import type { Metric, MetricBreakdownItem, AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import type { LucideIcon } from 'lucide-react';
-import type { ChartConfig } from '@/components/ui/chart';
+// ChartConfig and ChartDataPoint removed if no longer used
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -88,61 +87,11 @@ const overviewMetrics: Metric[] = [
   },
 ];
 
-const riskTrendData: ChartDataPoint[] = [
-  { name: "Jan", value: 120 },
-  { name: "Feb", value: 135 },
-  { name: "Mar", value: 110 },
-  { name: "Apr", value: 140 },
-  { name: "May", value: 125 },
-  { name: "Jun", value: 150 },
-];
-
-const riskTrendChartConfig = {
-  value: {
-    label: "Identified Risks",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
-
-const controlEffectivenessData: ChartDataPoint[] = [
-  { name: "Q1", value: 75 },
-  { name: "Q2", value: 82 },
-  { name: "Q3", value: 78 },
-  { name: "Q4", value: 85 },
-];
-
-const controlEffectivenessChartConfig = {
-  value: {
-    label: "Effectiveness (%)",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
-
-const riskDistributionData: ChartDataPoint[] = [
-  { name: "Critical", value: 25 },
-  { name: "High", value: 40 },
-  { name: "Medium", value: 60 },
-  { name: "Low", value: 80 },
-];
-
-const riskDistributionChartConfig = {
-  "Critical": { label: "Critical", color: "hsl(var(--chart-5))" },
-  "High": { label: "High", color: "hsl(var(--chart-1))" },
-  "Medium": { label: "Medium", color: "hsl(var(--chart-2))" },
-  "Low": { label: "Low", color: "hsl(var(--chart-3))" },
-} satisfies ChartConfig;
-
-const controlStatusData: ChartDataPoint[] = [
-  { name: "Implemented", value: 650 },
-  { name: "Pending", value: 150 },
-  { name: "Overdue", value: 50 },
-];
-
-const controlStatusChartConfig = {
-  "Implemented": { label: "Implemented", color: "hsl(var(--chart-4))" },
-  "Pending": { label: "Pending Review", color: "hsl(var(--chart-2))" },
-  "Overdue": { label: "Overdue", color: "hsl(var(--chart-1))" },
-} satisfies ChartConfig;
+// Removed chart data and config:
+// riskTrendData, riskTrendChartConfig
+// controlEffectivenessData, controlEffectivenessChartConfig
+// riskDistributionData, riskDistributionChartConfig
+// controlStatusData, controlStatusChartConfig
 
 
 // Copied from operations-center/page.tsx
@@ -446,40 +395,7 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <OverviewChart
-          data={riskTrendData}
-          title="Risk Trend Analysis"
-          description="Monthly trend of identified risks."
-          dataKey="value"
-          xAxisKey="name"
-          chartConfig={riskTrendChartConfig}
-        />
-        <PieChartCard
-          data={riskDistributionData}
-          title="Risk Distribution by Severity"
-          description="Breakdown of risks by their severity level."
-          dataKey="value"
-          nameKey="name"
-          chartConfig={riskDistributionChartConfig}
-        />
-        <OverviewChart
-          data={controlEffectivenessData}
-          title="Control Effectiveness"
-          description="Quarterly control effectiveness score."
-          dataKey="value"
-          xAxisKey="name"
-          chartConfig={controlEffectivenessChartConfig}
-        />
-        <PieChartCard
-          data={controlStatusData}
-          title="Control Implementation Status"
-          description="Current status of applied controls."
-          dataKey="value"
-          nameKey="name"
-          chartConfig={controlStatusChartConfig}
-        />
-      </div>
+      {/* Chart cards section removed from here */}
 
       <div className="space-y-4 pt-6">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center">
@@ -666,3 +582,4 @@ export default function OverviewPage() {
     </div>
   );
 }
+
