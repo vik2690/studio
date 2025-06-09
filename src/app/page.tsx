@@ -87,13 +87,6 @@ const overviewMetrics: Metric[] = [
   },
 ];
 
-// Removed chart data and config:
-// riskTrendData, riskTrendChartConfig
-// controlEffectivenessData, controlEffectivenessChartConfig
-// riskDistributionData, riskDistributionChartConfig
-// controlStatusData, controlStatusChartConfig
-
-
 // Copied from operations-center/page.tsx
 const initialAgents: AIAgent[] = [
   {
@@ -395,8 +388,6 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      {/* Chart cards section removed from here */}
-
       <div className="space-y-4 pt-6">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center">
             <ActivityIcon className="mr-3 h-7 w-7 text-primary" />
@@ -582,4 +573,3 @@ export default function OverviewPage() {
     </div>
   );
 }
-
