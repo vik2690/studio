@@ -191,7 +191,7 @@ export default function ComplianceHubPage() {
           };
         });
         setSuggestedControls(processedSuggestions);
-        toast({ title: "Analysis Complete", description: "Control suggestions generated and analyzed against existing library. Results are displayed at the top of the page." });
+        toast({ title: "Analysis Complete", description: "Control suggestions generated. Results are displayed at the top of the page." });
       }
     } catch (e) {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
@@ -613,3 +613,4 @@ export default function ComplianceHubPage() {
     </div>
   );
 }
+
