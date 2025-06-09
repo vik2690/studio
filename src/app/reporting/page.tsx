@@ -139,6 +139,46 @@ const reportOptionsByBody: Record<string, { value: string; label: string }[]> = 
   ],
 };
 
+const reportCitationsByReportValue: Record<string, { value: string; label: string }[]> = {
+  // ESMA
+  mifid_ii_q_transparency: [
+    { value: 'mifid_art_26', label: 'MiFID II Article 26 (Transaction Reporting)' },
+    { value: 'rts_22', label: 'RTS 22 (Reporting Obligations)' },
+    { value: 'mifid_art_16', label: 'MiFID II Article 16 (Organisational Requirements)' },
+  ],
+  emr_annual_clearing: [
+    { value: 'emir_art_4', label: 'EMIR Article 4 (Clearing Obligation)' },
+    { value: 'emir_art_9', label: 'EMIR Article 9 (Reporting Obligation to TRs)' },
+    { value: 'emir_art_11', label: 'EMIR Article 11 (Risk Mitigation Techniques)' },
+  ],
+  sfdr_entity_level: [
+    { value: 'sfdr_art_3', label: 'SFDR Article 3 (Transparency of PAI policies)' },
+    { value: 'sfdr_art_4', label: 'SFDR Article 4 (Transparency of PAI at product level)' },
+    { value: 'sfdr_rts_annex_1', label: 'SFDR RTS Annex I (Template PAI statement)' },
+  ],
+  // FinCEN
+  sar_monthly_summary: [
+    { value: '31_cfr_1020_320', label: '31 CFR § 1020.320 (SAR Filing Requirements)' },
+    { value: 'fincen_form_111', label: 'FinCEN Form 111 (SAR Form Instructions)' },
+    { value: 'bsa_recordkeeping', label: 'BSA Recordkeeping Requirements for SARs' },
+  ],
+  ctr_batch_filing: [
+    { value: '31_cfr_1010_311', label: '31 CFR § 1010.311 (CTR Filing Requirements)' },
+    { value: 'fincen_form_112', label: 'FinCEN Form 112 (CTR Form Instructions)' },
+    { value: 'ctr_aggregation_rules', label: 'CTR Aggregation Rules' },
+  ],
+  // Placeholder for other reports - expand as needed
+  form_10k_annual: [
+    {value: 'sec_item_1a', label: 'SEC Form 10-K Item 1A (Risk Factors)'},
+    {value: 'sec_item_7', label: 'SEC Form 10-K Item 7 (MD&A)'},
+  ],
+  itgc_effectiveness_report: [
+    {value: 'sox_302', label: 'SOX Section 302 (Corporate Responsibility)'},
+    {value: 'sox_404', label: 'SOX Section 404 (Management Assessment of ICFR)'},
+    {value: 'cobit_framework', label: 'COBIT Framework Alignment'},
+  ],
+};
+
 
 const riskTrendData: ChartDataPoint[] = [
   { name: "Jan", value: 120 },
@@ -201,9 +241,14 @@ export default function ReportingHubPage() {
   const [reportItems, setReportItems] = useState<ReportItem[]>(initialReportItems);
   const [selectedReportForComparison, setSelectedReportForComparison] = useState<ReportItem | null>(null);
   const [isComparisonDialogOpen, setIsComparisonDialogOpen] = useState(false);
+  
   const [manualRegulationInput, setManualRegulationInput] = useState<string | undefined>(undefined);
   const [selectedManualReport, setSelectedManualReport] = useState<string | undefined>(undefined);
   const [availableReports, setAvailableReports] = useState<{ value: string; label: string }[]>([]);
+  
+  const [selectedManualCitation, setSelectedManualCitation] = useState<string | undefined>(undefined);
+  const [availableCitations, setAvailableCitations] = useState<{ value: string; label: string }[]>([]);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -212,8 +257,19 @@ export default function ReportingHubPage() {
     } else {
       setAvailableReports([]);
     }
-    setSelectedManualReport(undefined); // Reset selected report when body changes
+    setSelectedManualReport(undefined);
+    setAvailableCitations([]);
+    setSelectedManualCitation(undefined);
   }, [manualRegulationInput]);
+
+  useEffect(() => {
+    if (selectedManualReport && reportCitationsByReportValue[selectedManualReport]) {
+      setAvailableCitations(reportCitationsByReportValue[selectedManualReport]);
+    } else {
+      setAvailableCitations([]);
+    }
+    setSelectedManualCitation(undefined);
+  }, [selectedManualReport]);
 
   const handlePreviewComparison = (report: ReportItem) => {
     if (!report.versionHistory || report.versionHistory.length === 0) {
@@ -260,9 +316,15 @@ export default function ReportingHubPage() {
     }
     const regBodyLabel = regulatoryBodies.find(b => b.value === manualRegulationInput)?.label || manualRegulationInput;
     const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
+    let citationContext = "";
+    if (selectedManualCitation) {
+        const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
+        citationContext = ` (Citation: ${citationLabel})`;
+    }
+
     toast({
       title: "Export Initiated",
-      description: `Report export started for "${reportLabel}" under ${regBodyLabel}. (Placeholder)`,
+      description: `Report export started for "${reportLabel}" under ${regBodyLabel}${citationContext}. (Placeholder)`,
     });
   };
 
@@ -277,10 +339,15 @@ export default function ReportingHubPage() {
       const reportLabel = availableReports.find(r => r.value === selectedManualReport)?.label || selectedManualReport;
       summaryFor = `"${reportLabel}" under ${regBodyLabel}`;
     }
+     let citationContext = "";
+    if (selectedManualCitation) {
+        const citationLabel = availableCitations.find(c => c.value === selectedManualCitation)?.label || selectedManualCitation;
+        citationContext = ` (focusing on citation: ${citationLabel})`;
+    }
     
     toast({
       title: "Summary Extraction Initiated",
-      description: `Summary extraction started for ${summaryFor}. (Placeholder)`,
+      description: `Summary extraction started for ${summaryFor}${citationContext}. (Placeholder)`,
     });
   };
 
@@ -483,7 +550,7 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Select a regulatory body and then a specific report to export or extract a summary.
+            Select a regulatory body, report, and optionally a citation to export or extract a summary.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -509,7 +576,7 @@ export default function ReportingHubPage() {
               disabled={!manualRegulationInput || availableReports.length === 0}
             >
               <SelectTrigger id="manualReportSelect" className="mt-1">
-                <SelectValue placeholder={!manualRegulationInput ? "First select a regulatory body" : "Select a specific report"} />
+                <SelectValue placeholder={!manualRegulationInput ? "First select a regulatory body" : (availableReports.length === 0 ? "No reports for selected body" : "Select a specific report")} />
               </SelectTrigger>
               <SelectContent>
                 {availableReports.length > 0 ? (
@@ -517,11 +584,38 @@ export default function ReportingHubPage() {
                     <SelectItem key={report.value} value={report.value}>{report.label}</SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="no_reports" disabled>No reports available for selected body</SelectItem>
+                  <SelectItem value="no_reports" disabled>
+                    {!manualRegulationInput ? "Select a regulatory body first" : "No reports available for selected body"}
+                  </SelectItem>
                 )}
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="manualCitationSelect" className="font-semibold">Citations (Optional)</Label>
+            <Select 
+              value={selectedManualCitation} 
+              onValueChange={setSelectedManualCitation} 
+              disabled={!selectedManualReport || availableCitations.length === 0}
+            >
+              <SelectTrigger id="manualCitationSelect" className="mt-1">
+                <SelectValue placeholder={!selectedManualReport ? "First select a report" : (availableCitations.length === 0 ? "No citations for selected report" : "Select a specific citation")} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCitations.length > 0 ? (
+                  availableCitations.map(citation => (
+                    <SelectItem key={citation.value} value={citation.value}>{citation.label}</SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no_citations" disabled>
+                    {!selectedManualReport ? "Select a report first" : "No citations available for selected report"}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
         </CardContent>
         <CardFooter className="gap-2 flex-wrap">
           <Button onClick={handleManualExport} disabled={!selectedManualReport}>
@@ -606,3 +700,4 @@ export default function ReportingHubPage() {
     </div>
   );
 }
+
