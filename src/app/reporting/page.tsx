@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { FileSpreadsheet, GitCompareArrows, Eye, AlertTriangle, Settings, Workflow, Download, FileOutput, FileSearch, Wand2, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, GitCompareArrows, Eye, Settings, Download, Wand2, Loader2, RotateCcw, FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard';
@@ -267,7 +267,7 @@ export default function ReportingHubPage() {
     } else if (isManualCitationEntry || !manualRegulationInput) {
       setAvailableReports([]);
     }
-    setSelectedManualReport(undefined);
+    setSelectedManualReport(undefined); // Reset report when body changes or mode changes
   }, [manualRegulationInput, isManualCitationEntry]);
 
   useEffect(() => {
@@ -276,7 +276,7 @@ export default function ReportingHubPage() {
     } else if (isManualCitationEntry || !selectedManualReport) {
       setAvailableCitations([]);
     }
-    setSelectedManualCitation(undefined);
+    setSelectedManualCitation(undefined); // Reset citation when report changes or mode changes
   }, [selectedManualReport, isManualCitationEntry]);
 
   const handleManualCitationCheckboxChange = (checked: boolean) => {
@@ -287,6 +287,7 @@ export default function ReportingHubPage() {
       setSelectedManualCitation(undefined);
       setAvailableReports([]);
       setAvailableCitations([]);
+      // Do not clear aiSummaryOutputText here, let reset button do it
     } else {
       setManualCitationDetailsText('');
     }
@@ -376,6 +377,22 @@ export default function ReportingHubPage() {
         description: "Summary successfully extracted and displayed below."
       });
     }, 2500);
+  };
+
+  const handleResetManualTools = () => {
+    setManualRegulationInput(undefined);
+    setSelectedManualReport(undefined);
+    setAvailableReports([]);
+    setSelectedManualCitation(undefined);
+    setAvailableCitations([]);
+    setIsManualCitationEntry(false);
+    setManualCitationDetailsText('');
+    setAiSummaryOutputText(null);
+    setIsGeneratingAiSummary(false); // Ensure loading state is also reset
+    toast({
+        title: "Manual Tools Reset",
+        description: "All selections and generated summaries have been cleared."
+    });
   };
 
   return (
@@ -577,7 +594,7 @@ export default function ReportingHubPage() {
             Manual Report Tools
           </CardTitle>
           <CardDescription>
-            Configure and generate reports or summaries based on specific criteria.
+            Configure and generate AI summaries based on specific criteria or manual input.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -685,7 +702,7 @@ export default function ReportingHubPage() {
         <CardFooter className="gap-2 flex-wrap">
           <Button 
             onClick={handleAiSummary} 
-            variant="outline" 
+            variant="default" 
             disabled={(isManualCitationEntry ? !manualCitationDetailsText.trim() : !manualRegulationInput) || isGeneratingAiSummary}
           >
             {isGeneratingAiSummary ? (
@@ -695,6 +712,14 @@ export default function ReportingHubPage() {
             )}
             AI Summary
           </Button>
+          <Button 
+            onClick={handleResetManualTools} 
+            variant="outline"
+            disabled={isGeneratingAiSummary}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
         </CardFooter>
       </Card>
 
@@ -702,7 +727,7 @@ export default function ReportingHubPage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Wand2 className="mr-2 h-6 w-6 text-primary" />
+              <FileSearch className="mr-2 h-6 w-6 text-primary" />
               AI Generated Summary
             </CardTitle>
           </CardHeader>
