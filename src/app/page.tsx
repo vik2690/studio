@@ -3,14 +3,12 @@
 
 import { useState, useEffect } from 'react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
-// OverviewChart and PieChartCard removed as they are no longer used here after moving charts
 import { 
   AlertTriangle, ShieldCheck, BarChartHorizontalBig, FileWarning, 
-  Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, StopCircle, Download, WalletCards, LineChart as LineChartIcon, BellRing
+  Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, StopCircle, Download
 } from 'lucide-react';
 import type { Metric, MetricBreakdownItem, AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import type { LucideIcon } from 'lucide-react';
-// ChartConfig and ChartDataPoint removed as no longer used
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,7 +85,6 @@ const overviewMetrics: Metric[] = [
   },
 ];
 
-// Copied from operations-center/page.tsx
 const initialAgents: AIAgent[] = [
   {
     id: 'risk-sentinel',
@@ -286,12 +283,12 @@ export default function OverviewPage() {
                 `Processed batch of ${Math.floor(Math.random()*100+10)} events.`,
                 `Data stream for ${agent.id.split('-')[0]} nominal.`,
               ];
-              newActivityLog.unshift({ // Add to the beginning for recent logs first
+              newActivityLog.unshift({ 
                   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                   message: commonMessages[Math.floor(Math.random() * commonMessages.length)],
                   type: 'Debug'
               });
-              if (newActivityLog.length > 20) newActivityLog.pop(); // Keep log size manageable
+              if (newActivityLog.length > 20) newActivityLog.pop(); 
           }
 
           let newWorkloadQueue = agent.workloadQueue ? [...agent.workloadQueue] : [];
@@ -387,8 +384,6 @@ export default function OverviewPage() {
           <MetricCard key={metric.title} {...metric} />
         ))}
       </div>
-
-      {/* Removed Chart Cards Section */}
 
       <div className="space-y-4 pt-6">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground flex items-center">
