@@ -132,14 +132,14 @@ function findSimilarExistingControls(suggestionText: string, existingControls: E
       }
     });
     if (matchScore > 1 || (suggestionKeywords.length <= 2 && matchScore > 0) ) {
-      const specificKeywords = ["access review", "data deletion", "backup", "segregation of duties", "payment", "encryption"];
+      const specificKeywords = ["access review", "data deletion", "backup", "segregation of duties", "payment", "encryption", "mfa", "dlp", "vulnerability scan", "incident response"];
       const hasSpecificKeyword = specificKeywords.some(skw => suggestionText.toLowerCase().includes(skw) && controlText.includes(skw));
       if (hasSpecificKeyword || matchScore > 2) {
          matchedControls.push(ec);
       }
     }
   });
-  return matchedControls.slice(0, 3);
+  return matchedControls.slice(0, 3); // Return top 3 matches
 }
 
 
@@ -340,22 +340,26 @@ export default function ComplianceHubPage() {
                         }
                         className={
                           control.status === 'approved' ? 'bg-green-500/20 text-green-700 dark:bg-green-700/30 dark:text-green-300 border-green-500/50' :
-                          control.status === 'implemented' ? 'bg-blue-500/20 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300 border-blue-500/50' : ''
+                          control.status === 'implemented' ? 'bg-blue-500/20 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300 border-blue-500/50' : 
+                          control.status === 'rejected' ? '' :
+                          'text-muted-foreground' 
                         }
                         >
                           {control.status.toUpperCase()}
                         </Badge>
                       </TableCell>
-                      <TableCell className="align-top space-x-2 space-y-2">
-                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
-                          <ThumbsUp className="mr-1 h-4 w-4" /> Approve
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
-                          <ThumbsDown className="mr-1 h-4 w-4" /> Reject
-                        </Button>
-                         <Button size="sm" variant="default" onClick={() => handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
-                          Mark Implemented
-                        </Button>
+                      <TableCell className="align-top space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'approved')} disabled={control.status === 'approved' || control.status === 'implemented'}>
+                            <ThumbsUp className="mr-1 h-4 w-4" /> Approve
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleControlValidation(control.id, 'rejected')} disabled={control.status === 'rejected'}>
+                            <ThumbsDown className="mr-1 h-4 w-4" /> Reject
+                            </Button>
+                            <Button size="sm" variant="default" onClick={() => handleControlValidation(control.id, 'implemented')} disabled={control.status !== 'approved'}>
+                            Mark Implemented
+                            </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
