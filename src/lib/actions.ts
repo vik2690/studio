@@ -5,12 +5,16 @@ import { summarizeRegulations as _summarizeRegulations, type SummarizeRegulation
 import { flagAMLTransactions as _flagAMLTransactions, type FlagAMLTransactionsInput, type FlagAMLTransactionsOutput } from '@/ai/flows/flag-aml-transactions';
 import { suggestControls as _suggestControls, type SuggestControlsInput, type SuggestControlsOutput } from '@/ai/flows/suggest-controls';
 import { compareDocuments as _compareDocuments, type CompareDocumentsInput, type CompareDocumentsOutput } from '@/ai/flows/compare-documents-flow';
-import { generateCostSummary as _generateCostSummary } from '@/ai/flows/generate-cost-summary-flow';
+import { generateCostSummary as _generateCostSummary } from '@/ai/flows/generate-cost-summary-flow.ts';
 import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
 import { GenerateCostSummaryInputSchema } from '@/ai/schemas/cost-summary-schemas';
-import { analyzeRiskToCostCorrelation as _analyzeRiskToCostCorrelation } from '@/ai/flows/risk-cost-correlation-flow';
+import { analyzeRiskToCostCorrelation as _analyzeRiskToCostCorrelation } from '@/ai/flows/risk-cost-correlation-flow.ts';
 import type { AnalyzeRiskToCostInput, AnalyzeRiskToCostOutput } from '@/ai/schemas/risk-cost-correlation-schemas';
 import { AnalyzeRiskToCostInputSchema } from '@/ai/schemas/risk-cost-correlation-schemas';
+import { suggestControlOptimization as _suggestControlOptimization } from '@/ai/flows/suggest-control-optimization-flow.ts';
+import type { ControlOptimizationInput, ControlOptimizationOutput } from '@/ai/schemas/control-optimization-schemas';
+import { ControlOptimizationInputSchema } from '@/ai/schemas/control-optimization-schemas';
+
 
 import { z } from 'zod';
 
@@ -115,3 +119,18 @@ export async function analyzeRiskToCostCorrelationAction(input: AnalyzeRiskToCos
     return { error: e.message || "Failed to analyze risk-to-cost correlation. Please try again." };
   }
 }
+
+export async function suggestControlOptimizationAction(input: ControlOptimizationInput): Promise<ControlOptimizationOutput | { error: string }> {
+  const validationResult = ControlOptimizationInputSchema.safeParse(input);
+  if (!validationResult.success) {
+    return { error: validationResult.error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join('; ') };
+  }
+  try {
+    const result = await _suggestControlOptimization(validationResult.data);
+    return result;
+  } catch (e: any) {
+    console.error("Error in suggestControlOptimizationAction:", e);
+    return { error: e.message || "Failed to get control optimization suggestion. Please try again." };
+  }
+}
+

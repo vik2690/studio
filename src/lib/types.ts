@@ -248,7 +248,6 @@ export interface FeedItem {
   assignedTo?: string; 
 }
 
-
 // Define ChartConfig more broadly if it's used by different chart types
 export type ChartConfig = {
   [key: string]: {
@@ -257,3 +256,19 @@ export type ChartConfig = {
     icon?: React.ComponentType;
   };
 };
+
+// For Control Optimization Page
+export interface TargetRiskDetails {
+  id: string;
+  description: string;
+  implementedControl: {
+    name: string;
+    description: string;
+    cost: number;
+  };
+}
+
+export interface SimilarControlForOptimization extends SimilarControl { // from Zod schema
+  selected?: boolean;
+}
+

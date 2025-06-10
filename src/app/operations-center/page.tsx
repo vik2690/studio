@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -95,22 +96,23 @@ interface RiskControlCostItem {
   riskId: string;
   riskDescription: string;
   associatedControls: string;
-  controlCostAnnual: number;
+  implementedControlCost: number; // Renamed from controlCostAnnual for clarity
   potentialRiskExposure: number;
   residualRiskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
   impactArea: string;
 }
 
 const illustrativeRiskControlCostData: RiskControlCostItem[] = [
-  { riskId: 'RISK-CYB-001', riskDescription: 'Unauthorized access to sensitive customer data.', associatedControls: 'CTRL-IAM-001 (MFA), CTRL-DLP-003 (Data Encryption)', controlCostAnnual: 15000, potentialRiskExposure: 500000, residualRiskLevel: 'Medium', impactArea: 'Customer Data, Reputation, IT Security' },
-  { riskId: 'RISK-COMP-005', riskDescription: 'Non-compliance with MiFID II transaction reporting.', associatedControls: 'CTRL-REGREP-002 (Automated Reporting), CTRL-QA-005 (Data Validation)', controlCostAnnual: 25000, potentialRiskExposure: 1000000, residualRiskLevel: 'Low', impactArea: 'Regulatory Compliance, Trading Operations' },
-  { riskId: 'RISK-OP-012', riskDescription: 'Third-party vendor failure affecting payment processing.', associatedControls: 'CTRL-TPRM-007 (Vendor Monitoring), CTRL-BCP-003 (Alternative Vendor)', controlCostAnnual: 8000, potentialRiskExposure: 250000, residualRiskLevel: 'Medium', impactArea: 'Operations, Financial Transactions' },
-  { riskId: 'RISK-FIN-003', riskDescription: 'Internal fraud leading to financial loss.', associatedControls: 'CTRL-SOD-001 (Segregation of Duties), CTRL-AUDIT-002 (Regular Audits)', controlCostAnnual: 12000, potentialRiskExposure: 150000, residualRiskLevel: 'Low', impactArea: 'Financial Assets, Internal Controls' },
+  { riskId: 'RISK-CYB-001', riskDescription: 'Unauthorized access to sensitive customer data.', associatedControls: 'CTRL-IAM-001 (MFA), CTRL-DLP-003 (Data Encryption)', implementedControlCost: 15000, potentialRiskExposure: 500000, residualRiskLevel: 'Medium', impactArea: 'Customer Data, Reputation, IT Security' },
+  { riskId: 'RISK-COMP-005', riskDescription: 'Non-compliance with MiFID II transaction reporting.', associatedControls: 'CTRL-REGREP-002 (Automated Reporting), CTRL-QA-005 (Data Validation)', implementedControlCost: 25000, potentialRiskExposure: 1000000, residualRiskLevel: 'Low', impactArea: 'Regulatory Compliance, Trading Operations' },
+  { riskId: 'RISK-OP-012', riskDescription: 'Third-party vendor failure affecting payment processing.', associatedControls: 'CTRL-TPRM-007 (Vendor Monitoring), CTRL-BCP-003 (Alternative Vendor)', implementedControlCost: 8000, potentialRiskExposure: 250000, residualRiskLevel: 'Medium', impactArea: 'Operations, Financial Transactions' },
+  { riskId: 'RISK-FIN-003', riskDescription: 'Internal fraud leading to financial loss.', associatedControls: 'CTRL-SOD-001 (Segregation of Duties), CTRL-AUDIT-002 (Regular Audits)', implementedControlCost: 12000, potentialRiskExposure: 150000, residualRiskLevel: 'Low', impactArea: 'Financial Assets, Internal Controls' },
 ];
 
 
 export default function CostCenterPage() {
   const { toast } = useToast();
+  const router = useRouter(); // Initialize useRouter
   const [period, setPeriod] = useState<string>("This Quarter");
   const [totalSpend, setTotalSpend] = useState<number>(50000);
   const [spendChangePercentage, setSpendChangePercentage] = useState<number>(25);
@@ -261,11 +263,7 @@ export default function CostCenterPage() {
   };
   
   const handleExploreSimilarControls = (riskId: string) => {
-    toast({
-      title: "Explore Similar Controls",
-      description: `This feature (for risk ID: ${riskId}) would help identify existing similar controls across the organization that could be leveraged or consolidated, potentially optimizing costs. (Placeholder feature)`,
-      duration: 5000,
-    });
+    router.push(`/cost-center/optimize-controls/${riskId}`);
   };
 
 
@@ -408,7 +406,7 @@ export default function CostCenterPage() {
                   <TableHead>Risk ID</TableHead>
                   <TableHead>Risk Description</TableHead>
                   <TableHead>Associated Control(s)</TableHead>
-                  <TableHead className="text-right">Control Cost (Est. Annual)</TableHead>
+                  <TableHead className="text-right">Implemented Control Cost (Est. Annual)</TableHead>
                   <TableHead className="text-right">Potential Exposure ($)</TableHead>
                   <TableHead>Residual Risk</TableHead>
                   <TableHead>Impact Area(s)</TableHead>
@@ -421,7 +419,7 @@ export default function CostCenterPage() {
                     <TableCell className="font-medium text-xs">{item.riskId}</TableCell>
                     <TableCell className="text-xs">{item.riskDescription}</TableCell>
                     <TableCell className="text-xs">{item.associatedControls}</TableCell>
-                    <TableCell className="text-right text-xs">${item.controlCostAnnual.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-xs">${item.implementedControlCost.toLocaleString()}</TableCell>
                     <TableCell className="text-right text-xs">${item.potentialRiskExposure.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge variant={getRiskLevelBadgeVariant(item.residualRiskLevel)} className="text-xs capitalize">
