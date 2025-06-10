@@ -272,3 +272,17 @@ export interface SimilarControlForOptimization extends SimilarControl { // from 
   selected?: boolean;
 }
 
+// For Control Hub - AI Identified Risks table
+export interface AIIdentifiedRiskItem {
+  id: string; // Risk ID
+  riskDescription: string;
+  aiSuggestedControls: string[]; // Array of control descriptions/names
+  impactArea: string;
+  dateIdentified: string;
+  status: 'New' | 'Under Review' | 'Action Planned' | 'Implemented' | 'Rejected';
+  aiConfidence?: number; // Optional: 0-100
+  source?: string; // e.g., "Risk Sentinel Agent", "Compliance Watchdog"
+  similarExistingControlIds?: string[]; // IDs of ExistingControl that are potentially relevant
+  proposedEffectiveDate?: string;
+  aiJustification?: string; // AI's reasoning for suggesting these controls for this risk
+}

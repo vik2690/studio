@@ -5,18 +5,19 @@ import * as React from 'react';
 import { useState } from 'react';
 import { suggestControlsAction } from '@/lib/actions';
 import type { SuggestControlsInput, SuggestControlsOutput } from '@/ai/flows/suggest-controls';
-import type { ExistingControl } from '@/lib/types';
+import type { ExistingControl, AIIdentifiedRiskItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle, ListChecks, Info, FileSearch } from 'lucide-react'; 
+import { Loader2, Lightbulb, ThumbsUp, ThumbsDown, ShieldCheck, Library, Eye, Edit3, Scale, MessageSquare, CheckCircle, AlertCircle as AlertCircleIcon, AlertTriangle as AlertTriangleIcon, HelpCircle, ListChecks, Info, FileSearch, Bot, GitBranch, Link as LinkIcon, XCircle } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface ControlSuggestion {
   id: string;
@@ -142,6 +143,47 @@ function findSimilarExistingControls(suggestionText: string, existingControls: E
   return matchedControls.slice(0, 3); // Return top 3 matches
 }
 
+const initialAiIdentifiedRisks: AIIdentifiedRiskItem[] = [
+  {
+    id: 'AIRISK-001',
+    riskDescription: 'Emerging risk of AI-driven social engineering attacks targeting finance department for unauthorized fund transfers.',
+    aiSuggestedControls: ['Implement multi-factor authentication for all fund transfer approvals.', 'Conduct mandatory advanced phishing awareness training focused on AI deepfakes.', 'Deploy AI-based email filtering to detect sophisticated spear-phishing attempts.'],
+    impactArea: 'Financial Assets, Cybersecurity, Operations',
+    dateIdentified: '2024-07-28',
+    status: 'New',
+    aiConfidence: 85,
+    source: 'Risk Sentinel Agent',
+    similarExistingControlIds: ['CTRL-001'],
+    proposedEffectiveDate: '2024-09-01',
+    aiJustification: 'Based on recent threat intelligence reports and an increase in similar attacks in the financial sector. Existing MFA (CTRL-001) is good but needs to be explicitly tied to fund transfer approvals.'
+  },
+  {
+    id: 'AIRISK-002',
+    riskDescription: 'Gap in compliance with new ESMA guidelines on algorithmic trading transparency (Directive XYZ-2024).',
+    aiSuggestedControls: ['Update algorithmic trading system logging to capture all ESMA-required data points.', 'Develop a pre-trade transparency module for client-facing algorithms.', 'Establish a quarterly review process for algo trading compliance.'],
+    impactArea: 'Regulatory Compliance, Trading Operations',
+    dateIdentified: '2024-07-22',
+    status: 'Under Review',
+    aiConfidence: 92,
+    source: 'Compliance Watchdog Agent',
+    proposedEffectiveDate: '2024-10-15',
+    aiJustification: 'New ESMA directive XYZ-2024 published last week mandates specific logging and transparency. Current systems lack these capabilities.'
+  },
+  {
+    id: 'AIRISK-003',
+    riskDescription: 'Increased risk of data exfiltration through unsanctioned use of generative AI tools by employees for sensitive document summarization.',
+    aiSuggestedControls: ['Implement Data Loss Prevention (DLP) rules for generative AI platforms.', 'Establish an approved list of generative AI tools and usage policy.', 'Provide training on secure use of AI for productivity tasks.'],
+    impactArea: 'Data Security, Intellectual Property, Compliance (GDPR)',
+    dateIdentified: '2024-07-15',
+    status: 'Action Planned',
+    aiConfidence: 78,
+    source: 'Internal Data Usage Monitor',
+    similarExistingControlIds: ['CTRL-003'], // GDPR Data Deletion might be tangentially related.
+    proposedEffectiveDate: '2024-08-20',
+    aiJustification: 'Analysis of network traffic shows increased usage of non-approved AI tools with sensitive data patterns. Existing GDPR controls need extension to cover AI data processing.'
+  },
+];
+
 
 export default function ComplianceHubPage() {
   const [riskGapReport, setRiskGapReport] = useState('');
@@ -150,9 +192,13 @@ export default function ComplianceHubPage() {
   const [suggestedControls, setSuggestedControls] = useState<ControlSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [existingControlsList] = useState<ExistingControl[]>(initialExistingControls);
+  const [existingControlsList, setExistingControlsList] = useState<ExistingControl[]>(initialExistingControls);
   const [selectedControlDetail, setSelectedControlDetail] = useState<ExistingControl | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  const [aiIdentifiedRiskItems, setAiIdentifiedRiskItems] = useState<AIIdentifiedRiskItem[]>(initialAiIdentifiedRisks);
+  const [selectedAiRiskItem, setSelectedAiRiskItem] = useState<AIIdentifiedRiskItem | null>(null);
+  const [isAiRiskDetailDialogOpen, setIsAiRiskDetailDialogOpen] = useState(false);
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -213,6 +259,16 @@ export default function ComplianceHubPage() {
     setSelectedControlDetail(control);
     setIsDetailDialogOpen(true);
   };
+  
+  const handleViewAiRiskDetails = (riskItem: AIIdentifiedRiskItem) => {
+    setSelectedAiRiskItem(riskItem);
+    setIsAiRiskDetailDialogOpen(true);
+  };
+
+  const handleAiRiskItemStatusChange = (riskId: string, newStatus: AIIdentifiedRiskItem['status']) => {
+    setAiIdentifiedRiskItems(prev => prev.map(item => item.id === riskId ? {...item, status: newStatus} : item));
+    toast({ title: "Risk Status Updated", description: `Status for risk ${riskId} changed to ${newStatus}.` });
+  };
 
   const handleManualUpdate = (controlId: string | undefined) => {
     if (!controlId) return;
@@ -270,6 +326,27 @@ export default function ComplianceHubPage() {
       default: return HelpCircle;
     }
   }
+
+  const getAIRiskStatusBadgeVariant = (status: AIIdentifiedRiskItem['status']): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    switch (status) {
+      case 'New': return 'default'; // Consider a blue-ish variant for 'New'
+      case 'Under Review': return 'secondary';
+      case 'Action Planned': return 'default'; // Yellow-ish
+      case 'Implemented': return 'outline'; // Green-ish
+      case 'Rejected': return 'destructive';
+      default: return 'outline';
+    }
+  };
+   const getAIRiskStatusBadgeClass = (status: AIIdentifiedRiskItem['status']): string => {
+    switch (status) {
+      case 'New': return 'bg-blue-100 text-blue-700 dark:bg-blue-700/80 dark:text-blue-100 border-blue-300 dark:border-blue-600';
+      case 'Under Review': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-700/80 dark:text-yellow-100 border-yellow-300 dark:border-yellow-600';
+      case 'Action Planned': return 'bg-purple-100 text-purple-700 dark:bg-purple-700/80 dark:text-purple-100 border-purple-300 dark:border-purple-600';
+      case 'Implemented': return 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600';
+      case 'Rejected': return ''; // Uses destructive variant which has its own styling
+      default: return 'text-muted-foreground';
+    }
+  };
 
 
   return (
@@ -369,6 +446,68 @@ export default function ComplianceHubPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Bot className="mr-2 h-6 w-6 text-primary" />
+            AI-Driven Risk Mitigation Dashboard
+          </CardTitle>
+          <CardDescription>
+            Proactively identified risks by AI agents and their suggested mitigation controls.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="max-h-[600px] w-full overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Risk ID</TableHead>
+                  <TableHead className="min-w-[250px]">Identified Risk Description</TableHead>
+                  <TableHead className="min-w-[250px]">AI Suggested Control(s)</TableHead>
+                  <TableHead>Impact Area(s)</TableHead>
+                  <TableHead>Date Identified</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {aiIdentifiedRiskItems.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      No AI-identified risks at the moment.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  aiIdentifiedRiskItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-xs">{item.id}</TableCell>
+                      <TableCell className="text-xs">{item.riskDescription}</TableCell>
+                      <TableCell className="text-xs">
+                        <ul className="list-disc list-inside space-y-0.5">
+                          {item.aiSuggestedControls.map((ctrl, idx) => <li key={idx}>{ctrl}</li>)}
+                        </ul>
+                      </TableCell>
+                      <TableCell className="text-xs">{item.impactArea}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{item.dateIdentified}</TableCell>
+                      <TableCell>
+                        <Badge variant={getAIRiskStatusBadgeVariant(item.status)} className={getAIRiskStatusBadgeClass(item.status)}>
+                          {item.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => handleViewAiRiskDetails(item)}>
+                          <Eye className="mr-1 h-3.5 w-3.5" /> View Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </CardContent>
+      </Card>
       
       <Card className="shadow-lg">
         <CardHeader>
@@ -524,7 +663,7 @@ export default function ComplianceHubPage() {
         </form>
       </Card>
 
-
+      {/* Dialog for Existing Control Details */}
       {selectedControlDetail && (
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
           <DialogContent className="sm:max-w-xl">
@@ -614,7 +753,122 @@ export default function ComplianceHubPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Dialog for AI Identified Risk Details */}
+      {selectedAiRiskItem && (
+        <Dialog open={isAiRiskDetailDialogOpen} onOpenChange={setIsAiRiskDetailDialogOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>AI Identified Risk: {selectedAiRiskItem.id}</DialogTitle>
+              <DialogDescription>
+                Detailed view of the AI-identified risk and suggested mitigations.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[70vh] pr-2">
+              <div className="space-y-4 py-4 text-sm">
+                <div>
+                  <h4 className="font-semibold mb-1">Risk Description:</h4>
+                  <p className="text-muted-foreground">{selectedAiRiskItem.riskDescription}</p>
+                </div>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold mb-1">AI Suggested Controls:</h4>
+                  <ul className="list-disc list-inside pl-4 space-y-1 text-muted-foreground">
+                    {selectedAiRiskItem.aiSuggestedControls.map((ctrl, idx) => <li key={idx}>{ctrl}</li>)}
+                  </ul>
+                </div>
+                 {selectedAiRiskItem.aiJustification && (
+                  <div>
+                    <h4 className="font-semibold mb-1">AI Justification for Suggestions:</h4>
+                    <p className="text-muted-foreground italic text-xs bg-muted/50 p-2 rounded-md">{selectedAiRiskItem.aiJustification}</p>
+                  </div>
+                )}
+                <Separator />
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div>
+                    <h4 className="font-semibold">Impact Area(s):</h4>
+                    <p className="text-muted-foreground">{selectedAiRiskItem.impactArea}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Date Identified:</h4>
+                    <p className="text-muted-foreground">{selectedAiRiskItem.dateIdentified}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Current Status:</h4>
+                     <Badge variant={getAIRiskStatusBadgeVariant(selectedAiRiskItem.status)} className={getAIRiskStatusBadgeClass(selectedAiRiskItem.status)}>
+                        {selectedAiRiskItem.status}
+                     </Badge>
+                  </div>
+                  {selectedAiRiskItem.proposedEffectiveDate && (
+                    <div>
+                      <h4 className="font-semibold">Proposed Effective Date:</h4>
+                      <p className="text-muted-foreground">{selectedAiRiskItem.proposedEffectiveDate}</p>
+                    </div>
+                  )}
+                  {selectedAiRiskItem.aiConfidence !== undefined && (
+                     <div>
+                      <h4 className="font-semibold">AI Confidence:</h4>
+                      <p className="text-muted-foreground">{selectedAiRiskItem.aiConfidence}%</p>
+                    </div>
+                  )}
+                  {selectedAiRiskItem.source && (
+                     <div>
+                      <h4 className="font-semibold">Source:</h4>
+                      <p className="text-muted-foreground">{selectedAiRiskItem.source}</p>
+                    </div>
+                  )}
+                </div>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold mb-2">Similar Existing Controls to Consider:</h4>
+                  {selectedAiRiskItem.similarExistingControlIds && selectedAiRiskItem.similarExistingControlIds.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedAiRiskItem.similarExistingControlIds.map(id => {
+                        const control = existingControlsList.find(ec => ec.id === id);
+                        return control ? (
+                          <Card key={id} className="bg-background/50 text-xs p-3 shadow-sm">
+                            <CardTitle className="text-sm mb-1">{control.controlName} (ID: {control.id})</CardTitle>
+                            <p><strong>Status:</strong> {control.status}</p>
+                            <p><strong>Objective:</strong> {control.objective}</p>
+                             <p><strong>Category:</strong> {control.controlCategory}</p>
+                            <Button variant="link" size="sm" className="h-auto p-0 mt-1" onClick={() => { setIsAiRiskDetailDialogOpen(false); handleViewControlDetails(control);}}>
+                              View Full Details of this Existing Control <Eye className="ml-1 h-3 w-3"/>
+                            </Button>
+                          </Card>
+                        ) : null;
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No specific existing controls were pre-identified as highly similar by AI. Manual review against library recommended.</p>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter className="gap-2 sm:gap-0 pt-4 border-t">
+              <Button variant="outline" size="sm" onClick={() => { 
+                  handleAiRiskItemStatusChange(selectedAiRiskItem.id, 'Action Planned'); 
+                  toast({title: "Action Planned", description: "Mitigation planning process initiated."});
+                }}
+                disabled={selectedAiRiskItem.status === 'Action Planned' || selectedAiRiskItem.status === 'Implemented' }
+              >
+                <GitBranch className="mr-2 h-4 w-4" /> Plan Mitigation
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => toast({title: "Placeholder", description: "Functionality to link to existing control."})}>
+                <LinkIcon className="mr-2 h-4 w-4" /> Link to Existing
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => {
+                  handleAiRiskItemStatusChange(selectedAiRiskItem.id, 'Rejected');
+                  toast({title: "Suggestion Rejected", description: "AI suggestion marked as rejected."});
+                }}
+                 disabled={selectedAiRiskItem.status === 'Rejected' || selectedAiRiskItem.status === 'Implemented'}
+              >
+                <XCircle className="mr-2 h-4 w-4" /> Reject Suggestion
+              </Button>
+              <DialogClose asChild><Button type="button" size="sm">Close</Button></DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
-
