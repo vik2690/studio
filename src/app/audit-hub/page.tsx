@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
   ClipboardCheck, ListTree, ShieldCheck, UserCheck, DatabaseZap, FileOutput, 
-  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon 
+  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon, BrainCircuit 
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -122,6 +122,80 @@ export default function AuditHubPage() {
     });
   };
 
+  const handleDownloadAIModelReport = () => {
+    const reportContent = `
+# CRICS AI Model Inventory & Details - Audit Report
+
+## Model: Risk Sentinel Agent (ID: risk-sentinel)
+-   **Purpose:** Detects new/emerging risks from various internal and external data sources.
+-   **Type:** Natural Language Processing (NLP), Classification
+-   **LLM/Base Model:** Gemini 1.5 Pro (Vertex AI)
+-   **Version:** 1.2.3
+-   **Deployment Date:** 2024-05-10
+-   **Training Data Summary:** Mix of public news articles (Reuters, Bloomberg archives - 1M articles), anonymized internal incident reports (10k records), regulatory publications (5k documents). Last updated: 2024-07-01.
+-   **Key Parameters/Configuration:**
+    -   Input Text Length: Max 8192 tokens
+    -   Output Categories: Geopolitical, Market, Operational, Cybersecurity, Regulatory
+    -   Confidence Threshold for Alerting: 0.75
+    -   Risk Scoring Algorithm: Proprietary weighted model v2.1
+-   **Performance Metrics (Last Evaluation: 2024-07-15):**
+    -   Accuracy (Risk Identification): 92%
+    -   Precision (High-Impact Risks): 88%
+    -   Recall (High-Impact Risks): 85%
+    -   Bias Assessment: Passed (Fairness score: 0.95 across demographic proxies)
+-   **Monitoring:** Continuous monitoring via Vertex AI Model Monitoring. Alerts set for performance drift > 5%.
+-   **Data Retention for Logs:** 12 months for input/output, 24 months for audit logs.
+
+## Model: Control Validator Agent (ID: control-validator)
+-   **Purpose:** Periodically tests key controls and gathers compliance evidence.
+-   **Type:** Rule-Based System with NLP for evidence parsing.
+-   **LLM/Base Model (for NLP):** Claude 3 Sonnet (Bedrock)
+-   **Version:** 2.0.1
+-   **Deployment Date:** 2024-06-01
+-   **Training Data Summary (for NLP parser):** 5000 sample compliance documents, control descriptions, and evidence logs.
+-   **Key Parameters/Configuration:**
+    -   Control Test Frequency: As per control definition (e.g., SOX C-045: Monthly)
+    -   Evidence Matching Threshold: 0.85 (semantic similarity)
+-   **Performance Metrics (Last Evaluation: 2024-07-20):**
+    -   Control Test Accuracy: 99.5%
+    -   Evidence Parsing Accuracy: 90%
+-   **Monitoring:** Rule execution logs, NLP parser accuracy checks quarterly.
+
+## Model: AML Transaction Screener (ID: aml-transaction-screener)
+-   **Purpose:** Monitors transactions for potential AML hits.
+-   **Type:** Hybrid (Rule-Based + Anomaly Detection ML)
+-   **LLM/Base Model (for pattern analysis):** Gemini 1.5 Flash (with custom AML Rule Engine)
+-   **Version:** 3.1.0
+-   **Deployment Date:** 2024-03-15
+-   **Key Parameters/Configuration:**
+    -   Rule Sets: FATF, OFAC, EU Sanctions, Internal Risk Typologies
+    -   Anomaly Detection Sensitivity: Medium-High
+    -   Transaction Thresholds: Configurable per jurisdiction
+-   **Performance Metrics (Last Evaluation: 2024-07-01):**
+    -   True Positive Rate (SARs): 75%
+    -   False Positive Rate: 5%
+-   **Monitoring:** Real-time alert volume, rule performance metrics, model drift for anomaly detection.
+
+---
+*This report is generated for audit purposes. Details are based on the latest available information.*
+    `;
+    const blob = new Blob([reportContent.trim()], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'AI_Model_Details_Report.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download Initiated",
+      description: "AI Model Details Report (AI_Model_Details_Report.txt) download has started.",
+    });
+  };
+
+
   const auditTools: AuditToolCardProps[] = [
     {
       title: "Audit Log Explorer",
@@ -171,6 +245,13 @@ export default function AuditHubPage() {
       icon: ResponsibleAIIcon,
       actionLabel: "Download Report",
       onActionClick: handleDownloadResponsibleAIReport,
+    },
+    {
+      title: "AI Model Inventory",
+      description: "Review details of AI models used in CRICS, including configurations, parameters, versions, and performance metrics.",
+      icon: BrainCircuit,
+      actionLabel: "Download Model Report",
+      onActionClick: handleDownloadAIModelReport,
     },
   ];
 
