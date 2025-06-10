@@ -7,13 +7,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download } from 'lucide-react'; 
+import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download, Link as LinkIcon } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
-import { generateCostSummaryAction } from '@/lib/actions';
+import { generateCostSummaryAction, analyzeRiskToCostCorrelationAction } from '@/lib/actions';
+import type { AnalyzeRiskToCostInput, AnalyzeRiskToCostOutput } from '@/ai/schemas/risk-cost-correlation-schemas';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard'; 
 import type { ChartConfig, ChartDataPoint } from '@/lib/types';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 // Mock data for line chart
 const costTrendData: ChartDataPoint[] = [
@@ -97,6 +100,11 @@ export default function CostCenterPage() {
   const [isLoadingSummary, setIsLoadingSummary] = useState<boolean>(false);
   const [executiveSummary, setExecutiveSummary] = useState<string | null>(null);
 
+  const [analysisContext, setAnalysisContext] = useState<string>("Analyze overall compliance spending against identified operational risks for the last quarter.");
+  const [isLoadingCorrelation, setIsLoadingCorrelation] = useState<boolean>(false);
+  const [correlationResult, setCorrelationResult] = useState<AnalyzeRiskToCostOutput | null>(null);
+
+
   const handleGenerateSummary = async () => {
     setIsLoadingSummary(true);
     setExecutiveSummary(null);
@@ -133,6 +141,49 @@ export default function CostCenterPage() {
       setIsLoadingSummary(false);
     }
   };
+
+  const handleAnalyzeRiskToCost = async () => {
+    setIsLoadingCorrelation(true);
+    setCorrelationResult(null);
+    if (!analysisContext.trim()) {
+      toast({
+        title: "Input Incomplete",
+        description: "Please provide an analysis context.",
+        variant: "destructive",
+      });
+      setIsLoadingCorrelation(false);
+      return;
+    }
+
+    const input: AnalyzeRiskToCostInput = { analysisContext };
+    try {
+      const result = await analyzeRiskToCostCorrelationAction(input);
+      if ('error' in result) {
+        toast({ title: "Risk-Cost Analysis Error", description: result.error, variant: "destructive"});
+      } else {
+        setCorrelationResult(result);
+        toast({ title: "Risk-Cost Analysis Complete", description: "Analysis generated successfully."});
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to perform risk-to-cost analysis.", variant: "destructive" });
+    } finally {
+      setIsLoadingCorrelation(false);
+    }
+  };
+
+  const handleDownloadAnalysisReport = (data: any, filename: string) => {
+    if (!data) {
+        toast({ title: "No Data", description: "No data to export.", variant: "destructive"});
+        return;
+    }
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = filename;
+    link.click();
+    toast({title: "Download Started", description: `${filename} is being downloaded.`});
+  };
+
 
   const costMetrics: CostMetricCardProps[] = [
     { title: "Total Compliance Spend (YTD)", value: "$450,800", description: "+5% from last year", icon: DollarSign },
@@ -234,6 +285,81 @@ export default function CostCenterPage() {
               <CardContent>
                 <p className="text-sm whitespace-pre-wrap">{executiveSummary}</p>
               </CardContent>
+            </Card>
+          )}
+        </CardFooter>
+      </Card>
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <LinkIcon className="mr-2 h-6 w-6 text-primary" />
+            Risk-to-Cost Correlation Modeling
+          </CardTitle>
+          <CardDescription>
+            Use AI to analyze which risks or controls lead to higher costs and identify optimization opportunities.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="analysisContext">Analysis Context / Area</Label>
+            <Textarea
+              id="analysisContext"
+              value={analysisContext}
+              onChange={(e) => setAnalysisContext(e.target.value)}
+              placeholder="e.g., 'Analyze IT security spending vs. cybersecurity risks for Q3', 'Correlate compliance failure costs in Finance with data privacy regulations.'"
+              rows={3}
+              disabled={isLoadingCorrelation}
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col items-start gap-4">
+          <Button onClick={handleAnalyzeRiskToCost} disabled={isLoadingCorrelation}>
+            {isLoadingCorrelation ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Brain className="mr-2 h-4 w-4" />
+            )}
+            Analyze Risk-to-Cost
+          </Button>
+          {correlationResult && (
+            <Card className="w-full bg-muted/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md flex items-center">
+                  <FileText className="mr-2 h-5 w-5 text-primary" />
+                  Risk-to-Cost Analysis Report
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Alert>
+                  <AlertTitle className="font-semibold">Correlation Analysis:</AlertTitle>
+                  <AlertDescription className="whitespace-pre-wrap text-sm">
+                    {correlationResult.correlationAnalysis}
+                  </AlertDescription>
+                </Alert>
+                {correlationResult.identifiedDrivers && correlationResult.identifiedDrivers.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1">Identified Cost Drivers:</h4>
+                    <ul className="list-disc list-inside pl-4 text-sm space-y-0.5">
+                      {correlationResult.identifiedDrivers.map((driver, idx) => <li key={`driver-${idx}`}>{driver}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {correlationResult.optimizationSuggestions && correlationResult.optimizationSuggestions.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1">Optimization Suggestions:</h4>
+                    <ul className="list-disc list-inside pl-4 text-sm space-y-0.5">
+                      {correlationResult.optimizationSuggestions.map((suggestion, idx) => <li key={`suggestion-${idx}`}>{suggestion}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter>
+                 <Button variant="outline" onClick={() => handleDownloadAnalysisReport(correlationResult, "risk_cost_correlation_analysis.json")}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Full Analysis (JSON)
+                </Button>
+              </CardFooter>
             </Card>
           )}
         </CardFooter>
