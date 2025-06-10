@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download, Link as LinkIcon } from 'lucide-react'; 
+import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download, Link as LinkIcon, TableIcon } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
 import { generateCostSummaryAction, analyzeRiskToCostCorrelationAction } from '@/lib/actions';
@@ -16,6 +16,8 @@ import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard'; 
 import type { ChartConfig, ChartDataPoint } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 
 // Mock data for line chart
@@ -88,6 +90,24 @@ const CostMetricCard: React.FC<CostMetricCardProps> = ({ title, value, descripti
     </Card>
   );
 };
+
+interface RiskControlCostItem {
+  riskId: string;
+  riskDescription: string;
+  associatedControls: string;
+  controlCostAnnual: number;
+  potentialRiskExposure: number;
+  residualRiskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  impactArea: string;
+}
+
+const illustrativeRiskControlCostData: RiskControlCostItem[] = [
+  { riskId: 'RISK-CYB-001', riskDescription: 'Unauthorized access to sensitive customer data.', associatedControls: 'CTRL-IAM-001 (MFA), CTRL-DLP-003 (Data Encryption)', controlCostAnnual: 15000, potentialRiskExposure: 500000, residualRiskLevel: 'Medium', impactArea: 'Customer Data, Reputation, IT Security' },
+  { riskId: 'RISK-COMP-005', riskDescription: 'Non-compliance with MiFID II transaction reporting.', associatedControls: 'CTRL-REGREP-002 (Automated Reporting), CTRL-QA-005 (Data Validation)', controlCostAnnual: 25000, potentialRiskExposure: 1000000, residualRiskLevel: 'Low', impactArea: 'Regulatory Compliance, Trading Operations' },
+  { riskId: 'RISK-OP-012', riskDescription: 'Third-party vendor failure affecting payment processing.', associatedControls: 'CTRL-TPRM-007 (Vendor Monitoring), CTRL-BCP-003 (Alternative Vendor)', controlCostAnnual: 8000, potentialRiskExposure: 250000, residualRiskLevel: 'Medium', impactArea: 'Operations, Financial Transactions' },
+  { riskId: 'RISK-FIN-003', riskDescription: 'Internal fraud leading to financial loss.', associatedControls: 'CTRL-SOD-001 (Segregation of Duties), CTRL-AUDIT-002 (Regular Audits)', controlCostAnnual: 12000, potentialRiskExposure: 150000, residualRiskLevel: 'Low', impactArea: 'Financial Assets, Internal Controls' },
+];
+
 
 export default function CostCenterPage() {
   const { toast } = useToast();
@@ -171,17 +191,49 @@ export default function CostCenterPage() {
     }
   };
 
-  const handleDownloadAnalysisReport = (data: any, filename: string) => {
+  const handleDownloadReport = (data: any, filename: string, format: 'json' | 'csv' = 'json') => {
     if (!data) {
         toast({ title: "No Data", description: "No data to export.", variant: "destructive"});
         return;
     }
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+    let fileString = '';
+    let mimeType = '';
+    let fileExtension = '';
+
+    if (format === 'json') {
+        fileString = JSON.stringify(data, null, 2);
+        mimeType = 'text/json';
+        fileExtension = 'json';
+    } else if (format === 'csv') {
+        if (Array.isArray(data) && data.length > 0) {
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => 
+                Object.values(row).map(value => {
+                    const strValue = String(value);
+                    // Escape commas and quotes
+                    if (strValue.includes(',') || strValue.includes('"')) {
+                        return `"${strValue.replace(/"/g, '""')}"`;
+                    }
+                    return strValue;
+                }).join(',')
+            );
+            fileString = [headers, ...rows].join('\n');
+        } else {
+            toast({ title: "CSV Error", description: "Data is not in a suitable format for CSV export.", variant: "destructive"});
+            return;
+        }
+        mimeType = 'text/csv';
+        fileExtension = 'csv';
+    }
+
+    const fullFilename = `${filename}.${fileExtension}`;
+    const blob = new Blob([fileString], { type: `${mimeType};charset=utf-8,` });
     const link = document.createElement("a");
-    link.href = jsonString;
-    link.download = filename;
+    link.href = URL.createObjectURL(blob);
+    link.download = fullFilename;
     link.click();
-    toast({title: "Download Started", description: `${filename} is being downloaded.`});
+    URL.revokeObjectURL(link.href);
+    toast({title: "Download Started", description: `${fullFilename} is being downloaded.`});
   };
 
 
@@ -198,6 +250,17 @@ export default function CostCenterPage() {
       description: `Preparing to download report for "${reportName}". (Placeholder)`,
     });
   };
+  
+  const getRiskLevelBadgeVariant = (level: RiskControlCostItem['residualRiskLevel']): 'destructive' | 'default' | 'secondary' | 'outline' => {
+    switch (level) {
+      case 'Critical': return 'destructive';
+      case 'High': return 'default';
+      case 'Medium': return 'secondary';
+      case 'Low': return 'outline';
+      default: return 'outline';
+    }
+  };
+
 
   return (
     <div className="space-y-8">
@@ -297,37 +360,79 @@ export default function CostCenterPage() {
             Risk-to-Cost Correlation Modeling
           </CardTitle>
           <CardDescription>
-            Use AI to analyze which risks or controls lead to higher costs and identify optimization opportunities.
+            Use AI to analyze which risks or controls lead to higher costs and identify optimization opportunities. The table below provides illustrative context.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="analysisContext">Analysis Context / Area</Label>
+            <Label htmlFor="analysisContext">Analysis Context / Area for AI</Label>
             <Textarea
               id="analysisContext"
               value={analysisContext}
               onChange={(e) => setAnalysisContext(e.target.value)}
               placeholder="e.g., 'Analyze IT security spending vs. cybersecurity risks for Q3', 'Correlate compliance failure costs in Finance with data privacy regulations.'"
-              rows={3}
+              rows={2}
               disabled={isLoadingCorrelation}
             />
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col items-start gap-4">
-          <Button onClick={handleAnalyzeRiskToCost} disabled={isLoadingCorrelation}>
+           <Button onClick={handleAnalyzeRiskToCost} disabled={isLoadingCorrelation} className="w-full sm:w-auto">
             {isLoadingCorrelation ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Brain className="mr-2 h-4 w-4" />
             )}
-            Analyze Risk-to-Cost
+            Analyze Risk-to-Cost with AI
           </Button>
+
+          <div className="pt-4">
+            <div className="flex justify-between items-center mb-2">
+                 <h3 className="text-lg font-semibold flex items-center">
+                    <TableIcon className="mr-2 h-5 w-5 text-muted-foreground" />
+                    Illustrative Risk, Control & Cost Data
+                </h3>
+                <Button variant="outline" size="sm" onClick={() => handleDownloadReport(illustrativeRiskControlCostData, "risk_control_cost_overview", "csv")}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Overview Data (CSV)
+                </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Risk ID</TableHead>
+                  <TableHead>Risk Description</TableHead>
+                  <TableHead>Associated Control(s)</TableHead>
+                  <TableHead className="text-right">Control Cost (Est. Annual)</TableHead>
+                  <TableHead className="text-right">Potential Exposure ($)</TableHead>
+                  <TableHead>Residual Risk</TableHead>
+                  <TableHead>Impact Area(s)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {illustrativeRiskControlCostData.map((item) => (
+                  <TableRow key={item.riskId}>
+                    <TableCell className="font-medium text-xs">{item.riskId}</TableCell>
+                    <TableCell className="text-xs">{item.riskDescription}</TableCell>
+                    <TableCell className="text-xs">{item.associatedControls}</TableCell>
+                    <TableCell className="text-right text-xs">${item.controlCostAnnual.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-xs">${item.potentialRiskExposure.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={getRiskLevelBadgeVariant(item.residualRiskLevel)} className="text-xs capitalize">
+                        {item.residualRiskLevel}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs">{item.impactArea}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
           {correlationResult && (
-            <Card className="w-full bg-muted/50">
+            <Card className="w-full bg-muted/50 mt-6">
               <CardHeader className="pb-2">
                 <CardTitle className="text-md flex items-center">
                   <FileText className="mr-2 h-5 w-5 text-primary" />
-                  Risk-to-Cost Analysis Report
+                  AI-Driven Risk-to-Cost Analysis Report
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -355,14 +460,14 @@ export default function CostCenterPage() {
                 )}
               </CardContent>
               <CardFooter>
-                 <Button variant="outline" onClick={() => handleDownloadAnalysisReport(correlationResult, "risk_cost_correlation_analysis.json")}>
+                 <Button variant="outline" onClick={() => handleDownloadReport(correlationResult, "risk_cost_correlation_analysis_ai", "json")}>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Full Analysis (JSON)
+                    Download AI Analysis (JSON)
                 </Button>
               </CardFooter>
             </Card>
           )}
-        </CardFooter>
+        </CardContent>
       </Card>
       
       <Card className="shadow-lg">
@@ -417,3 +522,4 @@ export default function CostCenterPage() {
     </div>
   );
 }
+
