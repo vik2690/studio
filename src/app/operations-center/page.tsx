@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download, Link as LinkIcon, TableIcon } from 'lucide-react'; 
+import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download, Link as LinkIcon, TableIcon, Search } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
 import { generateCostSummaryAction, analyzeRiskToCostCorrelationAction } from '@/lib/actions';
@@ -210,7 +210,6 @@ export default function CostCenterPage() {
             const rows = data.map(row => 
                 Object.values(row).map(value => {
                     const strValue = String(value);
-                    // Escape commas and quotes
                     if (strValue.includes(',') || strValue.includes('"')) {
                         return `"${strValue.replace(/"/g, '""')}"`;
                     }
@@ -259,6 +258,14 @@ export default function CostCenterPage() {
       case 'Low': return 'outline';
       default: return 'outline';
     }
+  };
+  
+  const handleExploreSimilarControls = (riskId: string) => {
+    toast({
+      title: "Explore Similar Controls",
+      description: `This feature (for risk ID: ${riskId}) would help identify existing similar controls across the organization that could be leveraged or consolidated, potentially optimizing costs. (Placeholder feature)`,
+      duration: 5000,
+    });
   };
 
 
@@ -405,6 +412,7 @@ export default function CostCenterPage() {
                   <TableHead className="text-right">Potential Exposure ($)</TableHead>
                   <TableHead>Residual Risk</TableHead>
                   <TableHead>Impact Area(s)</TableHead>
+                  <TableHead>Control Optimization</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -421,6 +429,11 @@ export default function CostCenterPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs">{item.impactArea}</TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => handleExploreSimilarControls(item.riskId)}>
+                        <Search className="mr-1.5 h-3.5 w-3.5" /> Explore Similar
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
