@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
   ClipboardCheck, ListTree, ShieldCheck, UserCheck, DatabaseZap, FileOutput, 
-  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon // Added Brain for Responsible AI
+  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon 
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -65,9 +65,60 @@ export default function AuditHubPage() {
   };
 
   const handleDownloadResponsibleAIReport = () => {
+    const reportContent = `
+# Responsible AI in Risk & AML - Audit Report
+
+## Key Parameters of Responsible AI in Risk & AML
+
+| Dimension                       | Description                                                               | AML/Risk Example                                                                                           |
+|---------------------------------|---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| Fairness & Non-Discrimination   | Avoid biases based on race, gender, geography, etc.                       | Ensuring SAR (Suspicious Activity Reports) aren't disproportionately generated for certain ethnic groups.      |
+| Explainability (XAI)            | Models should offer understandable rationales for decisions.              | When a transaction is flagged, the reason (e.g., "Unusual volume pattern vs. peer benchmark") should be clear. |
+| Transparency & Auditability     | AI decisions must be traceable and open to audit.                         | Model logs, version control, input/output documentation must be accessible to auditors and regulators.       |
+| Accountability                  | Defined roles for AI design, use, monitoring, and remediation.            | Business unit must review flagged transactions and override or accept AI decisions with justification.       |
+| Robustness & Security           | Models must perform reliably and withstand manipulation.                  | Prevent adversarial attacks like generating synthetic identities to fool KYC/AML systems.                    |
+| Privacy & Data Protection       | Respect for customer privacy and adherence to data protection laws.       | Avoid using unnecessary PII or storing transaction history longer than regulatory limits.                    |
+| Human-in-the-Loop (HITL)        | Humans must review critical decisions, especially in high-risk scenarios. | Compliance analysts reviewing AI-generated alerts before reporting to FINCEN.                                |
+| Continuous Monitoring & Governance | Ongoing assessment for drift, bias, and performance.                      | Periodically check if false positives are increasing in specific segments or geographies.                      |
+| Regulatory Alignment            | Alignment with local and international AML and compliance regulations.    | AI must comply with FATF recommendations, EU AML directives, OCC, or MAS guidelines.                       |
+
+## Additional Considerations
+
+### Model Documentation & Fact Sheets (e.g., Model Cards)
+- Include intended use, assumptions, performance metrics.
+
+### Ethical Risk Taxonomy
+- Identify and manage ethical risks at each stage (data ingestion, model training, deployment).
+
+### Scenario Testing
+- Use adversarial testing and synthetic data to evaluate robustness and edge cases.
+
+## Example Use Case Breakdown
+
+**Scenario:** AI system flags a transaction for AML review
+
+| Step             | Responsible AI Check                                                 |
+|------------------|----------------------------------------------------------------------|
+| Data Ingestion   | Ensure training data isn’t biased toward specific customer demographics. |
+| Model Prediction | Ensure model can justify why the transaction was flagged.              |
+| Alert Review     | Provide analysts with reasons and confidence scores.                   |
+| Feedback Loop    | Analyst feedback updates model performance.                            |
+| Audit            | Logs, justifications, and overrides are stored for regulators.       |
+`;
+
+    const blob = new Blob([reportContent.trim()], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Responsible_AI_Audit_Report.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     toast({
       title: "Download Initiated",
-      description: "Responsible AI Audit Report download has started. (Placeholder)",
+      description: "Responsible AI Audit Report (Responsible_AI_Audit_Report.txt) download has started.",
     });
   };
 
