@@ -13,9 +13,10 @@ interface PieChartCardProps {
   dataKey: string; // Key in data objects for the slice value
   nameKey: string; // Key in data objects for the slice name/label
   chartConfig: ChartConfig;
+  children?: React.ReactNode; // To allow passing CardFooter
 }
 
-export function PieChartCard({ data, title, description, dataKey, nameKey, chartConfig }: PieChartCardProps) {
+export function PieChartCard({ data, title, description, dataKey, nameKey, chartConfig, children }: PieChartCardProps) {
   // Ensure chartConfig provides a color for each data point name.
   // Recharts' <Cell> component expects a 'fill' prop for each slice.
   // We map data to include the fill color from chartConfig.
@@ -25,12 +26,12 @@ export function PieChartCard({ data, title, description, dataKey, nameKey, chart
   }));
 
   return (
-    <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-border/60 hover:border-primary/60">
+    <Card className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-border/60 hover:border-primary/60 flex flex-col">
       <CardHeader>
         <CardTitle className="text-muted-foreground">{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -53,7 +54,7 @@ export function PieChartCard({ data, title, description, dataKey, nameKey, chart
                 //   const y = cy + radius * Math.sin(-midAngle * RADIAN);
                 //   return (
                 //     <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="10px">
-                //       {`${(percent * 100).toFixed(0)}%`}
+                //       {`(${(percent * 100).toFixed(0)}%)`}
                 //     </text>
                 //   );
                 // }}
@@ -74,6 +75,7 @@ export function PieChartCard({ data, title, description, dataKey, nameKey, chart
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
+      {children} {/* Render CardFooter here */}
     </Card>
   );
 }

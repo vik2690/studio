@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building } from 'lucide-react'; // Added Users, Building
+import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building, Download } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
 import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
 import { generateCostSummaryAction } from '@/lib/actions';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
-import { PieChartCard } from '@/components/dashboard/PieChartCard'; // Added PieChartCard import
+import { PieChartCard } from '@/components/dashboard/PieChartCard'; 
 import type { ChartConfig, ChartDataPoint } from '@/lib/types';
 
 // Mock data for line chart
@@ -141,6 +141,13 @@ export default function CostCenterPage() {
     { title: "Estimated ROI on Compliance", value: "2.1x", description: "Fines avoided vs. spend", icon: TrendingUp },
   ];
 
+  const handleDownloadChartReport = (reportName: string) => {
+    toast({
+      title: "Download Initiated",
+      description: `Preparing to download report for "${reportName}". (Placeholder)`,
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -257,7 +264,14 @@ export default function CostCenterPage() {
             dataKey="value"
             nameKey="name"
             chartConfig={departmentCostChartConfig}
-        />
+        >
+          <CardFooter>
+            <Button onClick={() => handleDownloadChartReport('Cost Breakdown by Department')}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Report
+            </Button>
+          </CardFooter>
+        </PieChartCard>
         <PieChartCard
             data={fteAllocationData}
             title="Resource Allocation (FTEs)"
@@ -265,10 +279,15 @@ export default function CostCenterPage() {
             dataKey="value"
             nameKey="name"
             chartConfig={fteAllocationChartConfig}
-        />
+        >
+          <CardFooter>
+            <Button onClick={() => handleDownloadChartReport('Resource Allocation (FTEs)')}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Report
+            </Button>
+          </CardFooter>
+        </PieChartCard>
       </div>
     </div>
   );
 }
-
-    
