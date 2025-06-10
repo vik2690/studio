@@ -7,14 +7,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, BarChart2, PieChart, TrendingUp, Brain, Loader2, FileText } from 'lucide-react';
+import { DollarSign, BarChart2, PieChart as PieChartIcon, TrendingUp, Brain, Loader2, FileText, Users, Building } from 'lucide-react'; // Added Users, Building
 import { useToast } from '@/hooks/use-toast';
-import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/flows/generate-cost-summary-flow';
+import type { GenerateCostSummaryInput, GenerateCostSummaryOutput } from '@/ai/schemas/cost-summary-schemas';
 import { generateCostSummaryAction } from '@/lib/actions';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
-import type { ChartConfig, ChartDataPoint } from '@/lib/types'; // Ensure ChartDataPoint is suitable or define one
+import { PieChartCard } from '@/components/dashboard/PieChartCard'; // Added PieChartCard import
+import type { ChartConfig, ChartDataPoint } from '@/lib/types';
 
-// Mock data for charts - replace with actual data fetching later
+// Mock data for line chart
 const costTrendData: ChartDataPoint[] = [
   { name: "Jan", value: 12000 },
   { name: "Feb", value: 13500 },
@@ -27,6 +28,40 @@ const costTrendData: ChartDataPoint[] = [
 const costTrendChartConfig = {
   value: { label: "Spend ($)", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
+
+// Mock data for Department Cost Breakdown Pie Chart
+const departmentCostData: ChartDataPoint[] = [
+  { name: "IT & Security", value: 45000 },
+  { name: "Compliance Operations", value: 25000 },
+  { name: "Legal & Advisory", value: 15000 },
+  { name: "Risk Management Team", value: 12000 },
+  { name: "Training & Development", value: 3000 },
+];
+
+const departmentCostChartConfig: ChartConfig = {
+  "IT & Security": { label: "IT & Security", color: "hsl(var(--chart-1))" },
+  "Compliance Operations": { label: "Compliance Ops", color: "hsl(var(--chart-2))" },
+  "Legal & Advisory": { label: "Legal", color: "hsl(var(--chart-3))" },
+  "Risk Management Team": { label: "Risk Team", color: "hsl(var(--chart-4))" },
+  "Training & Development": { label: "Training", color: "hsl(var(--chart-5))" },
+};
+
+// Mock data for FTE Allocation Pie Chart
+const fteAllocationData: ChartDataPoint[] = [
+  { name: "Compliance Analysts", value: 12 },
+  { name: "IT Security Specialists", value: 8 },
+  { name: "Legal Counsel", value: 4 },
+  { name: "Risk Managers", value: 5 },
+  { name: "Audit Staff", value: 3 },
+];
+
+const fteAllocationChartConfig: ChartConfig = {
+  "Compliance Analysts": { label: "Compliance Analysts", color: "hsl(var(--chart-1))" },
+  "IT Security Specialists": { label: "IT Security", color: "hsl(var(--chart-2))" },
+  "Legal Counsel": { label: "Legal Counsel", color: "hsl(var(--chart-3))" },
+  "Risk Managers": { label: "Risk Managers", color: "hsl(var(--chart-4))" },
+  "Audit Staff": { label: "Audit Staff", color: "hsl(var(--chart-5))" },
+};
 
 
 interface CostMetricCardProps {
@@ -102,7 +137,7 @@ export default function CostCenterPage() {
   const costMetrics: CostMetricCardProps[] = [
     { title: "Total Compliance Spend (YTD)", value: "$450,800", description: "+5% from last year", icon: DollarSign },
     { title: "Cost Per Control (Avg)", value: "$530", description: "Based on 850 active controls", icon: BarChart2 },
-    { title: "Budget Variance", value: "-2.5% (Under Budget)", description: "YTD comparison", icon: PieChart },
+    { title: "Budget Variance", value: "-2.5% (Under Budget)", description: "YTD comparison", icon: PieChartIcon },
     { title: "Estimated ROI on Compliance", value: "2.1x", description: "Fines avoided vs. spend", icon: TrendingUp },
   ];
 
@@ -134,7 +169,6 @@ export default function CostCenterPage() {
           </CardTitle>
           <CardDescription>
             Input key cost metrics for the period to generate an AI-powered executive summary.
-            Example: "This quarter, IT spent 25% more due to two high-priority control implementations. Residual risk dropped by 40%."
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -215,27 +249,26 @@ export default function CostCenterPage() {
         </CardContent>
       </Card>
 
-      {/* Placeholder for more detailed cost breakdown cards */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Cost Breakdown by Department</CardTitle>
-            <CardDescription>(Placeholder for pie chart or bar chart)</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
-            Chart/Data would appear here.
-          </CardContent>
-        </Card>
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Resource Allocation (FTEs)</CardTitle>
-            <CardDescription>(Placeholder for FTE allocation data)</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[200px] flex items-center justify-center text-muted-foreground">
-            Details on FTEs dedicated to compliance.
-          </CardContent>
-        </Card>
+        <PieChartCard
+            data={departmentCostData}
+            title="Cost Breakdown by Department"
+            description="Distribution of compliance costs across departments."
+            dataKey="value"
+            nameKey="name"
+            chartConfig={departmentCostChartConfig}
+        />
+        <PieChartCard
+            data={fteAllocationData}
+            title="Resource Allocation (FTEs)"
+            description="Distribution of Full-Time Equivalents in compliance roles."
+            dataKey="value"
+            nameKey="name"
+            chartConfig={fteAllocationChartConfig}
+        />
       </div>
     </div>
   );
 }
+
+    
