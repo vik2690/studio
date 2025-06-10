@@ -8,7 +8,7 @@ import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui
 
 const navItems = [
   { href: "/", label: "Overview", icon: BarChartBig },
-  { href: "/ingestion", label: "Ingestion & Processing", icon: Workflow },
+  { href: "/ingestion", label: "Application Health", icon: Workflow },
   { href: "/regulations", label: "Regulations Hub", icon: BookOpenText },
   { href: "/risk-issues", label: "Risk & Issues Hub", icon: AlertTriangle },
   { href: "/aml", label: "AML Hub", icon: ShieldAlert },
@@ -47,3 +47,4 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
+
