@@ -8,7 +8,7 @@ import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui
 import { usePersona } from '@/contexts/PersonaContext';
 
 const allNavItems = [
-  { href: "/", label: "Overview", icon: BarChartBig },
+  { href: "/", label: "Overview & AI agents at work", icon: BarChartBig },
   { href: "/ingestion", label: "Application Health", icon: Workflow },
   { href: "/regulations", label: "Regulations Hub", icon: BookOpenText },
   { href: "/risk-issues", label: "Risk & Issues Hub", icon: AlertTriangle },
@@ -57,3 +57,4 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
+
