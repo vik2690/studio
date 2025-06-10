@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { 
   AlertTriangle, ShieldCheck, BarChartHorizontalBig, FileWarning, 
-  Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, StopCircle, Download
+  Bot, Zap, Coffee, Loader2, AlertTriangle as AlertTriangleIcon, PowerOff, Activity as ActivityIcon, ChevronRight, Brain, Database, ListChecks as ListChecksIcon, StopCircle, Download, TrendingUp
 } from 'lucide-react';
 import type { Metric, MetricBreakdownItem, AIAgent, AIAgentStatusValue, WorkloadItem, ActivityLogEntry } from '@/lib/types';
 import type { LucideIcon } from 'lucide-react';
@@ -258,9 +258,10 @@ export default function OverviewPage() {
   const [selectedAgentDetails, setSelectedAgentDetails] = useState<AIAgent | null>(null);
   const [isAgentDetailDialogOpen, setIsAgentDetailDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [currentForecastTime, setCurrentForecastTime] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const agentUpdateInterval = setInterval(() => {
       setAgents(prevAgents =>
         prevAgents.map(agent => {
           let newLastActive = agent.lastActive;
@@ -316,7 +317,14 @@ export default function OverviewPage() {
       );
     }, 7000); 
 
-    return () => clearInterval(interval);
+    const forecastTimeInterval = setInterval(() => {
+      setCurrentForecastTime(new Date().toLocaleTimeString());
+    }, 60000); // Update forecast time every minute
+
+    return () => {
+      clearInterval(agentUpdateInterval);
+      clearInterval(forecastTimeInterval);
+    };
   }, []);
 
   const handleViewAgentDetails = (agent: AIAgent) => {
@@ -448,6 +456,36 @@ export default function OverviewPage() {
         )}
       </div>
 
+      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader>
+          <div className="flex items-center">
+            <Brain className="mr-3 h-7 w-7 text-primary" />
+            <CardTitle className="text-2xl">AI-Driven Cost Forecasting</CardTitle>
+          </div>
+          <CardDescription>
+            Leverages historical trends and risk intelligence to project future compliance expenditures.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-muted/50 p-4 rounded-md border border-border/60">
+            <div className="flex items-center text-lg font-semibold text-foreground mb-2">
+              <TrendingUp className="mr-2 h-5 w-5 text-primary-foreground" />
+              Forecast Summary
+            </div>
+            <p className="text-md text-foreground">
+              Predicts that the Cybersecurity cost center will exceed budget by <strong>15% in Q3</strong> due to increased threat landscape severity and scheduled penetration testing.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              <strong>Recommended action:</strong> Review discretionary spending in other IT areas to offset potential overage. Consider deferring non-critical upgrades if feasible.
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter className="text-xs text-muted-foreground">
+          Last Forecast: {currentForecastTime} | Model: CRICS-Forecast-v1.2
+        </CardFooter>
+      </Card>
+
+
       {selectedAgentDetails && (
         <Dialog open={isAgentDetailDialogOpen} onOpenChange={setIsAgentDetailDialogOpen}>
           <DialogContent className="sm:max-w-3xl">
@@ -570,3 +608,5 @@ export default function OverviewPage() {
     </div>
   );
 }
+
+    
