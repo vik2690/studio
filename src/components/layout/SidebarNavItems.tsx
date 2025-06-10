@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShieldAlert, BookOpenText, FileText, Settings2, BarChartBig, Workflow, ClipboardCheck, AlertTriangle, Activity, CheckSquare, Bell, FileSpreadsheet, Globe, Bot } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { usePersona } from '@/contexts/PersonaContext';
 
-const navItems = [
+const allNavItems = [
   { href: "/", label: "Overview", icon: BarChartBig },
   { href: "/ingestion", label: "Application Health", icon: Workflow },
   { href: "/regulations", label: "Regulations Hub", icon: BookOpenText },
@@ -24,6 +25,15 @@ const navItems = [
 
 export function SidebarNavItems() {
   const pathname = usePathname();
+  const { persona } = usePersona();
+
+  let navItems = allNavItems;
+
+  if (persona === 'Analyst' || persona === 'Manager') {
+    const hiddenPathsForAnalystManager = ['/cost-center', '/audit-hub', '/admin'];
+    navItems = allNavItems.filter(item => !hiddenPathsForAnalystManager.includes(item.href));
+  }
+  // Admin sees all items, so no specific filtering needed for Admin beyond default allNavItems
 
   return (
     <SidebarMenu>
@@ -47,4 +57,3 @@ export function SidebarNavItems() {
     </SidebarMenu>
   );
 }
-

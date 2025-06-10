@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { OverviewChart } from '@/components/dashboard/OverviewChart';
 import { PieChartCard } from '@/components/dashboard/PieChartCard';
 import type { ChartConfig } from '@/components/ui/chart';
+import { usePersona } from '@/contexts/PersonaContext'; // Added import
 
 const initialReportItems: ReportItem[] = [
   {
@@ -258,8 +259,8 @@ export default function ReportingHubPage() {
   const [aiSummaryOutputText, setAiSummaryOutputText] = useState<string | null>(null);
   const [isGeneratingAiSummary, setIsGeneratingAiSummary] = useState(false);
 
-
   const { toast } = useToast();
+  const { persona } = usePersona(); // Added persona context
 
   useEffect(() => {
     if (!isManualCitationEntry && manualRegulationInput && reportOptionsByBody[manualRegulationInput]) {
@@ -400,110 +401,112 @@ export default function ReportingHubPage() {
         Analytics and Reporting Hub
       </h1>
       
+      {(persona === 'Admin' || persona === 'Manager') && ( // Conditional rendering for charts
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Reporting Dashboards</CardTitle>
+            <CardDescription>Visual overview of key risk and control metrics.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Risk Trend Analysis</CardTitle>
+                  <CardDescription>Monthly trend of identified risks.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <OverviewChart
+                    data={riskTrendData}
+                    title=""
+                    description=""
+                    xAxisKey="name"
+                    chartConfig={riskTrendChartConfig}
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => handleDownloadChartReport('Risk Trend Analysis')}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Report
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Risk Distribution by Severity</CardTitle>
+                  <CardDescription>Breakdown of risks by their severity level.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PieChartCard
+                    data={riskDistributionData}
+                    title=""
+                    description=""
+                    dataKey="value"
+                    nameKey="name"
+                    chartConfig={riskDistributionChartConfig}
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => handleDownloadChartReport('Risk Distribution by Severity')}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Report
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Control Effectiveness</CardTitle>
+                  <CardDescription>Quarterly control effectiveness score.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <OverviewChart
+                    data={controlEffectivenessData}
+                    title=""
+                    description=""
+                    xAxisKey="name"
+                    chartConfig={controlEffectivenessChartConfig}
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => handleDownloadChartReport('Control Effectiveness')}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Report
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Control Implementation Status</CardTitle>
+                  <CardDescription>Current status of applied controls.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PieChartCard
+                    data={controlStatusData}
+                    title=""
+                    description=""
+                    dataKey="value"
+                    nameKey="name"
+                    chartConfig={controlStatusChartConfig}
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => handleDownloadChartReport('Control Implementation Status')}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Report
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Reporting Dashboards</CardTitle>
-          <CardDescription>Visual overview of key risk and control metrics.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Risk Trend Analysis</CardTitle>
-                <CardDescription>Monthly trend of identified risks.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <OverviewChart
-                  data={riskTrendData}
-                  title=""
-                  description=""
-                  xAxisKey="name"
-                  chartConfig={riskTrendChartConfig}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => handleDownloadChartReport('Risk Trend Analysis')}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Report
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Risk Distribution by Severity</CardTitle>
-                <CardDescription>Breakdown of risks by their severity level.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PieChartCard
-                  data={riskDistributionData}
-                  title=""
-                  description=""
-                  dataKey="value"
-                  nameKey="name"
-                  chartConfig={riskDistributionChartConfig}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => handleDownloadChartReport('Risk Distribution by Severity')}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Report
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Control Effectiveness</CardTitle>
-                <CardDescription>Quarterly control effectiveness score.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <OverviewChart
-                  data={controlEffectivenessData}
-                  title=""
-                  description=""
-                  xAxisKey="name"
-                  chartConfig={controlEffectivenessChartConfig}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => handleDownloadChartReport('Control Effectiveness')}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Report
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Control Implementation Status</CardTitle>
-                <CardDescription>Current status of applied controls.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PieChartCard
-                  data={controlStatusData}
-                  title=""
-                  description=""
-                  dataKey="value"
-                  nameKey="name"
-                  chartConfig={controlStatusChartConfig}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => handleDownloadChartReport('Control Implementation Status')}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Report
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>Report Queue & Archive</CardTitle>
+          <CardTitle>Report Queue &amp; Archive</CardTitle>
           <CardDescription>
             Manage, track, and review all generated and pending compliance reports.
           </CardDescription>
@@ -813,6 +816,3 @@ export default function ReportingHubPage() {
     </div>
   );
 }
-
-
-    

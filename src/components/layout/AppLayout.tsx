@@ -1,3 +1,4 @@
+
 import type { ReactNode } from 'react';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -9,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { PanelLeft, Search, Settings, User } from 'lucide-react'; // Added Search, Settings, User
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
+import { PersonaSwitcher } from './PersonaSwitcher'; // Added PersonaSwitcher import
 
 const AppHeader = () => (
   <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 shadow-sm">
@@ -39,6 +41,7 @@ const AppHeader = () => (
       {/* Search can be added here if needed */}
     </div>
     <div className="flex flex-1 items-center justify-end gap-4">
+      <PersonaSwitcher /> {/* Added PersonaSwitcher component */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -1,8 +1,10 @@
+
 import type { Metadata } from 'next';
 import { Inter, Roboto_Mono } from 'next/font/google'; // Changed imports
 import './globals.css';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Toaster } from "@/components/ui/toaster";
+import { PersonaProvider } from '@/contexts/PersonaContext';
 
 const inter = Inter({ // Changed to Inter
   variable: '--font-inter', // Changed variable name
@@ -27,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${robotoMono.variable} antialiased`}> {/* Updated font variables */}
-        <AppLayout>{children}</AppLayout>
+        <PersonaProvider>
+          <AppLayout>{children}</AppLayout>
+        </PersonaProvider>
         <Toaster />
       </body>
     </html>
