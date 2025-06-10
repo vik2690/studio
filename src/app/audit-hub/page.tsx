@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
   ClipboardCheck, ListTree, ShieldCheck, UserCheck, DatabaseZap, FileOutput, 
-  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon, BrainCircuit 
+  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon, BrainCircuit, FileEdit
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -195,6 +195,58 @@ export default function AuditHubPage() {
     });
   };
 
+  const handleDownloadManualOverridesReport = () => {
+    const reportContent = `
+# CRICS Manual Override Log - Audit Report
+
+## Event ID: OV-2024-07-29-001
+-   **Timestamp:** 2024-07-29 10:15:30 UTC
+-   **User:** analyst_john_doe
+-   **Module:** AML Transaction Flagging
+-   **AI Suggestion Overridden:**
+    -   Flag Transaction TXN-987654 as 'Suspicious' (Risk Score: 85)
+    -   Reason from AI: "Matches pattern of known shell company activity."
+-   **Manual Action Taken:** Marked Transaction TXN-987654 as 'Not Suspicious'.
+-   **User Reasoning for Override:** "Verified with client. Transaction is for legitimate business expansion into a new, higher-risk, but permissible market. Supporting documentation (invoice #INV-2024-AB-001, contract #CON-2024-XYZ-002) uploaded and attached to case file. AI flagged based on jurisdiction, but specific client context justifies the transaction."
+
+## Event ID: OV-2024-07-28-003
+-   **Timestamp:** 2024-07-28 16:45:10 UTC
+-   **User:** compliance_manager_jane_smith
+-   **Module:** Control Suggestion (Risk ID: RISK-OP-007 - Inadequate Vendor Onboarding Process)
+-   **AI Suggestion Overridden:**
+    -   Suggested Control: "Implement automated quarterly due diligence checks for all Tier-1 vendors, integrated with financial stability APIs."
+    -   AI Justification: "Reduces manual effort by 80% and provides continuous monitoring."
+-   **Manual Action Taken:** Accepted AI suggestion but modified implementation plan.
+-   **User Reasoning for Override/Modification:** "AI suggestion is valid for Tier-1. However, for Tier-2 vendors, automated checks are cost-prohibitive. Will implement for Tier-1 as suggested and maintain current semi-annual manual checks for Tier-2, supplemented by AI-driven news alerts for Tier-2 vendor risk events. Full automation for Tier-2 to be re-evaluated in 12 months."
+
+## Event ID: OV-2024-07-27-015
+-   **Timestamp:** 2024-07-27 09:05:00 UTC
+-   **User:** risk_analyst_peter_jones
+-   **Module:** Risk Identification (Emerging Risks)
+-   **AI Suggestion Overridden:**
+    -   AI Identified Risk: "Potential supply chain disruption due to new import tariffs on Zylgromite." (Severity: Medium)
+-   **Manual Action Taken:** Downgraded risk severity to 'Low'.
+-   **User Reasoning for Override:** "Internal assessment confirms our current Zylgromite stock levels are sufficient for 18 months. Alternative, non-tariffed suppliers have been identified and pre-qualified. Immediate impact is minimal. Will monitor market for price changes beyond 12 months."
+
+---
+*This report is generated for audit purposes. Details are based on the latest available information from the override log.*
+    `;
+    const blob = new Blob([reportContent.trim()], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Manual_Overrides_Report.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download Initiated",
+      description: "Manual Overrides Report (Manual_Overrides_Report.txt) download has started.",
+    });
+  };
+
 
   const auditTools: AuditToolCardProps[] = [
     {
@@ -252,6 +304,13 @@ export default function AuditHubPage() {
       icon: BrainCircuit,
       actionLabel: "Download Model Report",
       onActionClick: handleDownloadAIModelReport,
+    },
+    {
+      title: "Manual Override Log",
+      description: "Review and download a log of all instances where AI suggestions were manually overridden by users, including justifications.",
+      icon: FileEdit, 
+      actionLabel: "Download Override Report",
+      onActionClick: handleDownloadManualOverridesReport,
     },
   ];
 
