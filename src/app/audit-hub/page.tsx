@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { 
   ClipboardCheck, ListTree, ShieldCheck, UserCheck, DatabaseZap, FileOutput, 
-  ExternalLink, FolderSearch
+  ExternalLink, FolderSearch, Brain as ResponsibleAIIcon // Added Brain for Responsible AI
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -64,6 +64,13 @@ export default function AuditHubPage() {
     });
   };
 
+  const handleDownloadResponsibleAIReport = () => {
+    toast({
+      title: "Download Initiated",
+      description: "Responsible AI Audit Report download has started. (Placeholder)",
+    });
+  };
+
   const auditTools: AuditToolCardProps[] = [
     {
       title: "Audit Log Explorer",
@@ -107,6 +114,13 @@ export default function AuditHubPage() {
       actionLabel: "Review Cases",
       onActionClick: () => handlePlaceholderAction("Incident & Case Review"),
     },
+    {
+      title: "Responsible AI Audit",
+      description: "Review AI model fairness, bias, transparency, accountability, and adherence to ethical AI principles and policies.",
+      icon: ResponsibleAIIcon,
+      actionLabel: "Download Report",
+      onActionClick: handleDownloadResponsibleAIReport,
+    },
   ];
 
   return (
@@ -138,3 +152,4 @@ export default function AuditHubPage() {
     </div>
   );
 }
+
