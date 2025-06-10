@@ -153,9 +153,9 @@ const initialAiIdentifiedRisks: AIIdentifiedRiskItem[] = [
     status: 'New',
     aiConfidence: 85,
     source: 'Risk Sentinel Agent',
-    similarExistingControlIds: ['CTRL-001'],
+    similarExistingControlIds: ['CTRL-001', 'CTRL-002'],
     proposedEffectiveDate: '2024-09-01',
-    aiJustification: 'Based on recent threat intelligence reports and an increase in similar attacks in the financial sector. Existing MFA (CTRL-001) is good but needs to be explicitly tied to fund transfer approvals.'
+    aiJustification: 'Based on recent threat intelligence reports and an increase in similar attacks in the financial sector. Existing MFA (CTRL-001) is good but needs to be explicitly tied to fund transfer approvals. SoD (CTRL-002) is also relevant for financial process integrity.'
   },
   {
     id: 'AIRISK-002',
@@ -166,6 +166,7 @@ const initialAiIdentifiedRisks: AIIdentifiedRiskItem[] = [
     status: 'Under Review',
     aiConfidence: 92,
     source: 'Compliance Watchdog Agent',
+    similarExistingControlIds: [], // No direct existing similar control found
     proposedEffectiveDate: '2024-10-15',
     aiJustification: 'New ESMA directive XYZ-2024 published last week mandates specific logging and transparency. Current systems lack these capabilities.'
   },
@@ -178,9 +179,22 @@ const initialAiIdentifiedRisks: AIIdentifiedRiskItem[] = [
     status: 'Action Planned',
     aiConfidence: 78,
     source: 'Internal Data Usage Monitor',
-    similarExistingControlIds: ['CTRL-003'], // GDPR Data Deletion might be tangentially related.
+    similarExistingControlIds: ['CTRL-003'], 
     proposedEffectiveDate: '2024-08-20',
-    aiJustification: 'Analysis of network traffic shows increased usage of non-approved AI tools with sensitive data patterns. Existing GDPR controls need extension to cover AI data processing.'
+    aiJustification: 'Analysis of network traffic shows increased usage of non-approved AI tools with sensitive data patterns. Existing GDPR controls (CTRL-003) need extension to cover AI data processing.'
+  },
+  {
+    id: 'AIRISK-004',
+    riskDescription: 'New vulnerability identified in core banking system (CBS-VendorPatch-July24) requiring immediate attention.',
+    aiSuggestedControls: ['Apply vendor patch immediately across all CBS instances.', 'Perform post-patch vulnerability scan.', 'Monitor system logs for anomalous activity post-patch.'],
+    impactArea: 'IT Systems, Financial Data Integrity, Operations',
+    dateIdentified: '2024-08-01',
+    status: 'New',
+    aiConfidence: 99,
+    source: 'Threat Intel Feed',
+    similarExistingControlIds: undefined, // Simulating no controls identified
+    proposedEffectiveDate: '2024-08-02',
+    aiJustification: 'Critical vulnerability (CVE-2024-XXXXX) reported by vendor with high exploitability. Immediate patching is crucial.'
   },
 ];
 
@@ -329,10 +343,10 @@ export default function ComplianceHubPage() {
 
   const getAIRiskStatusBadgeVariant = (status: AIIdentifiedRiskItem['status']): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (status) {
-      case 'New': return 'default'; // Consider a blue-ish variant for 'New'
+      case 'New': return 'default'; 
       case 'Under Review': return 'secondary';
-      case 'Action Planned': return 'default'; // Yellow-ish
-      case 'Implemented': return 'outline'; // Green-ish
+      case 'Action Planned': return 'default'; 
+      case 'Implemented': return 'outline'; 
       case 'Rejected': return 'destructive';
       default: return 'outline';
     }
@@ -343,7 +357,7 @@ export default function ComplianceHubPage() {
       case 'Under Review': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-700/80 dark:text-yellow-100 border-yellow-300 dark:border-yellow-600';
       case 'Action Planned': return 'bg-purple-100 text-purple-700 dark:bg-purple-700/80 dark:text-purple-100 border-purple-300 dark:border-purple-600';
       case 'Implemented': return 'bg-green-100 text-green-700 dark:bg-green-700/80 dark:text-green-100 border-green-300 dark:border-green-600';
-      case 'Rejected': return ''; // Uses destructive variant which has its own styling
+      case 'Rejected': return ''; 
       default: return 'text-muted-foreground';
     }
   };
@@ -454,7 +468,7 @@ export default function ComplianceHubPage() {
             AI-Driven Risk Mitigation Dashboard
           </CardTitle>
           <CardDescription>
-            Proactively identified risks by AI agents and their suggested mitigation controls.
+            Proactively identified risks by AI agents, their suggested mitigation controls, and relevant existing organizational controls.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -465,6 +479,7 @@ export default function ComplianceHubPage() {
                   <TableHead>Risk ID</TableHead>
                   <TableHead className="min-w-[250px]">Identified Risk Description</TableHead>
                   <TableHead className="min-w-[250px]">AI Suggested Control(s)</TableHead>
+                  <TableHead className="min-w-[200px]">Existing Similar Controls</TableHead>
                   <TableHead>Impact Area(s)</TableHead>
                   <TableHead>Date Identified</TableHead>
                   <TableHead>Status</TableHead>
@@ -474,7 +489,7 @@ export default function ComplianceHubPage() {
               <TableBody>
                 {aiIdentifiedRiskItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                       No AI-identified risks at the moment.
                     </TableCell>
                   </TableRow>
@@ -487,6 +502,23 @@ export default function ComplianceHubPage() {
                         <ul className="list-disc list-inside space-y-0.5">
                           {item.aiSuggestedControls.map((ctrl, idx) => <li key={idx}>{ctrl}</li>)}
                         </ul>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {item.similarExistingControlIds && item.similarExistingControlIds.length > 0 ? (
+                          <div className="flex flex-col space-y-1">
+                            {item.similarExistingControlIds.slice(0,2).map(id => {
+                                const control = existingControlsList.find(ec => ec.id === id);
+                                return control ? <Badge key={id} variant="secondary" className="whitespace-normal h-auto py-0.5">{control.id} - {control.controlName.substring(0,20)}...</Badge> : null;
+                            })}
+                            {item.similarExistingControlIds.length > 2 && (
+                                 <Badge variant="outline" className="text-xs">+{item.similarExistingControlIds.length - 2} more</Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-orange-50 border-orange-300 text-orange-600 dark:bg-orange-700/20 dark:border-orange-500 dark:text-orange-300">
+                            None identified
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-xs">{item.impactArea}</TableCell>
                       <TableCell className="text-xs whitespace-nowrap">{item.dateIdentified}</TableCell>
